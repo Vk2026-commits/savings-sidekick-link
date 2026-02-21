@@ -17,6 +17,7 @@ interface BillsListProps {
   owner?: BillOwner;
   paymentAccounts?: PaymentAccount[];
   selectedMonth?: string; // "YYYY-MM"
+  groupTotal?: number;
 }
 
 function fmt(n: number) {
@@ -36,7 +37,7 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   month: month || "",
 });
 
-export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth }: BillsListProps) {
+export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth, groupTotal }: BillsListProps) {
   const filteredBills = bills.filter((b) => {
     const ownerMatch = (b.owner ?? "household") === owner;
     const monthMatch = selectedMonth ? b.month === selectedMonth : true;
@@ -70,7 +71,14 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
   return (
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          {groupTotal !== undefined && groupTotal > 0 && (
+            <span className="text-destructive font-bold font-mono text-base">
+              {fmt(groupTotal)}
+            </span>
+          )}
+        </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
           {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
           {showForm ? "Cancel" : "Add Bill"}

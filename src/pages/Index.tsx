@@ -289,6 +289,9 @@ const Index = () => {
                     owner={group.id}
                     paymentAccounts={budget.paymentAccounts}
                     selectedMonth={selectedMonth}
+                    groupTotal={budget.bills
+                      .filter(b => (b.owner ?? "household") === group.id && b.month === selectedMonth)
+                      .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0)}
                   />
                 </div>
               ))}

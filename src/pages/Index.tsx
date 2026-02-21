@@ -135,7 +135,7 @@ const Index = () => {
                   <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
                   <CashFlowForecast income={budget.monthlyIncome} bills={budget.bills} />
                 </div>
-                <DailySpendingChart bills={budget.bills} monthlyIncome={budget.monthlyIncome} />
+                
               </>
             );
           })()

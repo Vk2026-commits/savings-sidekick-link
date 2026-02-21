@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import type { Transaction } from "@/types/budget";
+import type { Bill } from "@/types/budget";
+import { getMonthlyAmount } from "@/types/budget";
 
 interface DailySpendingChartProps {
-  transactions: Transaction[];
+  bills: Bill[];
+  month?: string; // "YYYY-MM" — if provided, only bills for that month
   compact?: boolean;
 }
 
@@ -19,35 +21,41 @@ const tooltipStyle = {
   fontSize: "13px",
 };
 
-export default function DailySpendingChart({ transactions, compact = false }: DailySpendingChartProps) {
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export default function DailySpendingChart({ bills, month, compact = false }: DailySpendingChartProps) {
+  // Filter bills by month if provided
+  const filtered = month ? bills.filter((b) => b.month === month) : bills;
+
+  // Determine the year/month context for mapping due dates to days of the week
   const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const [ctxYear, ctxMonth] = month
+    ? month.split("-").map(Number)
+    : [now.getFullYear(), now.getMonth() + 1];
 
-  // Build daily totals for current month
-  const dailyMap: Record<number, number> = {};
-  transactions
-    .filter((t) => {
-      const d = new Date(t.date);
-      return t.type === "expense" && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-    })
-    .forEach((t) => {
-      const day = new Date(t.date).getDate();
-      dailyMap[day] = (dailyMap[day] || 0) + t.amount;
-    });
+  // Group bill amounts by day of week using their dueDate (day of month)
+  const dayTotals = new Array(7).fill(0);
 
-  const chartData = Array.from({ length: daysInMonth }, (_, i) => ({
-    day: i + 1,
-    label: `${currentMonth + 1}/${i + 1}`,
-    amount: Math.round((dailyMap[i + 1] || 0) * 100) / 100,
+  filtered.forEach((bill) => {
+    const dueDay = Math.min(bill.dueDate, new Date(ctxYear, ctxMonth, 0).getDate()); // clamp to valid day
+    const date = new Date(ctxYear, ctxMonth - 1, dueDay);
+    const dow = date.getDay(); // 0=Sun, 6=Sat
+    dayTotals[dow] += getMonthlyAmount(bill.amount, bill.frequency);
+  });
+
+  const chartData = DAY_NAMES.map((name, i) => ({
+    day: DAY_SHORT[i],
+    fullDay: name,
+    amount: Math.round(dayTotals[i] * 100) / 100,
   }));
 
-  const totalSpent = Object.values(dailyMap).reduce((s, v) => s + v, 0);
-  const daysWithSpending = Object.keys(dailyMap).length;
-  const avgDaily = daysWithSpending > 0 ? totalSpent / daysWithSpending : 0;
-
+  const totalSpent = dayTotals.reduce((s, v) => s + v, 0);
   const hasData = totalSpent > 0;
+
+  const label = month
+    ? new Date(ctxYear, ctxMonth - 1).toLocaleString("default", { month: "long", year: "numeric" })
+    : "All Months";
 
   return (
     <motion.div
@@ -58,46 +66,31 @@ export default function DailySpendingChart({ transactions, compact = false }: Da
     >
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-sm">
-          Daily Spending — {now.toLocaleString("default", { month: "long" })}
+          Daily Spending by Day of Week {compact ? "" : `— ${label}`}
         </h3>
         {hasData && (
-          <div className="flex gap-4 text-xs text-muted-foreground">
-            <span>Total: <span className="font-mono text-foreground">{fmt(totalSpent)}</span></span>
-            <span>Avg: <span className="font-mono text-foreground">{fmt(avgDaily)}/day</span></span>
-          </div>
+          <span className="text-xs text-muted-foreground">
+            Total: <span className="font-mono text-foreground">{fmt(totalSpent)}</span>
+          </span>
         )}
       </div>
       {hasData ? (
         <ResponsiveContainer width="100%" height={compact ? 180 : 220}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 14%, 18%)" />
-            <XAxis
-              dataKey="day"
-              stroke="hsl(215, 12%, 55%)"
-              fontSize={10}
-              tickFormatter={(v) => (v % 5 === 0 || v === 1 ? `${v}` : "")}
-            />
-            <YAxis
-              stroke="hsl(215, 12%, 55%)"
-              fontSize={10}
-              tickFormatter={(v) => `$${v}`}
-            />
+            <XAxis dataKey="day" stroke="hsl(215, 12%, 55%)" fontSize={11} />
+            <YAxis stroke="hsl(215, 12%, 55%)" fontSize={10} tickFormatter={(v) => `$${v}`} />
             <Tooltip
               formatter={(v: number) => [fmt(v), "Spent"]}
-              labelFormatter={(day) => `Day ${day}`}
+              labelFormatter={(_, payload) => payload?.[0]?.payload?.fullDay || ""}
               contentStyle={tooltipStyle}
             />
-            <Bar
-              dataKey="amount"
-              fill="hsl(200, 80%, 55%)"
-              radius={[2, 2, 0, 0]}
-              name="Spent"
-            />
+            <Bar dataKey="amount" fill="hsl(200, 80%, 55%)" radius={[4, 4, 0, 0]} name="Spent" />
           </BarChart>
         </ResponsiveContainer>
       ) : (
         <p className="text-muted-foreground text-sm text-center py-8">
-          Add expense transactions to track daily spending
+          Add bills to track daily spending by day of week
         </p>
       )}
     </motion.div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, IncomeSource, BudgetState } from "@/types/budget";
-import { getMonthlyAmount } from "@/types/budget";
+import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, IncomeSource, ExpenseGroup, BudgetState } from "@/types/budget";
+import { getMonthlyAmount, DEFAULT_EXPENSE_GROUPS } from "@/types/budget";
 
 const STORAGE_KEY = "budget-app-data";
 
@@ -20,6 +20,7 @@ const defaultState: BudgetState = {
   savingsGoals: [],
   categoryBudgets: [],
   transactions: [],
+  expenseGroups: DEFAULT_EXPENSE_GROUPS,
   assets: [],
   liabilities: [],
 };
@@ -112,6 +113,21 @@ export function useBudget() {
     });
   }, []);
 
+  // Expense Groups CRUD
+  const addExpenseGroup = useCallback((name: string) => {
+    setState((s) => ({ ...s, expenseGroups: [...s.expenseGroups, { id: crypto.randomUUID(), name }] }));
+  }, []);
+  const updateExpenseGroup = useCallback((id: string, name: string) => {
+    setState((s) => ({ ...s, expenseGroups: s.expenseGroups.map((g) => (g.id === id ? { ...g, name } : g)) }));
+  }, []);
+  const deleteExpenseGroup = useCallback((id: string) => {
+    setState((s) => ({
+      ...s,
+      expenseGroups: s.expenseGroups.filter((g) => g.id !== id),
+      bills: s.bills.filter((b) => b.owner !== id),
+    }));
+  }, []);
+
   // Assets CRUD
   const addAsset = useCallback((asset: Omit<Asset, "id">) => {
     setState((s) => ({ ...s, assets: [...s.assets, { ...asset, id: crypto.randomUUID() }] }));
@@ -152,6 +168,7 @@ export function useBudget() {
     addCategoryBudget, updateCategoryBudget, deleteCategoryBudget,
     addTransaction, updateTransaction, deleteTransaction,
     addIncomeSource, updateIncomeSource, deleteIncomeSource,
+    addExpenseGroup, updateExpenseGroup, deleteExpenseGroup,
     addAsset, updateAsset, deleteAsset,
     addLiability, updateLiability, deleteLiability,
     totalMonthlyBills, totalSavingsTarget, totalSaved, remaining,

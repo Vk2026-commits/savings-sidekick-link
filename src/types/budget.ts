@@ -1,6 +1,6 @@
 export type BillFrequency = "weekly" | "biweekly" | "monthly" | "yearly";
 export type BillCategory = "housing" | "utilities" | "insurance" | "subscriptions" | "transportation" | "food" | "debt" | "entertainment" | "fast_food" | "restaurants" | "haircuts" | "beauty" | "kids" | "household" | "other";
-export type BillOwner = "household" | "kids" | "steven" | "kalila";
+export type BillOwner = string; // dynamic group id
 export type TransactionType = "income" | "expense";
 
 export interface Bill {
@@ -39,6 +39,11 @@ export interface Transaction {
   notes?: string;
 }
 
+export interface ExpenseGroup {
+  id: string;
+  name: string;
+}
+
 export interface IncomeSource {
   id: string;
   name: string;
@@ -70,6 +75,7 @@ export interface BudgetState {
   savingsGoals: SavingsGoal[];
   categoryBudgets: CategoryBudget[];
   transactions: Transaction[];
+  expenseGroups: ExpenseGroup[];
   assets: Asset[];
   liabilities: Liability[];
 }
@@ -92,12 +98,12 @@ export const CATEGORY_LABELS: Record<BillCategory, string> = {
   other: "Other",
 };
 
-export const OWNER_LABELS: Record<BillOwner, string> = {
-  household: "Bills & Expenses",
-  kids: "Kids' Expenses",
-  steven: "Steven's Expenses",
-  kalila: "Kalila's Expenses",
-};
+export const DEFAULT_EXPENSE_GROUPS: ExpenseGroup[] = [
+  { id: "household", name: "Bills & Expenses" },
+  { id: "kids", name: "Kids' Expenses" },
+  { id: "steven", name: "Steven's Expenses" },
+  { id: "kalila", name: "Kalila's Expenses" },
+];
 
 export const FREQUENCY_LABELS: Record<BillFrequency, string> = {
   weekly: "Weekly",

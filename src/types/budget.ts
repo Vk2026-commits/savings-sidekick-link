@@ -1,4 +1,4 @@
-export type BillFrequency = "weekly" | "biweekly" | "monthly" | "yearly";
+export type BillFrequency = "weekly" | "biweekly" | "monthly" | "yearly" | "one_time";
 export type BillCategory = "housing" | "utilities" | "insurance" | "subscriptions" | "transportation" | "food" | "debt" | "entertainment" | "fast_food" | "restaurants" | "haircuts" | "beauty" | "kids" | "household" | "other";
 export type BillOwner = string; // dynamic group id
 export type TransactionType = "income" | "expense";
@@ -138,6 +138,7 @@ export const FREQUENCY_LABELS: Record<BillFrequency, string> = {
   biweekly: "Bi-Weekly",
   monthly: "Monthly",
   yearly: "Yearly",
+  one_time: "One Time",
 };
 
 export const ASSET_TYPE_LABELS: Record<Asset["type"], string> = {
@@ -163,6 +164,7 @@ export function getMonthlyAmount(amount: number, frequency: BillFrequency): numb
     case "biweekly": return amount * 2.17;
     case "monthly": return amount;
     case "yearly": return amount / 12;
+    case "one_time": return amount;
   }
 }
 
@@ -172,5 +174,6 @@ export function getWeeklyAmount(amount: number, frequency: BillFrequency): numbe
     case "biweekly": return amount / 2;
     case "monthly": return amount / 4.33;
     case "yearly": return amount / 52;
+    case "one_time": return amount / 4.33;
   }
 }

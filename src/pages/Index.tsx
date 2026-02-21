@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import SummaryCards from "@/components/budget/SummaryCards";
@@ -18,8 +18,30 @@ import FinancialDashboard from "@/components/budget/FinancialDashboard";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
+import { getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function getCurrentMonth() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function formatMonthLabel(ym: string) {
+  const [y, m] = ym.split("-");
+  return `${MONTH_NAMES[parseInt(m) - 1]} ${y}`;
+}
+
+function shiftMonth(ym: string, delta: number) {
+  const [y, m] = ym.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "income", label: "Income", icon: Wallet },
@@ -41,6 +63,13 @@ const Index = () => {
   const [editingGroupName, setEditingGroupName] = useState("");
   const [newGroupName, setNewGroupName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+
+  const monthlyBillsTotal = useMemo(() => {
+    return budget.bills
+      .filter((b) => b.month === selectedMonth)
+      .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
+  }, [budget.bills, selectedMonth]);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -105,6 +134,31 @@ const Index = () => {
 
         {activeTab === "bills" && (
           <div className="space-y-6">
+            {/* Month Selector */}
+            <div className="glass-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))}
+                  className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <h2 className="text-lg font-bold min-w-[180px] text-center">{formatMonthLabel(selectedMonth)}</h2>
+                <button
+                  onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))}
+                  className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Total for {formatMonthLabel(selectedMonth)}</p>
+                <p className="text-xl font-bold font-mono">
+                  {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(monthlyBillsTotal)}
+                </p>
+              </div>
+            </div>
+
             {/* Add Group Button */}
             <div className="flex items-center gap-3">
               {showAddGroup ? (
@@ -206,6 +260,7 @@ const Index = () => {
                     title={group.name}
                     owner={group.id}
                     paymentAccounts={budget.paymentAccounts}
+                    selectedMonth={selectedMonth}
                   />
                 </div>
               ))}

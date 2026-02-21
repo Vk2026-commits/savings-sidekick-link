@@ -14,6 +14,7 @@ export interface Bill {
   autoPay: boolean;
   owner: BillOwner;
   paymentAccountId?: string;
+  month?: string; // "YYYY-MM" format, e.g. "2026-01"
 }
 
 export interface SavingsGoal {

@@ -16,6 +16,7 @@ import DebtPayoffPlanner from "@/components/budget/DebtPayoffPlanner";
 import BillCalendar from "@/components/budget/BillCalendar";
 import FinancialDashboard from "@/components/budget/FinancialDashboard";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
+import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import { getMonthlyAmount } from "@/types/budget";
@@ -131,9 +132,10 @@ const Index = () => {
                   totalSaved={budget.totalSaved}
                 />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
+                  <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} transactions={budget.transactions} />
                   <CashFlowForecast income={budget.monthlyIncome} bills={budget.bills} />
                 </div>
+                <DailySpendingChart transactions={budget.transactions} />
               </>
             );
           })()
@@ -242,7 +244,7 @@ const Index = () => {
             </div>
 
             {/* Budget Overview for selected month */}
-            <BudgetOverview bills={budget.bills.filter(b => b.month === selectedMonth)} income={budget.monthlyIncome} />
+            <BudgetOverview bills={budget.bills.filter(b => b.month === selectedMonth)} income={budget.monthlyIncome} transactions={budget.transactions} />
 
             {/* Payment Accounts Manager */}
             <PaymentAccountsManager

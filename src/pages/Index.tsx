@@ -22,6 +22,7 @@ import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import { getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import UserMenu from "@/components/UserMenu";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -82,7 +83,10 @@ const Index = () => {
             </div>
             <h1 className="text-xl font-bold tracking-tight">BudgetFlow</h1>
           </div>
-          <IncomeInput income={budget.monthlyIncome} onUpdate={budget.setMonthlyIncome} />
+          <div className="flex items-center gap-3">
+            <IncomeInput income={budget.monthlyIncome} onUpdate={budget.setMonthlyIncome} />
+            <UserMenu />
+          </div>
         </div>
 
         {/* Tab Navigation */}

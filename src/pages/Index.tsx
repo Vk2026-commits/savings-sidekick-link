@@ -282,6 +282,7 @@ const Index = () => {
                   </div>
                   <BillsList
                     bills={budget.bills}
+                    allBills={budget.bills}
                     onAdd={budget.addBill}
                     onUpdate={budget.updateBill}
                     onDelete={budget.deleteBill}

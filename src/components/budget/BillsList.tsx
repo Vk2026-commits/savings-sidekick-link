@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,14 @@ import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount } from "@/types/bud
 
 interface BillsListProps {
   bills: Bill[];
+  allBills?: Bill[]; // all bills across all groups for autocomplete
   onAdd: (bill: Omit<Bill, "id">) => void;
   onUpdate: (id: string, updates: Partial<Bill>) => void;
   onDelete: (id: string) => void;
   title?: string;
   owner?: BillOwner;
   paymentAccounts?: PaymentAccount[];
-  selectedMonth?: string; // "YYYY-MM"
+  selectedMonth?: string;
   groupTotal?: number;
   onMarkAllPaid?: () => void;
 }
@@ -51,7 +52,7 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   isRecurring: false,
 });
 
-export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
+export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
   const filteredBills = bills.filter((b) => {
     const ownerMatch = (b.owner ?? "household") === owner;
     const monthMatch = selectedMonth ? b.month === selectedMonth : true;
@@ -63,6 +64,60 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
   const [editForm, setEditForm] = useState<Partial<Bill>>({});
   const [reviewEditId, setReviewEditId] = useState<string | null>(null);
   const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Build unique bill names from all bills for autocomplete
+  const allBillNames = useMemo(() => {
+    const source = allBills || bills;
+    const names = new Set(source.map((b) => b.name).filter(Boolean));
+    return Array.from(names).sort();
+  }, [allBills, bills]);
+
+  const filteredSuggestions = useMemo(() => {
+    if (!form.name || form.name.length === 0) return [];
+    const query = form.name.toLowerCase();
+    return allBillNames.filter(
+      (name) => name.toLowerCase().includes(query) && name.toLowerCase() !== query
+    );
+  }, [form.name, allBillNames]);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node) &&
+        nameInputRef.current && !nameInputRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectSuggestion = (name: string) => {
+    // Find the most recent bill with this name to prefill details
+    const source = allBills || bills;
+    const match = source.filter((b) => b.name === name).pop();
+    if (match) {
+      setForm({
+        ...form,
+        name: match.name,
+        amount: match.amount,
+        category: match.category,
+        frequency: match.frequency,
+        dueDate: match.dueDate,
+        autoPay: match.autoPay,
+        paymentAccountId: match.paymentAccountId || "",
+        isRecurring: match.isRecurring || false,
+      });
+    } else {
+      setForm({ ...form, name });
+    }
+    setShowSuggestions(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,12 +232,36 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
             onSubmit={handleSubmit}
             className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 overflow-hidden"
           >
-            <Input
-              placeholder="Bill name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="col-span-2 md:col-span-1"
-            />
+            <div className="relative col-span-2 md:col-span-1">
+              <Input
+                ref={nameInputRef}
+                placeholder="Bill name"
+                value={form.name}
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => form.name.length > 0 && setShowSuggestions(true)}
+                autoComplete="off"
+              />
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div
+                  ref={suggestionsRef}
+                  className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-40 overflow-y-auto"
+                >
+                  {filteredSuggestions.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => selectSuggestion(name)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Input
               type="number"
               placeholder="Amount"

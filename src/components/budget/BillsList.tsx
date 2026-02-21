@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount } from "@/types/budget";
+import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount, ExpenseGroup } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount } from "@/types/budget";
 
 interface BillsListProps {
@@ -23,6 +23,7 @@ interface BillsListProps {
   title?: string;
   owner?: BillOwner;
   paymentAccounts?: PaymentAccount[];
+  expenseGroups?: ExpenseGroup[];
   selectedMonth?: string;
   groupTotal?: number;
   onMarkAllPaid?: () => void;
@@ -52,7 +53,7 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   isRecurring: false,
 });
 
-export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
+export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], expenseGroups = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
   const filteredBills = bills.filter((b) => {
     const ownerMatch = (b.owner ?? "household") === owner;
     const monthMatch = selectedMonth ? b.month === selectedMonth : true;
@@ -143,7 +144,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
 
   const startEdit = (bill: Bill) => {
     setEditingId(bill.id);
-    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId });
+    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId, owner: bill.owner });
   };
 
   const saveEdit = (id: string) => {
@@ -459,6 +460,16 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                           <SelectItem value="none">No Account</SelectItem>
                           {paymentAccounts.map((acc) => (
                             <SelectItem key={acc.id} value={acc.id}>{acc.nickname || acc.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {expenseGroups.length > 1 && (
+                      <Select value={editForm.owner as string || owner} onValueChange={(v) => setEditForm({ ...editForm, owner: v })}>
+                        <SelectTrigger><SelectValue placeholder="Move to group" /></SelectTrigger>
+                        <SelectContent>
+                          {expenseGroups.map((g) => (
+                            <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import SummaryCards from "@/components/budget/SummaryCards";
@@ -151,11 +151,39 @@ const Index = () => {
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">Total for {formatMonthLabel(selectedMonth)}</p>
-                <p className="text-xl font-bold font-mono">
-                  {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(monthlyBillsTotal)}
-                </p>
+              <div className="flex items-center gap-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const prevMonth = shiftMonth(selectedMonth, -1);
+                    const prevBills = budget.bills.filter(b => b.month === prevMonth);
+                    const currentBills = budget.bills.filter(b => b.month === selectedMonth);
+                    if (prevBills.length === 0) return;
+                    // Only copy bills that don't already exist (by name + owner)
+                    const existingKeys = new Set(currentBills.map(b => `${b.name}::${b.owner}`));
+                    let copied = 0;
+                    prevBills.forEach(bill => {
+                      if (!existingKeys.has(`${bill.name}::${bill.owner}`)) {
+                        const { id, ...billWithoutId } = bill;
+                        budget.addBill({ ...billWithoutId, month: selectedMonth, isPaid: false });
+                        copied++;
+                      }
+                    });
+                    if (copied === 0) {
+                      // All bills already exist
+                    }
+                  }}
+                  disabled={budget.bills.filter(b => b.month === shiftMonth(selectedMonth, -1)).length === 0}
+                >
+                  <Copy className="h-4 w-4 mr-1" /> Copy from {formatMonthLabel(shiftMonth(selectedMonth, -1))}
+                </Button>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Total for {formatMonthLabel(selectedMonth)}</p>
+                  <p className="text-xl font-bold font-mono">
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(monthlyBillsTotal)}
+                  </p>
+                </div>
               </div>
             </div>
 

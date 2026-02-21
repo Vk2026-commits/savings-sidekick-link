@@ -1,5 +1,6 @@
 export type BillFrequency = "weekly" | "biweekly" | "monthly" | "yearly";
-export type BillCategory = "housing" | "utilities" | "insurance" | "subscriptions" | "transportation" | "food" | "debt" | "other";
+export type BillCategory = "housing" | "utilities" | "insurance" | "subscriptions" | "transportation" | "food" | "debt" | "entertainment" | "fast_food" | "restaurants" | "haircuts" | "beauty" | "kids" | "household" | "other";
+export type BillOwner = "household" | "kids" | "steven" | "kalila";
 export type TransactionType = "income" | "expense";
 
 export interface Bill {
@@ -11,6 +12,7 @@ export interface Bill {
   dueDate: number; // day of month (1-31)
   isPaid: boolean;
   autoPay: boolean;
+  owner: BillOwner;
 }
 
 export interface SavingsGoal {
@@ -80,7 +82,21 @@ export const CATEGORY_LABELS: Record<BillCategory, string> = {
   transportation: "Transportation",
   food: "Food & Groceries",
   debt: "Debt Payments",
+  entertainment: "Entertainment",
+  fast_food: "Fast Food",
+  restaurants: "Restaurants",
+  haircuts: "Haircuts",
+  beauty: "Beauty (Nails/Pedicures)",
+  kids: "Kids' Expenses",
+  household: "Household Items",
   other: "Other",
+};
+
+export const OWNER_LABELS: Record<BillOwner, string> = {
+  household: "Bills & Expenses",
+  kids: "Kids' Expenses",
+  steven: "Steven's Expenses",
+  kalila: "Kalila's Expenses",
 };
 
 export const FREQUENCY_LABELS: Record<BillFrequency, string> = {

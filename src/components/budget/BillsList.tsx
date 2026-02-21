@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import type { Bill, BillCategory, BillFrequency } from "@/types/budget";
+import type { Bill, BillCategory, BillFrequency, BillOwner } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount } from "@/types/budget";
 
 interface BillsListProps {
@@ -13,13 +13,15 @@ interface BillsListProps {
   onAdd: (bill: Omit<Bill, "id">) => void;
   onUpdate: (id: string, updates: Partial<Bill>) => void;
   onDelete: (id: string) => void;
+  title?: string;
+  owner?: BillOwner;
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-const emptyBill = {
+const emptyBill = (owner: BillOwner = "household") => ({
   name: "",
   amount: 0,
   category: "other" as BillCategory,
@@ -27,11 +29,13 @@ const emptyBill = {
   dueDate: 1,
   isPaid: false,
   autoPay: false,
-};
+  owner,
+});
 
-export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsListProps) {
+export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household" }: BillsListProps) {
+  const filteredBills = bills.filter((b) => (b.owner ?? "household") === owner);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(emptyBill);
+  const [form, setForm] = useState(emptyBill(owner));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Bill>>({});
 
@@ -39,7 +43,7 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsLis
     e.preventDefault();
     if (!form.name || form.amount <= 0) return;
     onAdd(form);
-    setForm(emptyBill);
+    setForm(emptyBill(owner));
     setShowForm(false);
   };
 
@@ -58,7 +62,7 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsLis
   return (
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Bills & Expenses</h2>
+        <h2 className="text-lg font-semibold">{title}</h2>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
           {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
           {showForm ? "Cancel" : "Add Bill"}
@@ -123,8 +127,8 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsLis
         )}
       </AnimatePresence>
 
-      {bills.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center py-8">No bills added yet. Click "Add Bill" to get started.</p>
+      {filteredBills.length === 0 ? (
+        <p className="text-muted-foreground text-sm text-center py-8">No expenses added yet. Click "Add Bill" to get started.</p>
       ) : (
         <div className="space-y-2">
           <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
@@ -136,7 +140,7 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsLis
             <span className="w-8" />
           </div>
           <AnimatePresence>
-            {bills.map((bill) => {
+            {filteredBills.map((bill) => {
               const isEditing = editingId === bill.id;
 
               if (isEditing) {

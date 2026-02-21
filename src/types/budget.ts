@@ -13,6 +13,7 @@ export interface Bill {
   isPaid: boolean;
   autoPay: boolean;
   owner: BillOwner;
+  paymentAccountId?: string;
 }
 
 export interface SavingsGoal {
@@ -43,6 +44,21 @@ export interface ExpenseGroup {
   id: string;
   name: string;
 }
+
+export interface PaymentAccount {
+  id: string;
+  name: string;
+  nickname: string;
+  type: "direct_deposit" | "cash" | "credit_card" | "bank_account" | "other";
+}
+
+export const PAYMENT_ACCOUNT_TYPE_LABELS: Record<PaymentAccount["type"], string> = {
+  direct_deposit: "Direct Deposit",
+  cash: "Cash",
+  credit_card: "Credit Card",
+  bank_account: "Bank Account",
+  other: "Other",
+};
 
 export interface IncomeSource {
   id: string;
@@ -76,6 +92,7 @@ export interface BudgetState {
   categoryBudgets: CategoryBudget[];
   transactions: Transaction[];
   expenseGroups: ExpenseGroup[];
+  paymentAccounts: PaymentAccount[];
   assets: Asset[];
   liabilities: Liability[];
 }
@@ -103,6 +120,14 @@ export const DEFAULT_EXPENSE_GROUPS: ExpenseGroup[] = [
   { id: "kids", name: "Kids' Expenses" },
   { id: "steven", name: "Steven's Expenses" },
   { id: "kalila", name: "Kalila's Expenses" },
+];
+
+export const DEFAULT_PAYMENT_ACCOUNTS: PaymentAccount[] = [
+  { id: "direct_deposit", name: "Direct Deposit", nickname: "Direct Deposit", type: "direct_deposit" },
+  { id: "cash", name: "Cash", nickname: "Cash", type: "cash" },
+  { id: "amex", name: "American Express", nickname: "Amex", type: "credit_card" },
+  { id: "chase", name: "Chase Credit Card", nickname: "Chase CC", type: "credit_card" },
+  { id: "bank", name: "Bank Account", nickname: "Bank Account", type: "bank_account" },
 ];
 
 export const FREQUENCY_LABELS: Record<BillFrequency, string> = {

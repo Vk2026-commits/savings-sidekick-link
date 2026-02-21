@@ -17,6 +17,7 @@ import BillCalendar from "@/components/budget/BillCalendar";
 import FinancialDashboard from "@/components/budget/FinancialDashboard";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import IncomeManager from "@/components/budget/IncomeManager";
+import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 const tabs = [
@@ -144,6 +145,14 @@ const Index = () => {
             {/* Budget Overview at top */}
             <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
 
+            {/* Payment Accounts Manager */}
+            <PaymentAccountsManager
+              accounts={budget.paymentAccounts}
+              onAdd={budget.addPaymentAccount}
+              onUpdate={budget.updatePaymentAccount}
+              onDelete={budget.deletePaymentAccount}
+            />
+
             {/* Dynamic expense group boxes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {budget.expenseGroups.map((group) => (
@@ -195,6 +204,7 @@ const Index = () => {
                     onDelete={budget.deleteBill}
                     title={group.name}
                     owner={group.id}
+                    paymentAccounts={budget.paymentAccounts}
                   />
                 </div>
               ))}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import type { Bill, BillCategory, BillFrequency, BillOwner } from "@/types/budget";
+import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount } from "@/types/budget";
 
 interface BillsListProps {
@@ -15,6 +15,7 @@ interface BillsListProps {
   onDelete: (id: string) => void;
   title?: string;
   owner?: BillOwner;
+  paymentAccounts?: PaymentAccount[];
 }
 
 function fmt(n: number) {
@@ -30,9 +31,10 @@ const emptyBill = (owner: BillOwner = "household") => ({
   isPaid: false,
   autoPay: false,
   owner,
+  paymentAccountId: "" as string,
 });
 
-export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household" }: BillsListProps) {
+export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [] }: BillsListProps) {
   const filteredBills = bills.filter((b) => (b.owner ?? "household") === owner);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyBill(owner));
@@ -49,7 +51,7 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
 
   const startEdit = (bill: Bill) => {
     setEditingId(bill.id);
-    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay });
+    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId });
   };
 
   const saveEdit = (id: string) => {
@@ -120,6 +122,17 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
               <Switch checked={form.autoPay} onCheckedChange={(v) => setForm({ ...form, autoPay: v })} />
               <span className="text-sm text-muted-foreground">Auto-pay</span>
             </div>
+            {paymentAccounts.length > 0 && (
+              <Select value={form.paymentAccountId || "none"} onValueChange={(v) => setForm({ ...form, paymentAccountId: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue placeholder="Account" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Account</SelectItem>
+                  {paymentAccounts.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.id}>{acc.nickname || acc.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Button type="submit" className="col-span-2 md:col-span-1">
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
@@ -190,6 +203,17 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
                       <Switch checked={editForm.autoPay ?? false} onCheckedChange={(v) => setEditForm({ ...editForm, autoPay: v })} />
                       <span className="text-sm text-muted-foreground">Auto-pay</span>
                     </div>
+                    {paymentAccounts.length > 0 && (
+                      <Select value={editForm.paymentAccountId || "none"} onValueChange={(v) => setEditForm({ ...editForm, paymentAccountId: v === "none" ? "" : v })}>
+                        <SelectTrigger><SelectValue placeholder="Account" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No Account</SelectItem>
+                          {paymentAccounts.map((acc) => (
+                            <SelectItem key={acc.id} value={acc.id}>{acc.nickname || acc.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <div className="flex gap-2 col-span-2 md:col-span-1">
                       <Button size="sm" onClick={() => saveEdit(bill.id)}>
                         <Check className="h-4 w-4 mr-1" /> Save
@@ -216,6 +240,10 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
                     <p className="text-xs text-muted-foreground">
                       {CATEGORY_LABELS[bill.category]} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
                       {bill.autoPay && " · Auto"}
+                      {bill.paymentAccountId && paymentAccounts.length > 0 && (() => {
+                        const acc = paymentAccounts.find(a => a.id === bill.paymentAccountId);
+                        return acc ? ` · ${acc.nickname || acc.name}` : "";
+                      })()}
                     </p>
                   </div>
                   <span className="w-20 text-right font-mono text-sm">{fmt(bill.amount)}</span>

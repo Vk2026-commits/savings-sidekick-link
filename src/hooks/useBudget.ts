@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, IncomeSource, ExpenseGroup, BudgetState } from "@/types/budget";
-import { getMonthlyAmount, DEFAULT_EXPENSE_GROUPS } from "@/types/budget";
+import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, IncomeSource, ExpenseGroup, PaymentAccount, BudgetState } from "@/types/budget";
+import { getMonthlyAmount, DEFAULT_EXPENSE_GROUPS, DEFAULT_PAYMENT_ACCOUNTS } from "@/types/budget";
 
 const STORAGE_KEY = "budget-app-data";
 
@@ -21,6 +21,7 @@ const defaultState: BudgetState = {
   categoryBudgets: [],
   transactions: [],
   expenseGroups: DEFAULT_EXPENSE_GROUPS,
+  paymentAccounts: DEFAULT_PAYMENT_ACCOUNTS,
   assets: [],
   liabilities: [],
 };
@@ -128,6 +129,17 @@ export function useBudget() {
     }));
   }, []);
 
+  // Payment Accounts CRUD
+  const addPaymentAccount = useCallback((account: Omit<PaymentAccount, "id">) => {
+    setState((s) => ({ ...s, paymentAccounts: [...s.paymentAccounts, { ...account, id: crypto.randomUUID() }] }));
+  }, []);
+  const updatePaymentAccount = useCallback((id: string, updates: Partial<PaymentAccount>) => {
+    setState((s) => ({ ...s, paymentAccounts: s.paymentAccounts.map((a) => (a.id === id ? { ...a, ...updates } : a)) }));
+  }, []);
+  const deletePaymentAccount = useCallback((id: string) => {
+    setState((s) => ({ ...s, paymentAccounts: s.paymentAccounts.filter((a) => a.id !== id) }));
+  }, []);
+
   // Assets CRUD
   const addAsset = useCallback((asset: Omit<Asset, "id">) => {
     setState((s) => ({ ...s, assets: [...s.assets, { ...asset, id: crypto.randomUUID() }] }));
@@ -169,6 +181,7 @@ export function useBudget() {
     addTransaction, updateTransaction, deleteTransaction,
     addIncomeSource, updateIncomeSource, deleteIncomeSource,
     addExpenseGroup, updateExpenseGroup, deleteExpenseGroup,
+    addPaymentAccount, updatePaymentAccount, deletePaymentAccount,
     addAsset, updateAsset, deleteAsset,
     addLiability, updateLiability, deleteLiability,
     totalMonthlyBills, totalSavingsTarget, totalSaved, remaining,

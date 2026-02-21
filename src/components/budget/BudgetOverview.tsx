@@ -34,6 +34,9 @@ export default function BudgetOverview({ bills, income }: BudgetOverviewProps) {
 
   const totalWeekly = bills.reduce((sum, b) => sum + getWeeklyAmount(b.amount, b.frequency), 0);
   const totalMonthly = bills.reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
+  const weeklyIncome = income / 4.33;
+  const weeklyAvailable = weeklyIncome - totalWeekly;
+  const monthlyAvailable = income - totalMonthly;
 
   return (
     <motion.div
@@ -84,6 +87,14 @@ export default function BudgetOverview({ bills, income }: BudgetOverviewProps) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground mb-1">Weekly Income</p>
+              <p className="font-mono font-semibold text-primary">{fmt(weeklyIncome)}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground mb-1">Monthly Income</p>
+              <p className="font-mono font-semibold text-primary">{fmt(income)}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary/50">
               <p className="text-xs text-muted-foreground mb-1">Weekly Expenses</p>
               <p className="font-mono font-semibold text-chart-expense">{fmt(totalWeekly)}</p>
             </div>
@@ -93,11 +104,11 @@ export default function BudgetOverview({ bills, income }: BudgetOverviewProps) {
             </div>
             <div className="p-3 rounded-lg bg-secondary/50">
               <p className="text-xs text-muted-foreground mb-1">Weekly Available</p>
-              <p className="font-mono font-semibold text-primary">{fmt((income - totalMonthly) / 4.33)}</p>
+              <p className={`font-mono font-semibold ${weeklyAvailable >= 0 ? 'text-chart-savings' : 'text-destructive'}`}>{fmt(weeklyAvailable)}</p>
             </div>
             <div className="p-3 rounded-lg bg-secondary/50">
               <p className="text-xs text-muted-foreground mb-1">Monthly Available</p>
-              <p className="font-mono font-semibold text-primary">{fmt(income - totalMonthly)}</p>
+              <p className={`font-mono font-semibold ${monthlyAvailable >= 0 ? 'text-chart-savings' : 'text-destructive'}`}>{fmt(monthlyAvailable)}</p>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
-  Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft
+  Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
+  Plus, Pencil, Trash2, Check, X
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import SummaryCards from "@/components/budget/SummaryCards";
@@ -16,7 +17,8 @@ import BillCalendar from "@/components/budget/BillCalendar";
 import FinancialDashboard from "@/components/budget/FinancialDashboard";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import IncomeManager from "@/components/budget/IncomeManager";
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "income", label: "Income", icon: Wallet },
@@ -34,7 +36,10 @@ type TabId = typeof tabs[number]["id"];
 const Index = () => {
   const budget = useBudget();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
-
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingGroupName, setEditingGroupName] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [showAddGroup, setShowAddGroup] = useState(false);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -99,44 +104,98 @@ const Index = () => {
 
         {activeTab === "bills" && (
           <div className="space-y-6">
+            {/* Add Group Button */}
+            <div className="flex items-center gap-3">
+              {showAddGroup ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="New group name..."
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    className="w-64"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newGroupName.trim()) {
+                        budget.addExpenseGroup(newGroupName.trim());
+                        setNewGroupName("");
+                        setShowAddGroup(false);
+                      }
+                    }}
+                  />
+                  <Button size="sm" onClick={() => {
+                    if (newGroupName.trim()) {
+                      budget.addExpenseGroup(newGroupName.trim());
+                      setNewGroupName("");
+                      setShowAddGroup(false);
+                    }
+                  }}>
+                    <Check className="h-4 w-4 mr-1" /> Add
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setShowAddGroup(false); setNewGroupName(""); }}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setShowAddGroup(true)}>
+                  <Plus className="h-4 w-4 mr-1" /> Add Expense Group
+                </Button>
+              )}
+            </div>
+
+            {/* Dynamic expense group boxes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BillsList
-                bills={budget.bills}
-                onAdd={budget.addBill}
-                onUpdate={budget.updateBill}
-                onDelete={budget.deleteBill}
-                title="Bills & Expenses"
-                owner="household"
-              />
+              {budget.expenseGroups.map((group) => (
+                <div key={group.id} className="relative">
+                  {/* Group name edit controls */}
+                  <div className="flex items-center gap-2 mb-1">
+                    {editingGroupId === group.id ? (
+                      <>
+                        <Input
+                          value={editingGroupName}
+                          onChange={(e) => setEditingGroupName(e.target.value)}
+                          className="h-7 text-sm w-48"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && editingGroupName.trim()) {
+                              budget.updateExpenseGroup(group.id, editingGroupName.trim());
+                              setEditingGroupId(null);
+                            }
+                          }}
+                        />
+                        <button onClick={() => {
+                          if (editingGroupName.trim()) {
+                            budget.updateExpenseGroup(group.id, editingGroupName.trim());
+                            setEditingGroupId(null);
+                          }
+                        }} className="text-primary hover:text-primary/80">
+                          <Check className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setEditingGroupId(null)} className="text-muted-foreground hover:text-foreground">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => { setEditingGroupId(group.id); setEditingGroupName(group.name); }}
+                          className="text-muted-foreground hover:text-primary transition-colors" title="Edit name">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button onClick={() => budget.deleteExpenseGroup(group.id)}
+                          className="text-muted-foreground hover:text-destructive transition-colors" title="Delete group">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <BillsList
+                    bills={budget.bills}
+                    onAdd={budget.addBill}
+                    onUpdate={budget.updateBill}
+                    onDelete={budget.deleteBill}
+                    title={group.name}
+                    owner={group.id}
+                  />
+                </div>
+              ))}
               <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BillsList
-                bills={budget.bills}
-                onAdd={budget.addBill}
-                onUpdate={budget.updateBill}
-                onDelete={budget.deleteBill}
-                title="Kids' Expenses"
-                owner="kids"
-              />
-              <BillsList
-                bills={budget.bills}
-                onAdd={budget.addBill}
-                onUpdate={budget.updateBill}
-                onDelete={budget.deleteBill}
-                title="Steven's Expenses"
-                owner="steven"
-              />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BillsList
-                bills={budget.bills}
-                onAdd={budget.addBill}
-                onUpdate={budget.updateBill}
-                onDelete={budget.deleteBill}
-                title="Kalila's Expenses"
-                owner="kalila"
-              />
             </div>
           </div>
         )}

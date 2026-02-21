@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { PaymentAccount } from "@/types/budget";
-import { PAYMENT_ACCOUNT_TYPE_LABELS } from "@/types/budget";
+import type { PaymentAccount, Bill } from "@/types/budget";
+import { PAYMENT_ACCOUNT_TYPE_LABELS, getMonthlyAmount } from "@/types/budget";
 
 interface PaymentAccountsManagerProps {
   accounts: PaymentAccount[];
+  bills: Bill[];
   onAdd: (account: Omit<PaymentAccount, "id">) => void;
   onUpdate: (id: string, updates: Partial<PaymentAccount>) => void;
   onDelete: (id: string) => void;
@@ -21,7 +22,11 @@ const emptyAccount = (): Omit<PaymentAccount, "id"> => ({
   type: "bank_account",
 });
 
-export default function PaymentAccountsManager({ accounts, onAdd, onUpdate, onDelete }: PaymentAccountsManagerProps) {
+function fmt(n: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
+
+export default function PaymentAccountsManager({ accounts, bills, onAdd, onUpdate, onDelete }: PaymentAccountsManagerProps) {
   const [open, setOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyAccount());
@@ -90,6 +95,35 @@ export default function PaymentAccountsManager({ accounts, onAdd, onUpdate, onDe
             </motion.form>
           )}
         </AnimatePresence>
+
+        {/* Summary by account */}
+        {accounts.length > 0 && bills.length > 0 && (
+          <div className="mb-3 rounded-lg bg-accent/30 p-3 space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">Monthly Totals by Account</p>
+            {accounts.map((acc) => {
+              const accBills = bills.filter((b) => b.paymentAccountId === acc.id);
+              const total = accBills.reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
+              if (accBills.length === 0) return null;
+              return (
+                <div key={acc.id} className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{acc.nickname || acc.name} <span className="text-xs">({accBills.length})</span></span>
+                  <span className="font-mono font-medium">{fmt(total)}</span>
+                </div>
+              );
+            })}
+            {(() => {
+              const unassigned = bills.filter((b) => !b.paymentAccountId);
+              if (unassigned.length === 0) return null;
+              const total = unassigned.reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
+              return (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Unassigned <span className="text-xs">({unassigned.length})</span></span>
+                  <span className="font-mono font-medium">{fmt(total)}</span>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {accounts.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-4">No accounts added yet.</p>

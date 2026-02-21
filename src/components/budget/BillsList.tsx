@@ -435,7 +435,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
             <span className="w-8" />
           </div>
           <AnimatePresence>
-            {confirmedBills.map((bill) => {
+            {[...confirmedBills].reverse().map((bill) => {
               const isEditing = editingId === bill.id;
 
               if (isEditing) {

@@ -132,10 +132,10 @@ const Index = () => {
                   totalSaved={budget.totalSaved}
                 />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} transactions={budget.transactions} />
+                  <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
                   <CashFlowForecast income={budget.monthlyIncome} bills={budget.bills} />
                 </div>
-                <DailySpendingChart transactions={budget.transactions} />
+                <DailySpendingChart bills={budget.bills} />
               </>
             );
           })()
@@ -244,7 +244,7 @@ const Index = () => {
             </div>
 
             {/* Budget Overview for selected month */}
-            <BudgetOverview bills={budget.bills.filter(b => b.month === selectedMonth)} income={budget.monthlyIncome} transactions={budget.transactions} />
+            <BudgetOverview bills={budget.bills.filter(b => b.month === selectedMonth)} income={budget.monthlyIncome} />
 
             {/* Payment Accounts Manager */}
             <PaymentAccountsManager

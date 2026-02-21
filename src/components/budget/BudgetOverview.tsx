@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import type { Bill, Transaction } from "@/types/budget";
+import type { Bill } from "@/types/budget";
 import { CATEGORY_LABELS, getMonthlyAmount, getWeeklyAmount } from "@/types/budget";
 import DailySpendingChart from "./DailySpendingChart";
 
 interface BudgetOverviewProps {
   bills: Bill[];
   income: number;
-  transactions?: Transaction[];
 }
 
 function fmt(n: number) {
@@ -20,7 +19,7 @@ const COLORS = [
   "hsl(320,60%,55%)", "hsl(60,70%,50%)",
 ];
 
-export default function BudgetOverview({ bills, income, transactions = [] }: BudgetOverviewProps) {
+export default function BudgetOverview({ bills, income }: BudgetOverviewProps) {
   const categoryTotals = bills.reduce((acc, bill) => {
     const monthly = getMonthlyAmount(bill.amount, bill.frequency);
     acc[bill.category] = (acc[bill.category] || 0) + monthly;
@@ -130,9 +129,9 @@ export default function BudgetOverview({ bills, income, transactions = [] }: Bud
       </div>
 
       {/* Daily Spending Chart */}
-      {transactions.length > 0 && (
+      {bills.length > 0 && (
         <div className="mt-5 pt-5 border-t border-border/30">
-          <DailySpendingChart transactions={transactions} compact />
+          <DailySpendingChart bills={bills} compact />
         </div>
       )}
     </motion.div>

@@ -37,6 +37,14 @@ export interface Transaction {
   notes?: string;
 }
 
+export interface IncomeSource {
+  id: string;
+  name: string;
+  amount: number;
+  frequency: "weekly" | "biweekly" | "monthly" | "yearly";
+  type: "salary" | "freelance" | "business" | "investment" | "gift" | "other";
+}
+
 export interface Asset {
   id: string;
   name: string;
@@ -55,6 +63,7 @@ export interface Liability {
 
 export interface BudgetState {
   monthlyIncome: number;
+  incomeSources: IncomeSource[];
   bills: Bill[];
   savingsGoals: SavingsGoal[];
   categoryBudgets: CategoryBudget[];

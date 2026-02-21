@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, X, DollarSign, Briefcase, Building2, Gift, TrendingUp, Package } from "lucide-react";
+import { Plus, Trash2, X, DollarSign, Briefcase, Building2, Gift, TrendingUp, Package, Pencil, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,7 @@ function fmt(n: number) {
 interface IncomeManagerProps {
   sources: IncomeSource[];
   onAdd: (source: Omit<IncomeSource, "id">) => void;
+  onUpdate: (id: string, updates: Partial<IncomeSource>) => void;
   onDelete: (id: string) => void;
   totalMonthlyIncome: number;
 }
@@ -65,9 +66,11 @@ const emptyForm = {
   type: "salary" as IncomeSource["type"],
 };
 
-export default function IncomeManager({ sources, onAdd, onDelete, totalMonthlyIncome }: IncomeManagerProps) {
+export default function IncomeManager({ sources, onAdd, onUpdate, onDelete, totalMonthlyIncome }: IncomeManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<IncomeSource>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +78,18 @@ export default function IncomeManager({ sources, onAdd, onDelete, totalMonthlyIn
     onAdd(form);
     setForm(emptyForm);
     setShowForm(false);
+  };
+
+  const startEdit = (source: IncomeSource) => {
+    setEditingId(source.id);
+    setEditForm({ name: source.name, amount: source.amount, frequency: source.frequency, type: source.type });
+  };
+
+  const saveEdit = (id: string) => {
+    if (editForm.name && (editForm.amount ?? 0) > 0) {
+      onUpdate(id, editForm);
+    }
+    setEditingId(null);
   };
 
   return (
@@ -160,6 +175,55 @@ export default function IncomeManager({ sources, onAdd, onDelete, totalMonthlyIn
           <div className="space-y-2">
             {sources.map((source) => {
               const Icon = typeIcons[source.type] || DollarSign;
+              const isEditing = editingId === source.id;
+
+              if (isEditing) {
+                return (
+                  <motion.div
+                    key={source.id}
+                    layout
+                    className="grid grid-cols-2 md:grid-cols-5 gap-3 items-center px-3 py-3 rounded-lg bg-accent/50 border border-primary/20"
+                  >
+                    <Input
+                      value={editForm.name ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="col-span-2 md:col-span-1"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={editForm.amount ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, amount: parseFloat(e.target.value) || 0 })}
+                    />
+                    <Select value={editForm.frequency} onValueChange={(v) => setEditForm({ ...editForm, frequency: v as IncomeSource["frequency"] })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(FREQ_LABELS).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>{v}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={editForm.type} onValueChange={(v) => setEditForm({ ...editForm, type: v as IncomeSource["type"] })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(INCOME_TYPE_LABELS).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>{v}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => saveEdit(source.id)}>
+                        <Check className="h-4 w-4 mr-1" /> Save
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
               const monthly = getMonthly(source.amount, source.frequency);
               return (
                 <motion.div
@@ -185,6 +249,9 @@ export default function IncomeManager({ sources, onAdd, onDelete, totalMonthlyIn
                       <p className="font-mono text-sm font-medium text-primary">{fmt(source.amount)}</p>
                       <p className="font-mono text-xs text-muted-foreground">{fmt(monthly)}/mo</p>
                     </div>
+                    <button onClick={() => startEdit(source)} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Pencil className="h-4 w-4" />
+                    </button>
                     <button onClick={() => onDelete(source.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="h-4 w-4" />
                     </button>

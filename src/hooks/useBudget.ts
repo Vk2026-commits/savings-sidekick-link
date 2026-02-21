@@ -97,6 +97,13 @@ export function useBudget() {
       return { ...s, incomeSources: newSources, monthlyIncome: newTotal };
     });
   }, []);
+  const updateIncomeSource = useCallback((id: string, updates: Partial<IncomeSource>) => {
+    setState((s) => {
+      const newSources = s.incomeSources.map((src) => (src.id === id ? { ...src, ...updates } : src));
+      const newTotal = newSources.reduce((sum, src) => sum + getMonthlyIncome(src.amount, src.frequency), 0);
+      return { ...s, incomeSources: newSources, monthlyIncome: newTotal };
+    });
+  }, []);
   const deleteIncomeSource = useCallback((id: string) => {
     setState((s) => {
       const newSources = s.incomeSources.filter((src) => src.id !== id);
@@ -144,7 +151,7 @@ export function useBudget() {
     addSavingsGoal, updateSavingsGoal, deleteSavingsGoal,
     addCategoryBudget, updateCategoryBudget, deleteCategoryBudget,
     addTransaction, updateTransaction, deleteTransaction,
-    addIncomeSource, deleteIncomeSource,
+    addIncomeSource, updateIncomeSource, deleteIncomeSource,
     addAsset, updateAsset, deleteAsset,
     addLiability, updateLiability, deleteLiability,
     totalMonthlyBills, totalSavingsTarget, totalSaved, remaining,

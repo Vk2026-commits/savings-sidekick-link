@@ -16,13 +16,14 @@ interface BillsListProps {
   title?: string;
   owner?: BillOwner;
   paymentAccounts?: PaymentAccount[];
+  selectedMonth?: string; // "YYYY-MM"
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-const emptyBill = (owner: BillOwner = "household") => ({
+const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   name: "",
   amount: 0,
   category: "other" as BillCategory,
@@ -32,20 +33,25 @@ const emptyBill = (owner: BillOwner = "household") => ({
   autoPay: false,
   owner,
   paymentAccountId: "" as string,
+  month: month || "",
 });
 
-export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [] }: BillsListProps) {
-  const filteredBills = bills.filter((b) => (b.owner ?? "household") === owner);
+export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth }: BillsListProps) {
+  const filteredBills = bills.filter((b) => {
+    const ownerMatch = (b.owner ?? "household") === owner;
+    const monthMatch = selectedMonth ? b.month === selectedMonth : true;
+    return ownerMatch && monthMatch;
+  });
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(emptyBill(owner));
+  const [form, setForm] = useState(emptyBill(owner, selectedMonth));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Bill>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || form.amount <= 0) return;
-    onAdd(form);
-    setForm(emptyBill(owner));
+    onAdd({ ...form, month: selectedMonth || form.month });
+    setForm(emptyBill(owner, selectedMonth));
     setShowForm(false);
   };
 

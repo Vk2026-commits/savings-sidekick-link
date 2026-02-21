@@ -15,9 +15,11 @@ import DebtPayoffPlanner from "@/components/budget/DebtPayoffPlanner";
 import BillCalendar from "@/components/budget/BillCalendar";
 import FinancialDashboard from "@/components/budget/FinancialDashboard";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
+import IncomeManager from "@/components/budget/IncomeManager";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "income", label: "Income", icon: Wallet },
   { id: "bills", label: "Bills", icon: Receipt },
   { id: "budget", label: "Budget", icon: Target },
   { id: "transactions", label: "Transactions", icon: ArrowRightLeft },
@@ -83,6 +85,15 @@ const Index = () => {
               <CashFlowForecast income={budget.monthlyIncome} bills={budget.bills} />
             </div>
           </>
+        )}
+
+        {activeTab === "income" && (
+          <IncomeManager
+            sources={budget.incomeSources}
+            onAdd={budget.addIncomeSource}
+            onDelete={budget.deleteIncomeSource}
+            totalMonthlyIncome={budget.monthlyIncome}
+          />
         )}
 
         {activeTab === "bills" && (

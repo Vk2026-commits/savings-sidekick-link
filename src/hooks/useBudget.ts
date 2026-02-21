@@ -1,11 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, BudgetState } from "@/types/budget";
+import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, IncomeSource, BudgetState } from "@/types/budget";
 import { getMonthlyAmount } from "@/types/budget";
 
 const STORAGE_KEY = "budget-app-data";
 
+function getMonthlyIncome(amount: number, freq: IncomeSource["frequency"]): number {
+  switch (freq) {
+    case "weekly": return amount * 4.33;
+    case "biweekly": return amount * 2.17;
+    case "monthly": return amount;
+    case "yearly": return amount / 12;
+  }
+}
+
 const defaultState: BudgetState = {
   monthlyIncome: 0,
+  incomeSources: [],
   bills: [],
   savingsGoals: [],
   categoryBudgets: [],
@@ -79,6 +89,22 @@ export function useBudget() {
     setState((s) => ({ ...s, transactions: s.transactions.filter((t) => t.id !== id) }));
   }, []);
 
+  // Income Sources CRUD
+  const addIncomeSource = useCallback((source: Omit<IncomeSource, "id">) => {
+    setState((s) => {
+      const newSources = [...s.incomeSources, { ...source, id: crypto.randomUUID() }];
+      const newTotal = newSources.reduce((sum, src) => sum + getMonthlyIncome(src.amount, src.frequency), 0);
+      return { ...s, incomeSources: newSources, monthlyIncome: newTotal };
+    });
+  }, []);
+  const deleteIncomeSource = useCallback((id: string) => {
+    setState((s) => {
+      const newSources = s.incomeSources.filter((src) => src.id !== id);
+      const newTotal = newSources.reduce((sum, src) => sum + getMonthlyIncome(src.amount, src.frequency), 0);
+      return { ...s, incomeSources: newSources, monthlyIncome: newTotal };
+    });
+  }, []);
+
   // Assets CRUD
   const addAsset = useCallback((asset: Omit<Asset, "id">) => {
     setState((s) => ({ ...s, assets: [...s.assets, { ...asset, id: crypto.randomUUID() }] }));
@@ -118,6 +144,7 @@ export function useBudget() {
     addSavingsGoal, updateSavingsGoal, deleteSavingsGoal,
     addCategoryBudget, updateCategoryBudget, deleteCategoryBudget,
     addTransaction, updateTransaction, deleteTransaction,
+    addIncomeSource, deleteIncomeSource,
     addAsset, updateAsset, deleteAsset,
     addLiability, updateLiability, deleteLiability,
     totalMonthlyBills, totalSavingsTarget, totalSaved, remaining,

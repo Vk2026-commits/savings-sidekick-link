@@ -98,14 +98,46 @@ const Index = () => {
         )}
 
         {activeTab === "bills" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <BillsList
-              bills={budget.bills}
-              onAdd={budget.addBill}
-              onUpdate={budget.updateBill}
-              onDelete={budget.deleteBill}
-            />
-            <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BillsList
+                bills={budget.bills}
+                onAdd={budget.addBill}
+                onUpdate={budget.updateBill}
+                onDelete={budget.deleteBill}
+                title="Bills & Expenses"
+                owner="household"
+              />
+              <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BillsList
+                bills={budget.bills}
+                onAdd={budget.addBill}
+                onUpdate={budget.updateBill}
+                onDelete={budget.deleteBill}
+                title="Kids' Expenses"
+                owner="kids"
+              />
+              <BillsList
+                bills={budget.bills}
+                onAdd={budget.addBill}
+                onUpdate={budget.updateBill}
+                onDelete={budget.deleteBill}
+                title="Steven's Expenses"
+                owner="steven"
+              />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BillsList
+                bills={budget.bills}
+                onAdd={budget.addBill}
+                onUpdate={budget.updateBill}
+                onDelete={budget.deleteBill}
+                title="Kalila's Expenses"
+                owner="kalila"
+              />
+            </div>
           </div>
         )}
 

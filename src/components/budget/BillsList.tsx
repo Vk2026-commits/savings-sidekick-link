@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
   const [reviewEditId, setReviewEditId] = useState<string | null>(null);
   const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -196,8 +197,18 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
     }
   };
 
-  const pendingBills = filteredBills.filter((b) => b.pendingReview);
-  const confirmedBills = filteredBills.filter((b) => !b.pendingReview);
+  const searchLower = searchQuery.toLowerCase();
+  const matchesSearch = (bill: Bill) => {
+    if (!searchQuery) return true;
+    return (
+      bill.name.toLowerCase().includes(searchLower) ||
+      bill.amount.toString().includes(searchQuery) ||
+      fmt(bill.amount).toLowerCase().includes(searchLower)
+    );
+  };
+
+  const pendingBills = filteredBills.filter((b) => b.pendingReview && matchesSearch(b));
+  const confirmedBills = filteredBills.filter((b) => !b.pendingReview && matchesSearch(b));
   const hasBills = filteredBills.length > 0;
 
   return (
@@ -320,6 +331,27 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
           </motion.form>
         )}
       </AnimatePresence>
+
+      {/* Search bar */}
+      {hasBills && (
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or amount..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Pending Review Bills */}
       {pendingBills.length > 0 && (

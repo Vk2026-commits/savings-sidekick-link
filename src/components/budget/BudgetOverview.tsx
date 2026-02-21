@@ -131,7 +131,7 @@ export default function BudgetOverview({ bills, income }: BudgetOverviewProps) {
       {/* Daily Spending Chart */}
       {bills.length > 0 && (
         <div className="mt-5 pt-5 border-t border-border/30">
-          <DailySpendingChart bills={bills} compact />
+          <DailySpendingChart bills={bills} monthlyIncome={income} compact />
         </div>
       )}
     </motion.div>

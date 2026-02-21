@@ -148,6 +148,7 @@ const Index = () => {
             {/* Payment Accounts Manager */}
             <PaymentAccountsManager
               accounts={budget.paymentAccounts}
+              bills={budget.bills}
               onAdd={budget.addPaymentAccount}
               onUpdate={budget.updatePaymentAccount}
               onDelete={budget.deletePaymentAccount}

@@ -196,8 +196,8 @@ const Index = () => {
               )}
             </div>
 
-            {/* Budget Overview at top */}
-            <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
+            {/* Budget Overview for selected month */}
+            <BudgetOverview bills={budget.bills.filter(b => b.month === selectedMonth)} income={budget.monthlyIncome} />
 
             {/* Payment Accounts Manager */}
             <PaymentAccountsManager

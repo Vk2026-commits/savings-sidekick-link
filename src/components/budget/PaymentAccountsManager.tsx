@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Plus, Trash2, Check, X, Pencil, CreditCard } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, CreditCard, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { PaymentAccount } from "@/types/budget";
 import { PAYMENT_ACCOUNT_TYPE_LABELS } from "@/types/budget";
 
@@ -21,6 +22,7 @@ const emptyAccount = (): Omit<PaymentAccount, "id"> => ({
 });
 
 export default function PaymentAccountsManager({ accounts, onAdd, onUpdate, onDelete }: PaymentAccountsManagerProps) {
+  const [open, setOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyAccount());
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -47,66 +49,61 @@ export default function PaymentAccountsManager({ accounts, onAdd, onUpdate, onDe
   };
 
   return (
-    <div className="glass-card p-5">
-      <div className="flex items-center justify-between mb-4">
+    <Collapsible open={open} onOpenChange={setOpen} className="glass-card">
+      <CollapsibleTrigger className="flex items-center justify-between w-full px-5 py-3 hover:bg-secondary/30 transition-colors rounded-lg">
         <div className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Payment Accounts</h2>
+          <CreditCard className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">Payment Accounts</span>
+          <span className="text-xs text-muted-foreground">({accounts.length})</span>
         </div>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-          {showForm ? "Cancel" : "Add Account"}
-        </Button>
-      </div>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </CollapsibleTrigger>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.form
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 overflow-hidden"
-          >
-            <Input
-              placeholder="Account name (e.g. Chase Sapphire)"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-            <Input
-              placeholder="Nickname (e.g. Chase CC)"
-              value={form.nickname}
-              onChange={(e) => setForm({ ...form, nickname: e.target.value })}
-            />
-            <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as PaymentAccount["type"] })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {Object.entries(PAYMENT_ACCOUNT_TYPE_LABELS).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button type="submit">
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </motion.form>
-        )}
-      </AnimatePresence>
+      <CollapsibleContent className="px-5 pb-4">
+        <div className="flex justify-end mb-3 pt-1">
+          <Button size="sm" variant="outline" onClick={() => setShowForm(!showForm)}>
+            {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+            {showForm ? "Cancel" : "Add Account"}
+          </Button>
+        </div>
 
-      {accounts.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center py-6">No accounts added. Click "Add Account" to get started.</p>
-      ) : (
-        <div className="space-y-2">
-          <AnimatePresence>
+        <AnimatePresence>
+          {showForm && (
+            <motion.form
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 overflow-hidden"
+            >
+              <Input placeholder="Account name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input placeholder="Nickname" value={form.nickname} onChange={(e) => setForm({ ...form, nickname: e.target.value })} />
+              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as PaymentAccount["type"] })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {Object.entries(PAYMENT_ACCOUNT_TYPE_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button type="submit"><Plus className="h-4 w-4 mr-1" /> Add</Button>
+            </motion.form>
+          )}
+        </AnimatePresence>
+
+        {accounts.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-4">No accounts added yet.</p>
+        ) : (
+          <div className="space-y-1.5">
             {accounts.map((acc) => {
               if (editingId === acc.id) {
                 return (
-                  <motion.div key={acc.id} layout className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center px-3 py-3 rounded-lg bg-accent/50 border border-primary/20">
+                  <div key={acc.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center px-3 py-2.5 rounded-lg bg-accent/50 border border-primary/20">
                     <Input value={editForm.name ?? ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} placeholder="Account name" />
                     <Input value={editForm.nickname ?? ""} onChange={(e) => setEditForm({ ...editForm, nickname: e.target.value })} placeholder="Nickname" />
                     <Select value={editForm.type} onValueChange={(v) => setEditForm({ ...editForm, type: v as PaymentAccount["type"] })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-popover z-50">
                         {Object.entries(PAYMENT_ACCOUNT_TYPE_LABELS).map(([k, v]) => (
                           <SelectItem key={k} value={k}>{v}</SelectItem>
                         ))}
@@ -116,19 +113,12 @@ export default function PaymentAccountsManager({ accounts, onAdd, onUpdate, onDe
                       <Button size="sm" onClick={() => saveEdit(acc.id)}><Check className="h-4 w-4 mr-1" /> Save</Button>
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}><X className="h-4 w-4" /></Button>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               }
 
               return (
-                <motion.div
-                  key={acc.id}
-                  layout
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 8 }}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
+                <div key={acc.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
                   <div>
                     <p className="font-medium text-sm">{acc.nickname || acc.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -136,19 +126,19 @@ export default function PaymentAccountsManager({ accounts, onAdd, onUpdate, onDe
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => startEdit(acc)} className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                      <Pencil className="h-4 w-4" />
+                    <button onClick={() => startEdit(acc)} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                      <Pencil className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => onDelete(acc.id)} className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors">
-                      <Trash2 className="h-4 w-4" />
+                    <button onClick={() => onDelete(acc.id)} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
-          </AnimatePresence>
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

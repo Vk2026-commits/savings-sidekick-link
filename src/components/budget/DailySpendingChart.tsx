@@ -101,7 +101,7 @@ export default function DailySpendingChart({ bills, incomeSources = [], monthlyI
             <XAxis dataKey="day" stroke="hsl(215, 12%, 55%)" fontSize={11} />
             <YAxis stroke="hsl(215, 12%, 55%)" fontSize={10} tickFormatter={(v) => `$${v}`} />
             <Tooltip
-              formatter={(v: number, name: string) => [fmt(v), name === "income" ? "Income" : "Spent"]}
+              formatter={(v: number, name: string) => [fmt(v), name === "income" ? "Daily Income" : "Daily Spent"]}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.fullDay || ""}
               contentStyle={tooltipStyle}
             />

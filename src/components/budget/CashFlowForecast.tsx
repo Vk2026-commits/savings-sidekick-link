@@ -25,23 +25,53 @@ export default function CashFlowForecast({ income, bills }: CashFlowForecastProp
   const currentDay = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
-  // Build daily cash flow for the month
+  // Calculate total monthly bills using the same normalization as BudgetOverview
+  const totalMonthlyBills = bills.reduce((s, b) => s + getMonthlyAmount(b.amount, b.frequency), 0);
+
+  // Build daily cash flow: spread bills across the month based on frequency
+  // so the chart matches the normalized monthly totals
+  const dailyExpenses: { day: number; amount: number; labels: string[] }[] = Array.from(
+    { length: daysInMonth },
+    (_, i) => ({ day: i + 1, amount: 0, labels: [] })
+  );
+
+  bills.forEach((b) => {
+    const billDay = Math.min(b.dueDate, daysInMonth);
+    if (b.frequency === "weekly") {
+      // Place on every 7 days starting from dueDate, use per-occurrence amount
+      for (let d = billDay; d <= daysInMonth; d += 7) {
+        dailyExpenses[d - 1].amount += b.amount;
+        dailyExpenses[d - 1].labels.push(b.name);
+      }
+    } else if (b.frequency === "biweekly") {
+      // Place on every 14 days starting from dueDate
+      for (let d = billDay; d <= daysInMonth; d += 14) {
+        dailyExpenses[d - 1].amount += b.amount;
+        dailyExpenses[d - 1].labels.push(b.name);
+      }
+    } else if (b.frequency === "yearly") {
+      // Spread yearly as monthly / 1 occurrence
+      const monthlyPortion = b.amount / 12;
+      dailyExpenses[billDay - 1].amount += monthlyPortion;
+      dailyExpenses[billDay - 1].labels.push(b.name);
+    } else {
+      // monthly or one_time: full amount on due date
+      dailyExpenses[billDay - 1].amount += b.amount;
+      dailyExpenses[billDay - 1].labels.push(b.name);
+    }
+  });
+
   const dailyData: { day: number; balance: number; label: string }[] = [];
   let runningBalance = income;
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const dayBills = bills.filter((b) => Math.min(b.dueDate, daysInMonth) === day);
-    const dayExpenses = dayBills.reduce((sum, b) => sum + b.amount, 0);
-    runningBalance -= dayExpenses;
+    runningBalance -= dailyExpenses[day - 1].amount;
     dailyData.push({
       day,
       balance: Math.round(runningBalance * 100) / 100,
-      label: dayBills.map((b) => b.name).join(", ") || "",
+      label: dailyExpenses[day - 1].labels.join(", "),
     });
   }
-
-  // 3-month forecast
-  const totalMonthlyBills = bills.reduce((s, b) => s + getMonthlyAmount(b.amount, b.frequency), 0);
   const monthlyNet = income - totalMonthlyBills;
   const forecast: { month: string; projected: number }[] = [];
   let projBalance = runningBalance;

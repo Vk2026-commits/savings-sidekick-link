@@ -289,6 +289,7 @@ const Index = () => {
                     title={group.name}
                     owner={group.id}
                     paymentAccounts={budget.paymentAccounts}
+                    expenseGroups={budget.expenseGroups}
                     selectedMonth={selectedMonth}
                     groupTotal={budget.bills
                       .filter(b => (b.owner ?? "household") === group.id && b.month === selectedMonth)

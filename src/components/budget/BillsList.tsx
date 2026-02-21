@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Check, X } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,8 @@ const emptyBill = {
 export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsListProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyBill);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Bill>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +41,18 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsLis
     onAdd(form);
     setForm(emptyBill);
     setShowForm(false);
+  };
+
+  const startEdit = (bill: Bill) => {
+    setEditingId(bill.id);
+    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay });
+  };
+
+  const saveEdit = (id: string) => {
+    if (editForm.name && (editForm.amount ?? 0) > 0) {
+      onUpdate(id, editForm);
+    }
+    setEditingId(null);
   };
 
   return (
@@ -113,51 +127,118 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete }: BillsLis
         <p className="text-muted-foreground text-sm text-center py-8">No bills added yet. Click "Add Bill" to get started.</p>
       ) : (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
+          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
             <span>Name</span>
             <span className="w-20 text-right">Amount</span>
             <span className="w-20 text-right">Monthly</span>
             <span className="w-16 text-center">Paid</span>
             <span className="w-8" />
+            <span className="w-8" />
           </div>
           <AnimatePresence>
-            {bills.map((bill) => (
-              <motion.div
-                key={bill.id}
-                layout
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 8 }}
-                className="grid grid-cols-[1fr,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-              >
-                <div>
-                  <p className="font-medium text-sm">{bill.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {CATEGORY_LABELS[bill.category]} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
-                    {bill.autoPay && " · Auto"}
-                  </p>
-                </div>
-                <span className="w-20 text-right font-mono text-sm">{fmt(bill.amount)}</span>
-                <span className="w-20 text-right font-mono text-sm text-muted-foreground">
-                  {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
-                </span>
-                <div className="w-16 flex justify-center">
-                  <button
-                    onClick={() => onUpdate(bill.id, { isPaid: !bill.isPaid })}
-                    className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      bill.isPaid
-                        ? "bg-primary border-primary"
-                        : "border-muted-foreground/30 hover:border-primary/50"
-                    }`}
+            {bills.map((bill) => {
+              const isEditing = editingId === bill.id;
+
+              if (isEditing) {
+                return (
+                  <motion.div
+                    key={bill.id}
+                    layout
+                    className="grid grid-cols-2 md:grid-cols-4 gap-3 items-center px-3 py-3 rounded-lg bg-accent/50 border border-primary/20"
                   >
-                    {bill.isPaid && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+                    <Input
+                      value={editForm.name ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="col-span-2 md:col-span-1"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={editForm.amount ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, amount: parseFloat(e.target.value) || 0 })}
+                    />
+                    <Select value={editForm.category} onValueChange={(v) => setEditForm({ ...editForm, category: v as BillCategory })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>{v}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={editForm.frequency} onValueChange={(v) => setEditForm({ ...editForm, frequency: v as BillFrequency })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(FREQUENCY_LABELS).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>{v}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="number"
+                      placeholder="Due day"
+                      min={1}
+                      max={31}
+                      value={editForm.dueDate ?? 1}
+                      onChange={(e) => setEditForm({ ...editForm, dueDate: parseInt(e.target.value) || 1 })}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Switch checked={editForm.autoPay ?? false} onCheckedChange={(v) => setEditForm({ ...editForm, autoPay: v })} />
+                      <span className="text-sm text-muted-foreground">Auto-pay</span>
+                    </div>
+                    <div className="flex gap-2 col-span-2 md:col-span-1">
+                      <Button size="sm" onClick={() => saveEdit(bill.id)}>
+                        <Check className="h-4 w-4 mr-1" /> Save
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              return (
+                <motion.div
+                  key={bill.id}
+                  layout
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 8 }}
+                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                >
+                  <div>
+                    <p className="font-medium text-sm">{bill.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {CATEGORY_LABELS[bill.category]} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
+                      {bill.autoPay && " · Auto"}
+                    </p>
+                  </div>
+                  <span className="w-20 text-right font-mono text-sm">{fmt(bill.amount)}</span>
+                  <span className="w-20 text-right font-mono text-sm text-muted-foreground">
+                    {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
+                  </span>
+                  <div className="w-16 flex justify-center">
+                    <button
+                      onClick={() => onUpdate(bill.id, { isPaid: !bill.isPaid })}
+                      className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        bill.isPaid
+                          ? "bg-primary border-primary"
+                          : "border-muted-foreground/30 hover:border-primary/50"
+                      }`}
+                    >
+                      {bill.isPaid && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+                    </button>
+                  </div>
+                  <button onClick={() => startEdit(bill)} className="w-8 text-muted-foreground hover:text-primary transition-colors">
+                    <Pencil className="h-4 w-4" />
                   </button>
-                </div>
-                <button onClick={() => onDelete(bill.id)} className="w-8 text-muted-foreground hover:text-destructive transition-colors">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </motion.div>
-            ))}
+                  <button onClick={() => onDelete(bill.id)} className="w-8 text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

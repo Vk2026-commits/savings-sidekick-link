@@ -91,6 +91,7 @@ const Index = () => {
           <IncomeManager
             sources={budget.incomeSources}
             onAdd={budget.addIncomeSource}
+            onUpdate={budget.updateIncomeSource}
             onDelete={budget.deleteIncomeSource}
             totalMonthlyIncome={budget.monthlyIncome}
           />

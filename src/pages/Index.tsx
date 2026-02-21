@@ -292,6 +292,11 @@ const Index = () => {
                     groupTotal={budget.bills
                       .filter(b => (b.owner ?? "household") === group.id && b.month === selectedMonth)
                       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0)}
+                    onMarkAllPaid={() => {
+                      budget.bills
+                        .filter(b => (b.owner ?? "household") === group.id && b.month === selectedMonth && !b.isPaid)
+                        .forEach(b => budget.updateBill(b.id, { isPaid: true }));
+                    }}
                   />
                 </div>
               ))}

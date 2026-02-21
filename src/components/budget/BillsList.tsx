@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { Plus, Trash2, Check, X, Pencil } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount } from "@/types/budget";
 
@@ -18,10 +24,17 @@ interface BillsListProps {
   paymentAccounts?: PaymentAccount[];
   selectedMonth?: string; // "YYYY-MM"
   groupTotal?: number;
+  onMarkAllPaid?: () => void;
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
+
+function shiftMonth(ym: string, delta: number) {
+  const [y, m] = ym.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
 const emptyBill = (owner: BillOwner = "household", month?: string) => ({
@@ -35,9 +48,10 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   owner,
   paymentAccountId: "" as string,
   month: month || "",
+  isRecurring: false,
 });
 
-export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth, groupTotal }: BillsListProps) {
+export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
   const filteredBills = bills.filter((b) => {
     const ownerMatch = (b.owner ?? "household") === owner;
     const monthMatch = selectedMonth ? b.month === selectedMonth : true;
@@ -47,11 +61,27 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
   const [form, setForm] = useState(emptyBill(owner, selectedMonth));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Bill>>({});
+  const [reviewEditId, setReviewEditId] = useState<string | null>(null);
+  const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || form.amount <= 0) return;
-    onAdd({ ...form, month: selectedMonth || form.month });
+    const newBill: Omit<Bill, "id"> = { ...form, month: selectedMonth || form.month };
+    onAdd(newBill);
+
+    // If recurring, also add to next month with pendingReview
+    if (form.isRecurring && selectedMonth) {
+      const nextMonth = shiftMonth(selectedMonth, 1);
+      onAdd({
+        ...newBill,
+        month: nextMonth,
+        isPaid: false,
+        isRecurring: true,
+        pendingReview: true,
+      });
+    }
+
     setForm(emptyBill(owner, selectedMonth));
     setShowForm(false);
   };
@@ -68,6 +98,52 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
     setEditingId(null);
   };
 
+  const acceptReview = (bill: Bill) => {
+    onUpdate(bill.id, { pendingReview: false });
+  };
+
+  const startReviewEdit = (bill: Bill) => {
+    setReviewEditId(bill.id);
+    setReviewForm({ amount: bill.amount, dueDate: bill.dueDate });
+  };
+
+  const acceptReviewEdit = (bill: Bill) => {
+    onUpdate(bill.id, { amount: reviewForm.amount, dueDate: reviewForm.dueDate, pendingReview: false });
+    setReviewEditId(null);
+  };
+
+  // Toggle recurring: mark current bill as recurring, and create a copy in next month
+  const toggleRecurring = (bill: Bill) => {
+    if (bill.isRecurring) {
+      // Turn off recurring
+      onUpdate(bill.id, { isRecurring: false });
+    } else {
+      // Turn on recurring + create next month copy
+      onUpdate(bill.id, { isRecurring: true });
+      if (selectedMonth) {
+        const nextMonth = shiftMonth(selectedMonth, 1);
+        // Check if already exists in next month
+        const existsInNext = bills.some(
+          (b) => b.name === bill.name && (b.owner ?? "household") === owner && b.month === nextMonth
+        );
+        if (!existsInNext) {
+          const { id, ...rest } = bill;
+          onAdd({
+            ...rest,
+            month: nextMonth,
+            isPaid: false,
+            isRecurring: true,
+            pendingReview: true,
+          });
+        }
+      }
+    }
+  };
+
+  const pendingBills = filteredBills.filter((b) => b.pendingReview);
+  const confirmedBills = filteredBills.filter((b) => !b.pendingReview);
+  const hasBills = filteredBills.length > 0;
+
   return (
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
@@ -79,10 +155,17 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
             </span>
           )}
         </div>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-          {showForm ? "Cancel" : "Add Bill"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {hasBills && onMarkAllPaid && (
+            <Button size="sm" variant="outline" onClick={onMarkAllPaid}>
+              <CheckCircle2 className="h-4 w-4 mr-1" /> Mark All Paid
+            </Button>
+          )}
+          <Button size="sm" onClick={() => setShowForm(!showForm)}>
+            {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+            {showForm ? "Cancel" : "Add Bill"}
+          </Button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -136,6 +219,10 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
               <Switch checked={form.autoPay} onCheckedChange={(v) => setForm({ ...form, autoPay: v })} />
               <span className="text-sm text-muted-foreground">Auto-pay</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.isRecurring} onCheckedChange={(v) => setForm({ ...form, isRecurring: v })} />
+              <span className="text-sm text-muted-foreground">Recurring Bill</span>
+            </div>
             {paymentAccounts.length > 0 && (
               <Select value={form.paymentAccountId || "none"} onValueChange={(v) => setForm({ ...form, paymentAccountId: v === "none" ? "" : v })}>
                 <SelectTrigger><SelectValue placeholder="Account" /></SelectTrigger>
@@ -154,20 +241,89 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
         )}
       </AnimatePresence>
 
-      {filteredBills.length === 0 ? (
+      {/* Pending Review Bills */}
+      {pendingBills.length > 0 && (
+        <div className="mb-4">
+          <p className="text-xs font-semibold text-warning uppercase tracking-wider mb-2">
+            ⏳ Recurring — Needs Review
+          </p>
+          <div className="space-y-2">
+            {pendingBills.map((bill) => (
+              <motion.div
+                key={bill.id}
+                layout
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-accent/50 border border-accent"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{bill.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {fmt(bill.amount)} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
+                  </p>
+                </div>
+
+                {reviewEditId === bill.id ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={reviewForm.amount || ""}
+                      onChange={(e) => setReviewForm({ ...reviewForm, amount: parseFloat(e.target.value) || 0 })}
+                      className="w-24 h-8 text-sm"
+                      placeholder="Amount"
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={reviewForm.dueDate}
+                      onChange={(e) => setReviewForm({ ...reviewForm, dueDate: parseInt(e.target.value) || 1 })}
+                      className="w-20 h-8 text-sm"
+                      placeholder="Day"
+                    />
+                    <Button size="sm" variant="default" onClick={() => acceptReviewEdit(bill)}>
+                      <Check className="h-4 w-4 mr-1" /> Accept
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setReviewEditId(null)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => acceptReview(bill)} title="Same price — accept as-is">
+                      <Check className="h-4 w-4 mr-1" /> Confirm
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => startReviewEdit(bill)} title="Edit amount or due date">
+                      <Pencil className="h-4 w-4 mr-1" /> Edit
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => onDelete(bill.id)} title="Remove">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {confirmedBills.length === 0 && pendingBills.length === 0 ? (
         <p className="text-muted-foreground text-sm text-center py-8">No expenses added yet. Click "Add Bill" to get started.</p>
-      ) : (
+      ) : confirmedBills.length > 0 ? (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
+          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
             <span>Name</span>
             <span className="w-20 text-right">Amount</span>
             <span className="w-20 text-right">Monthly</span>
             <span className="w-16 text-center">Paid</span>
             <span className="w-8" />
             <span className="w-8" />
+            <span className="w-8" />
           </div>
           <AnimatePresence>
-            {filteredBills.map((bill) => {
+            {confirmedBills.map((bill) => {
               const isEditing = editingId === bill.id;
 
               if (isEditing) {
@@ -247,10 +403,15 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 8 }}
-                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                 >
                   <div>
-                    <p className="font-medium text-sm">{bill.name}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-medium text-sm">{bill.name}</p>
+                      {bill.isRecurring && (
+                        <span title="Recurring bill"><RefreshCw className="h-3 w-3 text-primary" /></span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {CATEGORY_LABELS[bill.category]} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
                       {bill.autoPay && " · Auto"}
@@ -276,6 +437,29 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
                       {bill.isPaid && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
                     </button>
                   </div>
+                  {/* Recurring dropdown */}
+                  <div className="w-8">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className={`text-muted-foreground hover:text-primary transition-colors ${bill.isRecurring ? 'text-primary' : ''}`} title="Recurring options">
+                          <RefreshCw className="h-4 w-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover border border-border shadow-lg z-50">
+                        <DropdownMenuItem onClick={() => toggleRecurring(bill)}>
+                          {bill.isRecurring ? (
+                            <>
+                              <X className="h-4 w-4 mr-2" /> Remove Recurring
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="h-4 w-4 mr-2" /> Make Recurring Bill
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   <button onClick={() => startEdit(bill)} className="w-8 text-muted-foreground hover:text-primary transition-colors">
                     <Pencil className="h-4 w-4" />
                   </button>
@@ -287,7 +471,7 @@ export default function BillsList({ bills, onAdd, onUpdate, onDelete, title = "B
             })}
           </AnimatePresence>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

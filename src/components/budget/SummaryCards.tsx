@@ -2,16 +2,16 @@ import { DollarSign, TrendingDown, TrendingUp, PiggyBank } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface SummaryCardsProps {
-  income: number;
-  totalBills: number;
-  remaining: number;
+  ytdIncome: number;
+  ytdBills: number;
+  ytdRemaining: number;
   totalSaved: number;
 }
 
 const cards = [
-  { key: "income", label: "Monthly Income", icon: DollarSign, colorClass: "text-primary" },
-  { key: "bills", label: "Total Bills", icon: TrendingDown, colorClass: "text-destructive" },
-  { key: "remaining", label: "Remaining", icon: TrendingUp, colorClass: "text-chart-savings" },
+  { key: "income", label: "YTD Income", icon: DollarSign, colorClass: "text-primary" },
+  { key: "bills", label: "YTD Bills", icon: TrendingDown, colorClass: "text-destructive" },
+  { key: "remaining", label: "YTD Remaining", icon: TrendingUp, colorClass: "text-chart-savings" },
   { key: "saved", label: "Total Saved", icon: PiggyBank, colorClass: "text-chart-bills" },
 ] as const;
 
@@ -19,8 +19,8 @@ function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-export default function SummaryCards({ income, totalBills, remaining, totalSaved }: SummaryCardsProps) {
-  const values: Record<string, number> = { income, bills: totalBills, remaining, saved: totalSaved };
+export default function SummaryCards({ ytdIncome, ytdBills, ytdRemaining, totalSaved }: SummaryCardsProps) {
+  const values: Record<string, number> = { income: ytdIncome, bills: ytdBills, remaining: ytdRemaining, saved: totalSaved };
 
   return (
     <div className="budget-grid">

@@ -141,6 +141,9 @@ const Index = () => {
               )}
             </div>
 
+            {/* Budget Overview at top */}
+            <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
+
             {/* Dynamic expense group boxes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {budget.expenseGroups.map((group) => (
@@ -195,7 +198,6 @@ const Index = () => {
                   />
                 </div>
               ))}
-              <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
             </div>
           </div>
         )}

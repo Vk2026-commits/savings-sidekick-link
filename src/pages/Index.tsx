@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import SummaryCards from "@/components/budget/SummaryCards";
@@ -19,6 +19,7 @@ import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
+import PlaidLink from "@/components/budget/PlaidLink";
 import { getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ const tabs = [
   { id: "networth", label: "Net Worth", icon: TrendingUp },
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "reports", label: "Reports", icon: BarChart3 },
+  { id: "bank", label: "Bank", icon: Landmark },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];
@@ -389,6 +391,10 @@ const Index = () => {
             bills={budget.bills}
             income={budget.monthlyIncome}
           />
+        )}
+
+        {activeTab === "bank" && (
+          <PlaidLink />
         )}
       </main>
     </div>

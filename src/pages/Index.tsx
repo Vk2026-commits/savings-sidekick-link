@@ -20,6 +20,7 @@ import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import PlaidLink from "@/components/budget/PlaidLink";
+import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import { getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -394,7 +395,10 @@ const Index = () => {
         )}
 
         {activeTab === "bank" && (
-          <PlaidLink />
+          <div className="space-y-6">
+            <PlaidLink />
+            <ReconcileTransactions />
+          </div>
         )}
       </main>
     </div>

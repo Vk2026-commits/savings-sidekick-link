@@ -221,6 +221,42 @@ export type Database = {
         }
         Relationships: []
       }
+      linked_accounts: {
+        Row: {
+          access_token: string
+          account_ids: string[] | null
+          created_at: string
+          id: string
+          institution_id: string | null
+          institution_name: string
+          item_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_ids?: string[] | null
+          created_at?: string
+          id?: string
+          institution_id?: string | null
+          institution_name: string
+          item_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_ids?: string[] | null
+          created_at?: string
+          id?: string
+          institution_id?: string | null
+          institution_name?: string
+          item_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_accounts: {
         Row: {
           created_at: string

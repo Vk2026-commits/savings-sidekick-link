@@ -30,12 +30,12 @@ export default function ReconcileTransactions() {
 
   const fetchUnreconciled = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from("transactions")
       .select("id, date, description, amount, type, category, notes")
-      .eq("source" as any, "plaid")
-      .eq("is_reconciled" as any, false)
-      .order("date", { ascending: false });
+      .eq("source", "plaid")
+      .eq("is_reconciled", false)
+      .order("date", { ascending: false }) as any);
 
     if (!error && data) {
       setTxns(data as UnreconciledTxn[]);

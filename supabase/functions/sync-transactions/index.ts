@@ -1,0 +1,102 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.97.0";
+import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.97.0/cors";
+
+const PLAID_ENV = "sandbox";
+const PLAID_BASE_URL = `https://${PLAID_ENV}.plaid.com`;
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const plaidClientId = Deno.env.get("PLAID_CLIENT_ID");
+    const plaidSecret = Deno.env.get("PLAID_SECRET");
+
+    if (!plaidClientId || !plaidSecret) {
+      throw new Error("Plaid credentials not configured");
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header");
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) throw new Error("Unauthorized");
+
+    // Get all linked accounts for this user
+    const { data: linkedAccounts, error: fetchError } = await supabase
+      .from("linked_accounts")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (fetchError) throw new Error(`DB error: ${fetchError.message}`);
+    if (!linkedAccounts || linkedAccounts.length === 0) {
+      return new Response(JSON.stringify({ message: "No linked accounts", transactions: [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split("T")[0];
+    const endDate = now.toISOString().split("T")[0];
+
+    let allTransactions: Array<Record<string, unknown>> = [];
+    let importedCount = 0;
+
+    for (const account of linkedAccounts) {
+      const txRes = await fetch(`${PLAID_BASE_URL}/transactions/get`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: plaidClientId,
+          secret: plaidSecret,
+          access_token: account.access_token,
+          start_date: startDate,
+          end_date: endDate,
+          options: { count: 100, offset: 0 },
+        }),
+      });
+
+      const txData = await txRes.json();
+      if (!txRes.ok) continue;
+
+      const transactions = txData.transactions || [];
+      allTransactions = allTransactions.concat(transactions);
+
+      // Import into transactions table
+      for (const tx of transactions) {
+        const { error } = await supabase
+          .from("transactions")
+          .upsert({
+            user_id: user.id,
+            date: tx.date,
+            description: tx.name || tx.merchant_name || "Unknown",
+            amount: Math.abs(tx.amount),
+            type: tx.amount > 0 ? "expense" : "income",
+            category: tx.category?.[0] || "other",
+            notes: `Imported from ${account.institution_name}`,
+          }, { onConflict: "id" });
+
+        if (!error) importedCount++;
+      }
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      imported: importedCount,
+      total_fetched: allTransactions.length 
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

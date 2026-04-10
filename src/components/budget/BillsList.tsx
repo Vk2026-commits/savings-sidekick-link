@@ -556,6 +556,14 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   <span className="w-20 text-right font-mono text-sm text-muted-foreground">
                     {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
                   </span>
+                  <div className="w-24 flex justify-center">
+                    <input
+                      type="date"
+                      value={bill.paidDate ?? ""}
+                      onChange={(e) => onUpdate(bill.id, { paidDate: e.target.value || undefined })}
+                      className="w-full text-xs bg-transparent border-none text-center text-muted-foreground focus:text-foreground focus:outline-none"
+                    />
+                  </div>
                   <div className="w-16 flex justify-center">
                     <button
                       onClick={() => onUpdate(bill.id, { isPaid: !bill.isPaid })}

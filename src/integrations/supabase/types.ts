@@ -58,6 +58,7 @@ export type Database = {
           month: string | null
           name: string
           owner: string
+          paid_date: string | null
           payment_account_id: string | null
           pending_review: boolean | null
           updated_at: string
@@ -76,6 +77,7 @@ export type Database = {
           month?: string | null
           name: string
           owner?: string
+          paid_date?: string | null
           payment_account_id?: string | null
           pending_review?: boolean | null
           updated_at?: string
@@ -94,6 +96,7 @@ export type Database = {
           month?: string | null
           name?: string
           owner?: string
+          paid_date?: string | null
           payment_account_id?: string | null
           pending_review?: boolean | null
           updated_at?: string

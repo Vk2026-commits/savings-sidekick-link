@@ -17,6 +17,7 @@ export interface Bill {
   month?: string; // "YYYY-MM" format, e.g. "2026-01"
   isRecurring?: boolean; // auto-copy to next month
   pendingReview?: boolean; // needs confirmation in next month
+  paidDate?: string; // date bill was paid, e.g. "2026-04-05"
 }
 
 export interface SavingsGoal {

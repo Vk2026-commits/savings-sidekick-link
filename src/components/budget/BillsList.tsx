@@ -145,7 +145,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
 
   const startEdit = (bill: Bill) => {
     setEditingId(bill.id);
-    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId, owner: bill.owner });
+    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId, owner: bill.owner, paidDate: bill.paidDate });
   };
 
   const saveEdit = (id: string) => {
@@ -425,10 +425,11 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
         <p className="text-muted-foreground text-sm text-center py-8">No expenses added yet. Click "Add Bill" to get started.</p>
       ) : confirmedBills.length > 0 ? (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
+          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
             <span>Name</span>
             <span className="w-20 text-right">Amount</span>
             <span className="w-20 text-right">Monthly</span>
+            <span className="w-24 text-center">Date Paid</span>
             <span className="w-16 text-center">Paid</span>
             <span className="w-8" />
             <span className="w-8" />
@@ -506,6 +507,14 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                         </SelectContent>
                       </Select>
                     )}
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="text-xs text-muted-foreground mb-1 block">Date Paid</label>
+                      <Input
+                        type="date"
+                        value={editForm.paidDate ?? ""}
+                        onChange={(e) => setEditForm({ ...editForm, paidDate: e.target.value || undefined })}
+                      />
+                    </div>
                     <div className="flex gap-2 col-span-2 md:col-span-1">
                       <Button size="sm" onClick={() => saveEdit(bill.id)}>
                         <Check className="h-4 w-4 mr-1" /> Save
@@ -525,7 +534,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 8 }}
-                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -547,9 +556,21 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   <span className="w-20 text-right font-mono text-sm text-muted-foreground">
                     {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
                   </span>
+                  <div className="w-24 flex justify-center">
+                    <input
+                      type="date"
+                      value={bill.paidDate ?? ""}
+                      onChange={(e) => onUpdate(bill.id, { paidDate: e.target.value || undefined })}
+                      className="w-full text-xs bg-transparent border-none text-center text-muted-foreground focus:text-foreground focus:outline-none"
+                    />
+                  </div>
                   <div className="w-16 flex justify-center">
                     <button
-                      onClick={() => onUpdate(bill.id, { isPaid: !bill.isPaid })}
+                      onClick={() => {
+                        const nowPaid = !bill.isPaid;
+                        const today = new Date().toISOString().split("T")[0];
+                        onUpdate(bill.id, { isPaid: nowPaid, paidDate: nowPaid ? (bill.paidDate || today) : undefined });
+                      }}
                       className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                         bill.isPaid
                           ? "bg-primary border-primary"

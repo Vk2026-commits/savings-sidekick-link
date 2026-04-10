@@ -1,0 +1,1 @@
+ALTER TABLE public.bills ADD COLUMN paid_date text NULL;

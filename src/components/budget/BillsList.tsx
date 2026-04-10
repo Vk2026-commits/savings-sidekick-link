@@ -116,7 +116,8 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
         isRecurring: match.isRecurring || false,
       });
     } else {
-      setForm({ ...form, name });
+      const suggested = suggestCategoryFromName(name);
+      setForm({ ...form, name, ...(suggested ? { category: suggested } : {}) });
     }
     setShowSuggestions(false);
   };

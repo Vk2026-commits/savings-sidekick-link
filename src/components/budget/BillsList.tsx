@@ -560,7 +560,14 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                     <input
                       type="date"
                       value={bill.paidDate ?? ""}
-                      onChange={(e) => onUpdate(bill.id, { paidDate: e.target.value || undefined })}
+                      onChange={(e) => {
+                        const val = e.target.value || undefined;
+                        const updates: Partial<Bill> = { paidDate: val };
+                        if (val) {
+                          updates.month = val.substring(0, 7); // "YYYY-MM"
+                        }
+                        onUpdate(bill.id, updates);
+                      }}
                       className="w-full text-xs bg-transparent border-none text-center text-muted-foreground focus:text-foreground focus:outline-none"
                     />
                   </div>
@@ -569,7 +576,9 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       onClick={() => {
                         const nowPaid = !bill.isPaid;
                         const today = new Date().toISOString().split("T")[0];
-                        onUpdate(bill.id, { isPaid: nowPaid, paidDate: nowPaid ? (bill.paidDate || today) : undefined });
+                        const paidDate = nowPaid ? (bill.paidDate || today) : undefined;
+                        const monthUpdate = paidDate ? paidDate.substring(0, 7) : bill.month;
+                        onUpdate(bill.id, { isPaid: nowPaid, paidDate, month: monthUpdate });
                       }}
                       className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                         bill.isPaid

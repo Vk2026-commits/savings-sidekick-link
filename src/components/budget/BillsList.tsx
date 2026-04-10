@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount, ExpenseGroup } from "@/types/budget";
-import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount } from "@/types/budget";
+import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount, suggestCategoryFromName } from "@/types/budget";
 
 interface BillsListProps {
   bills: Bill[];
@@ -250,7 +250,9 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                 placeholder="Bill name"
                 value={form.name}
                 onChange={(e) => {
-                  setForm({ ...form, name: e.target.value });
+                  const newName = e.target.value;
+                  const suggested = suggestCategoryFromName(newName);
+                  setForm({ ...form, name: newName, ...(suggested && form.category === "other" ? { category: suggested } : {}) });
                   setShowSuggestions(true);
                 }}
                 onFocus={() => form.name.length > 0 && setShowSuggestions(true)}

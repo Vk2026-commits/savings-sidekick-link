@@ -566,7 +566,11 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   </div>
                   <div className="w-16 flex justify-center">
                     <button
-                      onClick={() => onUpdate(bill.id, { isPaid: !bill.isPaid })}
+                      onClick={() => {
+                        const nowPaid = !bill.isPaid;
+                        const today = new Date().toISOString().split("T")[0];
+                        onUpdate(bill.id, { isPaid: nowPaid, paidDate: nowPaid ? (bill.paidDate || today) : undefined });
+                      }}
                       className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                         bill.isPaid
                           ? "bg-primary border-primary"

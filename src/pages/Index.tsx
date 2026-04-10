@@ -21,7 +21,7 @@ import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import PlaidLink from "@/components/budget/PlaidLink";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
-import { getMonthlyAmount } from "@/types/budget";
+import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import UserMenu from "@/components/UserMenu";
@@ -69,10 +69,11 @@ const Index = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+  const billMatchesMonth = (bill: (typeof budget.bills)[number], month: string) => getAssignedBillMonth(bill) === month;
 
   const monthlyBillsTotal = useMemo(() => {
     return budget.bills
-      .filter((b) => b.month === selectedMonth)
+      .filter((b) => billMatchesMonth(b, selectedMonth))
       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
   }, [budget.bills, selectedMonth]);
   return (
@@ -183,8 +184,8 @@ const Index = () => {
                   variant="outline"
                   onClick={() => {
                     const prevMonth = shiftMonth(selectedMonth, -1);
-                    const prevBills = budget.bills.filter(b => b.month === prevMonth);
-                    const currentBills = budget.bills.filter(b => b.month === selectedMonth);
+                    const prevBills = budget.bills.filter(b => billMatchesMonth(b, prevMonth));
+                    const currentBills = budget.bills.filter(b => billMatchesMonth(b, selectedMonth));
                     if (prevBills.length === 0) return;
                     // Only copy bills that don't already exist (by name + owner)
                     const existingKeys = new Set(currentBills.map(b => `${b.name}::${b.owner}`));
@@ -200,7 +201,7 @@ const Index = () => {
                       // All bills already exist
                     }
                   }}
-                  disabled={budget.bills.filter(b => b.month === shiftMonth(selectedMonth, -1)).length === 0}
+                  disabled={budget.bills.filter(b => billMatchesMonth(b, shiftMonth(selectedMonth, -1))).length === 0}
                 >
                   <Copy className="h-4 w-4 mr-1" /> Copy from {formatMonthLabel(shiftMonth(selectedMonth, -1))}
                 </Button>
@@ -251,7 +252,7 @@ const Index = () => {
             </div>
 
             {/* Budget Overview for selected month */}
-            <BudgetOverview bills={budget.bills.filter(b => b.month === selectedMonth)} income={budget.monthlyIncome} />
+            <BudgetOverview bills={budget.bills.filter(b => billMatchesMonth(b, selectedMonth))} income={budget.monthlyIncome} />
 
             {/* Payment Accounts Manager */}
             <PaymentAccountsManager
@@ -318,11 +319,11 @@ const Index = () => {
                     expenseGroups={budget.expenseGroups}
                     selectedMonth={selectedMonth}
                     groupTotal={budget.bills
-                      .filter(b => (b.owner ?? "household") === group.id && b.month === selectedMonth)
+                      .filter(b => (b.owner ?? "household") === group.id && billMatchesMonth(b, selectedMonth))
                       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0)}
                     onMarkAllPaid={() => {
                       budget.bills
-                        .filter(b => (b.owner ?? "household") === group.id && b.month === selectedMonth && !b.isPaid)
+                        .filter(b => (b.owner ?? "household") === group.id && billMatchesMonth(b, selectedMonth) && !b.isPaid)
                         .forEach(b => budget.updateBill(b.id, { isPaid: true }));
                     }}
                   />

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount, ExpenseGroup } from "@/types/budget";
-import { CATEGORY_LABELS, FREQUENCY_LABELS, getMonthlyAmount, suggestCategoryFromName } from "@/types/budget";
+import { CATEGORY_LABELS, FREQUENCY_LABELS, getAssignedBillMonth, getMonthlyAmount, getYearMonthFromDateInput, suggestCategoryFromName } from "@/types/budget";
 
 interface BillsListProps {
   bills: Bill[];
@@ -56,7 +56,7 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
 export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], expenseGroups = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
   const filteredBills = bills.filter((b) => {
     const ownerMatch = (b.owner ?? "household") === owner;
-    const monthMatch = selectedMonth ? b.month === selectedMonth : true;
+    const monthMatch = selectedMonth ? getAssignedBillMonth(b) === selectedMonth : true;
     return ownerMatch && monthMatch;
   });
   const [showForm, setShowForm] = useState(false);
@@ -146,14 +146,14 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
 
   const startEdit = (bill: Bill) => {
     setEditingId(bill.id);
-    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId, owner: bill.owner, paidDate: bill.paidDate });
+    setEditForm({ name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency, dueDate: bill.dueDate, autoPay: bill.autoPay, paymentAccountId: bill.paymentAccountId, owner: bill.owner, paidDate: bill.paidDate, month: getAssignedBillMonth(bill) });
   };
 
   const saveEdit = (id: string) => {
     if (editForm.name && (editForm.amount ?? 0) > 0) {
       const updates = { ...editForm };
       if (updates.paidDate) {
-        updates.month = updates.paidDate.substring(0, 7);
+        updates.month = getYearMonthFromDateInput(updates.paidDate);
       }
       onUpdate(id, updates);
     }
@@ -521,7 +521,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                         value={editForm.paidDate ?? ""}
                         onChange={(e) => {
                           const val = e.target.value || undefined;
-                          setEditForm({ ...editForm, paidDate: val, month: val ? val.substring(0, 7) : editForm.month });
+                          setEditForm({ ...editForm, paidDate: val, month: val ? getYearMonthFromDateInput(val) : editForm.month });
                         }}
                       />
                     </div>
@@ -574,7 +574,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                         const val = e.target.value || undefined;
                         const updates: Partial<Bill> = { paidDate: val };
                         if (val) {
-                          updates.month = val.substring(0, 7); // "YYYY-MM"
+                          updates.month = getYearMonthFromDateInput(val);
                         }
                         onUpdate(bill.id, updates);
                       }}
@@ -587,7 +587,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                         const nowPaid = !bill.isPaid;
                         const today = new Date().toISOString().split("T")[0];
                         const paidDate = nowPaid ? (bill.paidDate || today) : undefined;
-                        const monthUpdate = paidDate ? paidDate.substring(0, 7) : bill.month;
+                        const monthUpdate = paidDate ? getYearMonthFromDateInput(paidDate) : getAssignedBillMonth(bill);
                         onUpdate(bill.id, { isPaid: nowPaid, paidDate, month: monthUpdate });
                       }}
                       className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${

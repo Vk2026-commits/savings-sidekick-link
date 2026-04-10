@@ -154,6 +154,52 @@ export function suggestCategoryFromName(name: string): BillCategory | null {
   return null;
 }
 
+function isValidBudgetDate(year: number, month: number, day: number) {
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  );
+}
+
+export function getYearMonthFromDateInput(dateStr?: string | null): string | undefined {
+  if (!dateStr) return undefined;
+
+  const value = dateStr.trim();
+  const isoMatch = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
+    if (!isValidBudgetDate(year, month, day)) return undefined;
+    return `${year}-${String(month).padStart(2, "0")}`;
+  }
+
+  const numericMatch = value.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+  if (!numericMatch) return undefined;
+
+  let first = Number(numericMatch[1]);
+  let second = Number(numericMatch[2]);
+  let year = Number(numericMatch[3]);
+  if (year < 100) year += 2000;
+
+  let month = first;
+  let day = second;
+
+  if (month > 12 && day <= 12) {
+    month = second;
+    day = first;
+  }
+
+  if (!isValidBudgetDate(year, month, day)) return undefined;
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
+export function getAssignedBillMonth(bill: Pick<Bill, "month" | "paidDate">): string | undefined {
+  return getYearMonthFromDateInput(bill.paidDate) ?? bill.month;
+}
+
 export const DEFAULT_EXPENSE_GROUPS: ExpenseGroup[] = [
   { id: "household", name: "Bills & Expenses" },
   { id: "kids", name: "Kids' Expenses" },

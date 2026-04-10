@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Bill, SavingsGoal, CategoryBudget, Transaction, Asset, Liability, IncomeSource, ExpenseGroup, PaymentAccount, BudgetState } from "@/types/budget";
-import { getMonthlyAmount, DEFAULT_EXPENSE_GROUPS, DEFAULT_PAYMENT_ACCOUNTS } from "@/types/budget";
+import { getMonthlyAmount, DEFAULT_EXPENSE_GROUPS, DEFAULT_PAYMENT_ACCOUNTS, getAssignedBillMonth } from "@/types/budget";
 import { useToast } from "@/hooks/use-toast";
 
 function getMonthlyIncome(amount: number, freq: IncomeSource["frequency"]): number {
@@ -17,7 +17,22 @@ function getMonthlyIncome(amount: number, freq: IncomeSource["frequency"]): numb
 
 // Map DB row to app type helpers
 function mapBill(r: any): Bill {
-  return { id: r.id, name: r.name, amount: Number(r.amount), category: r.category, frequency: r.frequency, dueDate: r.due_date, isPaid: r.is_paid, autoPay: r.auto_pay, owner: r.owner, paymentAccountId: r.payment_account_id ?? undefined, month: r.month ?? undefined, isRecurring: r.is_recurring ?? false, pendingReview: r.pending_review ?? false, paidDate: r.paid_date ?? undefined };
+  return {
+    id: r.id,
+    name: r.name,
+    amount: Number(r.amount),
+    category: r.category,
+    frequency: r.frequency,
+    dueDate: r.due_date,
+    isPaid: r.is_paid,
+    autoPay: r.auto_pay,
+    owner: r.owner,
+    paymentAccountId: r.payment_account_id ?? undefined,
+    month: getAssignedBillMonth({ month: r.month ?? undefined, paidDate: r.paid_date ?? undefined }),
+    isRecurring: r.is_recurring ?? false,
+    pendingReview: r.pending_review ?? false,
+    paidDate: r.paid_date ?? undefined,
+  };
 }
 function mapIncome(r: any): IncomeSource {
   return { id: r.id, name: r.name, amount: Number(r.amount), frequency: r.frequency, type: r.type };
@@ -123,10 +138,11 @@ export function useBudget() {
   // ---- BILLS ----
   const addBill = useCallback(async (bill: Omit<Bill, "id">) => {
     if (!uid) return;
+    const assignedMonth = getAssignedBillMonth({ month: bill.month, paidDate: bill.paidDate });
     const { data, error } = await supabase.from("bills").insert({
       user_id: uid, name: bill.name, amount: bill.amount, category: bill.category, frequency: bill.frequency,
       due_date: bill.dueDate, is_paid: bill.isPaid, auto_pay: bill.autoPay, owner: bill.owner,
-      payment_account_id: bill.paymentAccountId ?? null, month: bill.month ?? null,
+      payment_account_id: bill.paymentAccountId ?? null, month: assignedMonth ?? null,
       is_recurring: bill.isRecurring ?? false, pending_review: bill.pendingReview ?? false, paid_date: bill.paidDate ?? null,
     }).select().single();
     if (error) return showError(error.message);
@@ -134,6 +150,14 @@ export function useBudget() {
   }, [uid]);
 
   const updateBill = useCallback(async (id: string, updates: Partial<Bill>) => {
+    const existingBill = bills.find((bill) => bill.id === id);
+    const shouldRecalculateMonth = updates.paidDate !== undefined || updates.month !== undefined;
+    const nextMonth = shouldRecalculateMonth
+      ? getAssignedBillMonth({
+          month: updates.month !== undefined ? updates.month : existingBill?.month,
+          paidDate: updates.paidDate !== undefined ? updates.paidDate : existingBill?.paidDate,
+        })
+      : existingBill?.month;
     const dbUpdates: any = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.amount !== undefined) dbUpdates.amount = updates.amount;
@@ -144,14 +168,14 @@ export function useBudget() {
     if (updates.autoPay !== undefined) dbUpdates.auto_pay = updates.autoPay;
     if (updates.owner !== undefined) dbUpdates.owner = updates.owner;
     if (updates.paymentAccountId !== undefined) dbUpdates.payment_account_id = updates.paymentAccountId;
-    if (updates.month !== undefined) dbUpdates.month = updates.month;
+    if (shouldRecalculateMonth) dbUpdates.month = nextMonth ?? null;
     if (updates.isRecurring !== undefined) dbUpdates.is_recurring = updates.isRecurring;
     if (updates.pendingReview !== undefined) dbUpdates.pending_review = updates.pendingReview;
     if (updates.paidDate !== undefined) dbUpdates.paid_date = updates.paidDate;
     const { error } = await supabase.from("bills").update(dbUpdates).eq("id", id);
     if (error) return showError(error.message);
-    setBills(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
-  }, []);
+    setBills(prev => prev.map(b => b.id === id ? { ...b, ...updates, ...(shouldRecalculateMonth ? { month: nextMonth } : {}) } : b));
+  }, [bills]);
 
   const deleteBill = useCallback(async (id: string) => {
     const { error } = await supabase.from("bills").delete().eq("id", id);

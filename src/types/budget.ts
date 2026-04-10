@@ -1,5 +1,5 @@
 export type BillFrequency = "weekly" | "biweekly" | "monthly" | "yearly" | "one_time";
-export type BillCategory = "housing" | "utilities" | "insurance" | "subscriptions" | "transportation" | "food" | "debt" | "entertainment" | "fast_food" | "restaurants" | "haircuts" | "beauty" | "kids" | "household" | "other";
+export type BillCategory = "housing" | "utilities" | "insurance" | "subscriptions" | "transportation" | "food" | "debt" | "entertainment" | "fast_food" | "restaurants" | "haircuts" | "beauty" | "kids" | "household" | "internet" | "energy" | "water" | "education" | "mortgage" | "auto_payment" | "bank_fees" | "other";
 export type BillOwner = string; // dynamic group id
 export type TransactionType = "income" | "expense";
 
@@ -116,8 +116,43 @@ export const CATEGORY_LABELS: Record<BillCategory, string> = {
   beauty: "Beauty (Nails/Pedicures)",
   kids: "Kids' Expenses",
   household: "Household Items",
+  internet: "Internet",
+  energy: "Energy (Electric/Gas)",
+  water: "Water/MUD",
+  education: "Education/Private School",
+  mortgage: "Mortgage",
+  auto_payment: "Auto Payment",
+  bank_fees: "Bank Fees/Overdraft",
   other: "Other",
 };
+
+// Auto-suggest category based on bill name keywords
+export const BILL_NAME_CATEGORY_MAP: Array<{ keywords: string[]; category: BillCategory }> = [
+  { keywords: ["centerpoint", "centerpoint energy", "intech"], category: "energy" },
+  { keywords: ["direct energy"], category: "energy" },
+  { keywords: ["harris county mud", "mud 153", "mud"], category: "water" },
+  { keywords: ["pennymac", "mortgage"], category: "mortgage" },
+  { keywords: ["ally", "ally payment"], category: "auto_payment" },
+  { keywords: ["smmcs", "williams private", "private school", "school tuition"], category: "education" },
+  { keywords: ["overdraft", "nsf fee", "bank fee"], category: "bank_fees" },
+  { keywords: ["internet", "wifi", "broadband", "comcast", "xfinity", "att fiber", "spectrum"], category: "internet" },
+  { keywords: ["electric", "power"], category: "energy" },
+  { keywords: ["water", "sewer"], category: "water" },
+  { keywords: ["netflix", "hulu", "spotify", "disney", "apple tv", "youtube"], category: "subscriptions" },
+  { keywords: ["state farm", "geico", "allstate", "progressive"], category: "insurance" },
+  { keywords: ["rent"], category: "housing" },
+];
+
+export function suggestCategoryFromName(name: string): BillCategory | null {
+  const lower = name.toLowerCase().trim();
+  if (!lower) return null;
+  for (const mapping of BILL_NAME_CATEGORY_MAP) {
+    for (const kw of mapping.keywords) {
+      if (lower.includes(kw)) return mapping.category;
+    }
+  }
+  return null;
+}
 
 export const DEFAULT_EXPENSE_GROUPS: ExpenseGroup[] = [
   { id: "household", name: "Bills & Expenses" },

@@ -151,7 +151,11 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
 
   const saveEdit = (id: string) => {
     if (editForm.name && (editForm.amount ?? 0) > 0) {
-      onUpdate(id, editForm);
+      const updates = { ...editForm };
+      if (updates.paidDate) {
+        updates.month = updates.paidDate.substring(0, 7);
+      }
+      onUpdate(id, updates);
     }
     setEditingId(null);
   };
@@ -515,7 +519,10 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       <Input
                         type="date"
                         value={editForm.paidDate ?? ""}
-                        onChange={(e) => setEditForm({ ...editForm, paidDate: e.target.value || undefined })}
+                        onChange={(e) => {
+                          const val = e.target.value || undefined;
+                          setEditForm({ ...editForm, paidDate: val, month: val ? val.substring(0, 7) : editForm.month });
+                        }}
                       />
                     </div>
                     <div className="flex gap-2 col-span-2 md:col-span-1">

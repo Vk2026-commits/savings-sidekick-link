@@ -168,13 +168,30 @@ export default function NetWorthTracker({
     setEditingLiabId(null);
   };
 
-  const addSuggestion = (s: Suggestion) => {
+  const openSuggestionForm = (s: Suggestion) => {
+    const key = `${s.billId}-${s.target}`;
+    if (expandedSuggestion === key) {
+      setExpandedSuggestion(null);
+      return;
+    }
+    setExpandedSuggestion(key);
     if (s.target === "asset") {
-      onAddAsset({ name: s.billName, value: s.amount, type: s.type as Asset["type"] });
+      setSuggestionAssetForm({ value: 0 });
     } else {
-      onAddLiability({ name: s.billName, balance: s.amount, interestRate: 0, minimumPayment: 0, type: s.type as Liability["type"] });
+      setSuggestionLiabForm({ balance: 0, interestRate: 0, minimumPayment: s.amount });
+    }
+  };
+
+  const submitSuggestion = (s: Suggestion) => {
+    if (s.target === "asset") {
+      if (suggestionAssetForm.value <= 0) return;
+      onAddAsset({ name: s.billName, value: suggestionAssetForm.value, type: s.type as Asset["type"] });
+    } else {
+      if (suggestionLiabForm.balance <= 0) return;
+      onAddLiability({ name: s.billName, balance: suggestionLiabForm.balance, interestRate: suggestionLiabForm.interestRate, minimumPayment: suggestionLiabForm.minimumPayment, type: s.type as Liability["type"] });
     }
     setDismissedSuggestions(prev => new Set([...prev, s.billId]));
+    setExpandedSuggestion(null);
   };
 
   const dismissSuggestion = (key: string) => {

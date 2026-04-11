@@ -43,14 +43,35 @@ export default function DailySpendingChart({ bills, incomeSources = [], monthlyI
     weekdayCounts[dow]++;
   }
 
-  // Group bill amounts by day of week
+  // Group bill amounts by day of week using paid date if available, otherwise spread evenly
   const spendTotals = new Array(7).fill(0);
+  let unassignedSpend = 0;
   filtered.forEach((bill) => {
-    const dueDay = Math.min(bill.dueDate, daysInMonth);
-    const date = new Date(ctxYear, ctxMonth - 1, dueDay);
-    const dow = date.getDay();
-    spendTotals[dow] += getMonthlyAmount(bill.amount, bill.frequency);
+    const monthlyAmt = getMonthlyAmount(bill.amount, bill.frequency);
+    if (bill.isPaid && bill.paidDate) {
+      const pd = new Date(bill.paidDate);
+      if (pd.getFullYear() === ctxYear && pd.getMonth() + 1 === ctxMonth) {
+        spendTotals[pd.getDay()] += monthlyAmt;
+        return;
+      }
+    }
+    // If the bill has a real due date (not default 1), use it
+    if (bill.dueDate > 1) {
+      const dueDay = Math.min(bill.dueDate, daysInMonth);
+      const dow = new Date(ctxYear, ctxMonth - 1, dueDay).getDay();
+      spendTotals[dow] += monthlyAmt;
+    } else {
+      // No meaningful date — distribute evenly like income
+      unassignedSpend += monthlyAmt;
+    }
   });
+  // Distribute unassigned spending proportionally across weekdays
+  if (unassignedSpend > 0) {
+    const dailySpend = unassignedSpend / daysInMonth;
+    weekdayCounts.forEach((count, i) => {
+      spendTotals[i] += dailySpend * count;
+    });
+  }
 
   // Spread monthly income evenly across weekdays proportional to how many of each day exist
   const dailyIncome = monthlyIncome / daysInMonth;

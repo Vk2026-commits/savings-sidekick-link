@@ -378,6 +378,7 @@ const Index = () => {
         {activeTab === "networth" && (
           <>
             <NetWorthTracker
+              bills={budget.bills}
               assets={budget.assets}
               liabilities={budget.liabilities}
               netWorth={budget.netWorth}

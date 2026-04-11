@@ -435,6 +435,11 @@ const Index = () => {
           </div>
         )}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
     </div>
     </PinUnlockProvider>
   );

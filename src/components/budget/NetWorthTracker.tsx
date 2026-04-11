@@ -321,17 +321,28 @@ export default function NetWorthTracker({
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mb-4 text-sm text-muted-foreground space-y-2">
-                  <p className="font-medium text-foreground">What is an asset?</p>
-                  <p>An asset is anything of value that you <strong>own</strong>. It contributes positively to your net worth.</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li><strong>Cash & Savings</strong> — Checking, savings, emergency fund</li>
-                    <li><strong>Investments</strong> — 401(k), IRA, stocks, bonds, crypto</li>
-                    <li><strong>Property</strong> — Home, rental property, land</li>
-                    <li><strong>Vehicles</strong> — Cars, trucks (current market value)</li>
-                    <li><strong>Other</strong> — Jewelry, collectibles, business equity</li>
-                  </ul>
-                  <p className="text-xs italic">Tip: Enter the current market value, not what you paid.</p>
+                <div className="p-4 rounded-lg bg-primary/10 border border-primary/20 mb-4 text-sm text-muted-foreground space-y-3">
+                  <p className="font-medium text-foreground text-base">What is an asset?</p>
+                  <p>An asset is anything of value that you <strong>own</strong>. Even if you're still paying it off, the item itself has value. Assets increase your net worth.</p>
+                  
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground text-sm">Common assets to track:</p>
+                    <ul className="space-y-2 text-xs">
+                      <li><strong>🏠 Real Estate</strong> — Your home is an asset even if you have a mortgage. Enter the <em>current market value</em> (what it would sell for today, check Zillow or recent comps). The mortgage goes under liabilities. The difference is your <strong>home equity</strong>.</li>
+                      <li><strong>🚗 Vehicles</strong> — Cars, trucks, motorcycles. Use the current resale value (check KBB or Edmunds), not what you paid. If you have an auto loan, that goes under liabilities.</li>
+                      <li><strong>💰 Cash & Savings</strong> — Checking accounts, savings accounts, emergency fund, money market accounts. Use current balances.</li>
+                      <li><strong>📈 Investments</strong> — 401(k), IRA, Roth IRA, brokerage accounts, stocks, bonds, mutual funds, crypto. Use current account balance.</li>
+                      <li><strong>🛡️ Whole Life Insurance</strong> — Only <em>whole life</em> or <em>universal life</em> policies have a cash value that counts as an asset. Enter the current <strong>cash surrender value</strong> (found on your policy statement). <em>Term life insurance does NOT have cash value and should not be listed here.</em></li>
+                      <li><strong>💼 Business Equity</strong> — If you own a business, your ownership share is an asset.</li>
+                      <li><strong>💎 Valuables</strong> — Jewelry, art, collectibles — only if they have significant resale value.</li>
+                      <li><strong>🏗️ Rental Property</strong> — Investment properties at current market value. Rental income is tracked separately under income.</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-2 rounded bg-primary/10 text-xs">
+                    <p className="font-medium text-foreground">💡 Key rule:</p>
+                    <p>Always enter what the asset is worth <em>today</em>, not what you paid for it. Update values periodically (quarterly is a good habit).</p>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -46,6 +46,48 @@ function shiftMonth(ym: string, delta: number) {
   const d = new Date(y, m - 1 + delta, 1);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
+
+function DashboardView({ budget }: { budget: ReturnType<typeof useBudget> }) {
+  const now = new Date();
+  const [dashMonth, setDashMonth] = useState(getCurrentMonth());
+
+  const [y, m] = dashMonth.split("-").map(Number);
+  const monthsElapsed = now.getFullYear() === y ? Math.min(m, now.getMonth() + 1) : m;
+  const ytdIncome = budget.monthlyIncome * monthsElapsed;
+  const ytdBills = budget.bills
+    .filter((b) => {
+      if (!b.month) return false;
+      const [by] = b.month.split("-").map(Number);
+      return by === y;
+    })
+    .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
+  const ytdRemaining = ytdIncome - ytdBills;
+  const viewBills = budget.bills.filter((b) => getAssignedBillMonth(b) === dashMonth);
+
+  return (
+    <>
+      <SummaryCards
+        ytdIncome={ytdIncome}
+        ytdBills={ytdBills}
+        ytdRemaining={ytdRemaining}
+        totalSaved={budget.totalSaved}
+      />
+      <div className="flex items-center justify-center gap-3 my-2">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDashMonth(shiftMonth(dashMonth, -1))}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="font-medium text-sm min-w-[140px] text-center">{formatMonthLabel(dashMonth)}</span>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDashMonth(shiftMonth(dashMonth, 1))}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <BudgetOverview bills={viewBills} income={budget.monthlyIncome} />
+        <CashFlowForecast income={budget.monthlyIncome} bills={viewBills} />
+      </div>
+    </>
+  );
+}
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "income", label: "Income", icon: Wallet },
@@ -117,38 +159,7 @@ const Index = () => {
       {/* Main */}
       <main className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
         {activeTab === "dashboard" && (
-          (() => {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth(); // 0-indexed
-            const currentYM = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
-            const monthsElapsed = currentMonth + 1; // Jan=1, Feb=2, etc.
-            const ytdIncome = budget.monthlyIncome * monthsElapsed;
-            const ytdBills = budget.bills
-              .filter((b) => {
-                if (!b.month) return false;
-                const [y] = b.month.split("-").map(Number);
-                return y === currentYear;
-              })
-              .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
-            const ytdRemaining = ytdIncome - ytdBills;
-            const currentMonthBills = budget.bills.filter((b) => getAssignedBillMonth(b) === currentYM);
-            return (
-              <>
-                <SummaryCards
-                  ytdIncome={ytdIncome}
-                  ytdBills={ytdBills}
-                  ytdRemaining={ytdRemaining}
-                  totalSaved={budget.totalSaved}
-                />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <BudgetOverview bills={currentMonthBills} income={budget.monthlyIncome} />
-                  <CashFlowForecast income={budget.monthlyIncome} bills={currentMonthBills} />
-                </div>
-                
-              </>
-            );
-          })()
+          <DashboardView budget={budget} />
         )}
 
         {activeTab === "income" && (

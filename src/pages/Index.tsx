@@ -129,21 +129,21 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-md sticky top-0 z-10 bg-background/80">
-        <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Wallet className="h-5 w-5 text-primary" />
+        <div className="container max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight">BudgetFlow</h1>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight">BudgetFlow</h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <IncomeInput income={budget.monthlyIncome} onUpdate={budget.setMonthlyIncome} />
             <UserMenu />
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="container max-w-7xl mx-auto px-4">
+        {/* Tab Navigation - hidden on mobile, shown on md+ */}
+        <div className="container max-w-7xl mx-auto px-4 hidden md:block">
           <nav className="flex gap-1 overflow-x-auto pb-0 -mb-px scrollbar-none">
             {tabs.map((tab) => (
               <button
@@ -156,7 +156,7 @@ const Index = () => {
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span>{tab.label}</span>
               </button>
             ))}
           </nav>

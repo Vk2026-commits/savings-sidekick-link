@@ -656,6 +656,24 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
           </AnimatePresence>
         </div>
       ) : null}
+      {/* Duplicate Warning Dialog */}
+      <AlertDialog open={!!duplicateWarning} onOpenChange={(o) => !o && setDuplicateWarning(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Possible Duplicate Bill
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              A bill named "<strong>{duplicateWarning?.match.name}</strong>" in the same category ({CATEGORY_LABELS[duplicateWarning?.match.category as keyof typeof CATEGORY_LABELS] || duplicateWarning?.match.category}) already exists this month for {fmt(duplicateWarning?.match.amount || 0)}. Do you still want to add this bill?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDuplicate}>Add Anyway</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

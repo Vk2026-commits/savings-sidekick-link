@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import SummaryCards from "@/components/budget/SummaryCards";
@@ -99,7 +99,7 @@ const tabs = [
   { id: "networth", label: "Net Worth", icon: TrendingUp },
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "reports", label: "Reports", icon: BarChart3 },
-  { id: "analytics", label: "Analytics", icon: TrendingUp },
+  { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "bank", label: "Bank", icon: Landmark },
 ] as const;
 

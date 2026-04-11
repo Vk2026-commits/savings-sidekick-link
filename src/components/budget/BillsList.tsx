@@ -371,7 +371,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   onSelect={(date) => {
                     if (date) {
                       const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-                      setForm({ ...form, paidDate: iso, dueDate: date.getDate() });
+                      setForm({ ...form, paidDate: iso });
                     } else {
                       setForm({ ...form, paidDate: undefined });
                     }

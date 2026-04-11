@@ -22,7 +22,7 @@ import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import PlaidLink from "@/components/budget/PlaidLink";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
-import PinGate from "@/components/budget/PinGate";
+import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

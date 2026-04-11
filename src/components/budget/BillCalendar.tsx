@@ -22,7 +22,19 @@ export default function BillCalendar({ bills }: BillCalendarProps) {
 
   const billsByDay: Record<number, Bill[]> = {};
   bills.forEach((bill) => {
-    const day = Math.min(bill.dueDate, daysInMonth);
+    let day: number;
+    if (bill.isPaid && bill.paidDate) {
+      // Use the paid date's day-of-month so it appears on the calendar when it was actually paid
+      const pd = new Date(bill.paidDate);
+      if (pd.getFullYear() === year && pd.getMonth() === month) {
+        day = pd.getDate();
+      } else {
+        // Paid date is in a different month — fall back to due date
+        day = Math.min(bill.dueDate, daysInMonth);
+      }
+    } else {
+      day = Math.min(bill.dueDate, daysInMonth);
+    }
     if (!billsByDay[day]) billsByDay[day] = [];
     billsByDay[day].push(bill);
   });

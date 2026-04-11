@@ -23,10 +23,12 @@ import PlaidLink from "@/components/budget/PlaidLink";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
+import MobileBottomNav from "@/components/budget/MobileBottomNav";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import UserMenu from "@/components/UserMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",

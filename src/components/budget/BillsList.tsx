@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

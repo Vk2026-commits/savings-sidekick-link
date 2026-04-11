@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search, AlertTriangle, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +59,7 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   paymentAccountId: "" as string,
   month: month || "",
   isRecurring: false,
+  paidDate: undefined as string | undefined,
 });
 
 export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], expenseGroups = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {
@@ -343,6 +348,37 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
               <Switch checked={form.isRecurring} onCheckedChange={(v) => setForm({ ...form, isRecurring: v })} />
               <span className="text-sm text-muted-foreground">Recurring Bill</span>
             </div>
+            {/* Date Paid picker */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !form.paidDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {form.paidDate ? format(new Date(form.paidDate + "T00:00:00"), "MMM d, yyyy") : "Date Paid"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={form.paidDate ? new Date(form.paidDate + "T00:00:00") : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                      setForm({ ...form, paidDate: iso, dueDate: date.getDate() });
+                    } else {
+                      setForm({ ...form, paidDate: undefined });
+                    }
+                  }}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
             {paymentAccounts.length > 0 && (
               <Select value={form.paymentAccountId || "none"} onValueChange={(v) => setForm({ ...form, paymentAccountId: v === "none" ? "" : v })}>
                 <SelectTrigger><SelectValue placeholder="Account" /></SelectTrigger>

@@ -122,6 +122,7 @@ const Index = () => {
       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
   }, [budget.bills, selectedMonth]);
   return (
+    <PinUnlockProvider>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-md sticky top-0 z-10 bg-background/80">

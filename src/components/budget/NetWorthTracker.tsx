@@ -109,7 +109,7 @@ export default function NetWorthTracker({
         else if (type === "investment") reason = "This appears to be an investment or retirement contribution.";
         else reason = "This bill may relate to something of value you own.";
 
-        results.push({ billId: name, billName: bill.name, amount: bill.amount * 100, target: "asset", type, reason });
+        results.push({ billId: name, billName: bill.name, amount: bill.amount, target: "asset", type, reason });
       }
 
       // Check for potential liabilities

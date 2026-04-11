@@ -371,7 +371,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   onSelect={(date) => {
                     if (date) {
                       const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-                      setForm({ ...form, paidDate: iso, dueDate: date.getDate() });
+                      setForm({ ...form, paidDate: iso });
                     } else {
                       setForm({ ...form, paidDate: undefined });
                     }
@@ -491,11 +491,12 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
         <p className="text-muted-foreground text-sm text-center py-8">No expenses added yet. Click "Add Bill" to get started.</p>
       ) : confirmedBills.length > 0 ? (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
+          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
             <span>Name</span>
             <span className="w-20 text-right">Amount</span>
             <span className="w-20 text-right">Monthly</span>
-            <span className="w-24 text-center">Date Paid</span>
+            <span className="w-16 text-center">Due Date</span>
+            <span className="w-24 text-center">Paid On</span>
             <span className="w-16 text-center">Paid</span>
             <span className="w-8" />
             <span className="w-8" />
@@ -596,7 +597,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                             onSelect={(date) => {
                               if (date) {
                                 const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-                                setEditForm({ ...editForm, paidDate: iso, dueDate: date.getDate(), month: getYearMonthFromDateInput(iso) });
+                                setEditForm({ ...editForm, paidDate: iso, month: getYearMonthFromDateInput(iso) });
                               } else {
                                 setEditForm({ ...editForm, paidDate: undefined });
                               }
@@ -625,7 +626,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 8 }}
-                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -635,7 +636,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {CATEGORY_LABELS[bill.category]} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
+                      {CATEGORY_LABELS[bill.category]} · {FREQUENCY_LABELS[bill.frequency]}
                       {bill.autoPay && " · Auto"}
                       {bill.paymentAccountId && paymentAccounts.length > 0 && (() => {
                         const acc = paymentAccounts.find(a => a.id === bill.paymentAccountId);
@@ -647,6 +648,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   <span className="w-20 text-right font-mono text-sm text-muted-foreground">
                     {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
                   </span>
+                  <span className="w-16 text-center text-xs font-medium">{bill.dueDate}{bill.dueDate === 1 ? "st" : bill.dueDate === 2 ? "nd" : bill.dueDate === 3 ? "rd" : "th"}</span>
                   <div className="w-24 flex justify-center">
                     <input
                       type="date"

@@ -47,6 +47,13 @@ export default function PinGate({ children, label = "this section" }: PinGatePro
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"check" | "setup" | "enter">("check");
 
+  // Lock when navigating away (unmount)
+  useEffect(() => {
+    return () => {
+      setUnlocked(false);
+    };
+  }, [setUnlocked]);
+
   useEffect(() => {
     if (!user || unlocked) return;
     checkPin();

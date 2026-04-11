@@ -396,7 +396,7 @@ const Index = () => {
               monthlyIncome={budget.monthlyIncome}
               totalMonthlyBills={budget.totalMonthlyBills}
             />
-          </>
+          </PinGate>
         )}
 
         {activeTab === "calendar" && (

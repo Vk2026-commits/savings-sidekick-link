@@ -376,7 +376,7 @@ const Index = () => {
         )}
 
         {activeTab === "networth" && (
-          <>
+          <PinGate>
             <NetWorthTracker
               bills={budget.bills}
               assets={budget.assets}

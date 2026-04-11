@@ -79,7 +79,7 @@ export default function CashFlowForecast({ income, bills, viewMonth }: CashFlowF
   const forecast: { month: string; projected: number }[] = [];
   let projBalance = runningBalance;
   for (let i = 1; i <= 6; i++) {
-    const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const m = new Date(viewYear, viewMo + i, 1);
     projBalance += monthlyNet;
     forecast.push({
       month: m.toLocaleString("default", { month: "short", year: "2-digit" }),
@@ -87,7 +87,7 @@ export default function CashFlowForecast({ income, bills, viewMonth }: CashFlowF
     });
   }
 
-  const monthName = now.toLocaleString("default", { month: "long" });
+  const monthName = new Date(viewYear, viewMo, 1).toLocaleString("default", { month: "long" });
 
   return (
     <div className="space-y-6">
@@ -118,7 +118,7 @@ export default function CashFlowForecast({ income, bills, viewMonth }: CashFlowF
               labelFormatter={(day) => `Day ${day}`}
               contentStyle={tooltipStyle}
             />
-            <ReferenceLine x={currentDay} stroke="hsl(152, 60%, 48%)" strokeDasharray="5 5" label={{ value: "Today", fill: "hsl(152, 60%, 48%)", fontSize: 11 }} />
+            {currentDay && <ReferenceLine x={currentDay} stroke="hsl(152, 60%, 48%)" strokeDasharray="5 5" label={{ value: "Today", fill: "hsl(152, 60%, 48%)", fontSize: 11 }} />}
             <ReferenceLine y={0} stroke="hsl(0, 72%, 55%)" strokeDasharray="3 3" />
             <Line type="monotone" dataKey="balance" stroke="hsl(200, 80%, 55%)" strokeWidth={2} dot={false} />
           </LineChart>

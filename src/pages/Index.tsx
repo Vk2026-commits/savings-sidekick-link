@@ -110,6 +110,7 @@ type TabId = typeof tabs[number]["id"];
 
 const Index = () => {
   const budget = useBudget();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");

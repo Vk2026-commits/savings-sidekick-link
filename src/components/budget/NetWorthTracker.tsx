@@ -82,6 +82,9 @@ export default function NetWorthTracker({
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
   const [showAssetInfo, setShowAssetInfo] = useState(false);
   const [showLiabInfo, setShowLiabInfo] = useState(false);
+  const [expandedSuggestion, setExpandedSuggestion] = useState<string | null>(null);
+  const [suggestionAssetForm, setSuggestionAssetForm] = useState({ value: 0 });
+  const [suggestionLiabForm, setSuggestionLiabForm] = useState({ balance: 0, interestRate: 0, minimumPayment: 0 });
 
   // Generate suggestions from bills
   const suggestions = useMemo(() => {

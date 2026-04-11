@@ -231,33 +231,69 @@ export default function NetWorthTracker({
             <Lightbulb className="h-5 w-5 text-accent-foreground" />
             Suggestions from Your Bills
           </h3>
-          <p className="text-xs text-muted-foreground mb-4">
-            Based on your bills, these items may belong in your net worth tracker. Click to add them directly.
+           <p className="text-xs text-muted-foreground mb-4">
+            Based on your bills, these items may belong in your net worth tracker. Enter the actual values to add them.
           </p>
           <div className="space-y-2">
-            {suggestions.map((s) => (
-              <motion.div key={`${s.billId}-${s.target}`} layout initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-secondary/50"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${s.target === "asset" ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
-                      {s.target === "asset" ? "Asset" : "Liability"}
-                    </span>
-                    <p className="font-medium text-sm truncate">{s.billName}</p>
+            {suggestions.map((s) => {
+              const key = `${s.billId}-${s.target}`;
+              const isExpanded = expandedSuggestion === key;
+              return (
+                <motion.div key={key} layout initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                  className="rounded-lg bg-secondary/50 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between px-3 py-2.5">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${s.target === "asset" ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
+                          {s.target === "asset" ? "Asset" : "Liability"}
+                        </span>
+                        <p className="font-medium text-sm truncate">{s.billName}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{s.reason}</p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-3 shrink-0">
+                      <Button size="sm" variant="outline" onClick={() => openSuggestionForm(s)} className="gap-1">
+                        {isExpanded ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                        {isExpanded ? "Cancel" : "Add"}
+                      </Button>
+                      <button onClick={() => dismissSuggestion(s.billId)} className="text-muted-foreground hover:text-foreground transition-colors">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{s.reason}</p>
-                </div>
-                <div className="flex items-center gap-2 ml-3 shrink-0">
-                  <Button size="sm" variant="outline" onClick={() => addSuggestion(s)} className="gap-1">
-                    <Plus className="h-3.5 w-3.5" /> Add
-                  </Button>
-                  <button onClick={() => dismissSuggestion(s.billId)} className="text-muted-foreground hover:text-foreground transition-colors">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-3 pb-3 space-y-2 border-t border-border/50 pt-3">
+                          {s.target === "asset" ? (
+                            <>
+                              <p className="text-xs text-muted-foreground">Enter the current market value (what it's worth today, not what you paid):</p>
+                              <Input type="number" placeholder="Current market value" min={0} step={0.01} value={suggestionAssetForm.value || ""} onChange={(e) => setSuggestionAssetForm({ value: parseFloat(e.target.value) || 0 })} />
+                              <Button size="sm" onClick={() => submitSuggestion(s)} disabled={suggestionAssetForm.value <= 0}>
+                                <Check className="h-4 w-4 mr-1" /> Add as Asset
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-xs text-muted-foreground">Enter your remaining loan balance and interest details:</p>
+                              <Input type="number" placeholder="Remaining balance owed" min={0} step={0.01} value={suggestionLiabForm.balance || ""} onChange={(e) => setSuggestionLiabForm({ ...suggestionLiabForm, balance: parseFloat(e.target.value) || 0 })} />
+                              <Input type="number" placeholder="Interest rate %" min={0} step={0.01} value={suggestionLiabForm.interestRate || ""} onChange={(e) => setSuggestionLiabForm({ ...suggestionLiabForm, interestRate: parseFloat(e.target.value) || 0 })} />
+                              <Input type="number" placeholder="Monthly payment" min={0} step={0.01} value={suggestionLiabForm.minimumPayment || ""} onChange={(e) => setSuggestionLiabForm({ ...suggestionLiabForm, minimumPayment: parseFloat(e.target.value) || 0 })} />
+                              <Button size="sm" onClick={() => submitSuggestion(s)} disabled={suggestionLiabForm.balance <= 0}>
+                                <Check className="h-4 w-4 mr-1" /> Add as Liability
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       )}

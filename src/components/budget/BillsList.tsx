@@ -348,6 +348,37 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
               <Switch checked={form.isRecurring} onCheckedChange={(v) => setForm({ ...form, isRecurring: v })} />
               <span className="text-sm text-muted-foreground">Recurring Bill</span>
             </div>
+            {/* Date Paid picker */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !form.paidDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {form.paidDate ? format(new Date(form.paidDate + "T00:00:00"), "MMM d, yyyy") : "Date Paid"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={form.paidDate ? new Date(form.paidDate + "T00:00:00") : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                      setForm({ ...form, paidDate: iso, dueDate: date.getDate() });
+                    } else {
+                      setForm({ ...form, paidDate: undefined });
+                    }
+                  }}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
             {paymentAccounts.length > 0 && (
               <Select value={form.paymentAccountId || "none"} onValueChange={(v) => setForm({ ...form, paymentAccountId: v === "none" ? "" : v })}>
                 <SelectTrigger><SelectValue placeholder="Account" /></SelectTrigger>

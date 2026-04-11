@@ -71,6 +71,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
   const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [duplicateWarning, setDuplicateWarning] = useState<{ bill: Omit<Bill, "id">; match: Bill } | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 

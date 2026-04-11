@@ -166,13 +166,15 @@ const Index = () => {
         )}
 
         {activeTab === "income" && (
-          <IncomeManager
-            sources={budget.incomeSources}
-            onAdd={budget.addIncomeSource}
-            onUpdate={budget.updateIncomeSource}
-            onDelete={budget.deleteIncomeSource}
-            totalMonthlyIncome={budget.monthlyIncome}
-          />
+          <PinGate label="Income">
+            <IncomeManager
+              sources={budget.incomeSources}
+              onAdd={budget.addIncomeSource}
+              onUpdate={budget.updateIncomeSource}
+              onDelete={budget.deleteIncomeSource}
+              totalMonthlyIncome={budget.monthlyIncome}
+            />
+          </PinGate>
         )}
 
         {activeTab === "bills" && (

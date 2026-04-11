@@ -449,17 +449,41 @@ export default function NetWorthTracker({
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 mb-4 text-sm text-muted-foreground space-y-2">
-                  <p className="font-medium text-foreground">What is a liability?</p>
-                  <p>A liability is any money you <strong>owe</strong>. It reduces your net worth and usually comes with interest charges.</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li><strong>Credit Cards</strong> — Outstanding balances with high interest</li>
-                    <li><strong>Mortgage</strong> — Remaining balance on your home loan</li>
-                    <li><strong>Auto Loans</strong> — What you still owe on a vehicle</li>
-                    <li><strong>Student Loans</strong> — Education debt (federal or private)</li>
-                    <li><strong>Personal Loans</strong> — Any other borrowed money</li>
-                  </ul>
-                  <p className="text-xs italic">Tip: Enter the total remaining balance, not the monthly payment.</p>
+                <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 mb-4 text-sm text-muted-foreground space-y-3">
+                  <p className="font-medium text-foreground text-base">What is a liability?</p>
+                  <p>A liability is any money you <strong>owe</strong> to someone else. It reduces your net worth. The goal is to shrink liabilities over time.</p>
+                  
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground text-sm">Common liabilities to track:</p>
+                    <ul className="space-y-2 text-xs">
+                      <li><strong>🏠 Mortgage</strong> — Enter the <em>remaining principal balance</em> on your home loan (found on your mortgage statement or lender portal). This is NOT your monthly payment — it's the total you still owe. As you pay, this number decreases and your home equity grows.</li>
+                      <li><strong>🚗 Auto Loan</strong> — The remaining balance on your car loan. Check your lender statement for the payoff amount.</li>
+                      <li><strong>💳 Credit Card Debt</strong> — Any outstanding balances you carry month to month. These typically have the highest interest rates (15-25%+), so tracking them here helps prioritize payoff.</li>
+                      <li><strong>🎓 Student Loans</strong> — Federal and private student loan balances. Include all loans (subsidized, unsubsidized, PLUS, private).</li>
+                      <li><strong>🤝 Personal Loans</strong> — Money borrowed from banks, credit unions, family, or online lenders.</li>
+                      <li><strong>🏥 Medical Debt</strong> — Outstanding medical bills or payment plans.</li>
+                      <li><strong>🏗️ Home Equity Loan / HELOC</strong> — If you've borrowed against your home equity, that's a separate liability from your mortgage.</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-2 rounded bg-destructive/10 text-xs">
+                    <p className="font-medium text-foreground">💡 Key rules:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Enter the <em>total remaining balance</em>, not your monthly payment.</li>
+                      <li>Include the interest rate — it helps prioritize which debts to pay off first.</li>
+                      <li>Monthly bills like utilities, groceries, and subscriptions are <em>not</em> liabilities — those are expenses tracked under Bills.</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-2 rounded bg-secondary/50 text-xs">
+                    <p className="font-medium text-foreground">🏠 Example: Understanding your mortgage</p>
+                    <p>If your home is worth $350,000 and you owe $250,000 on the mortgage:</p>
+                    <ul className="list-disc list-inside mt-1 space-y-0.5">
+                      <li>Asset: Home → $350,000 (market value)</li>
+                      <li>Liability: Mortgage → $250,000 (remaining balance)</li>
+                      <li>Your home equity = $100,000</li>
+                    </ul>
+                  </div>
                 </div>
               </motion.div>
             )}

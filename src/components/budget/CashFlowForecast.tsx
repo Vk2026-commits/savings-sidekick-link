@@ -6,6 +6,7 @@ import { getMonthlyAmount } from "@/types/budget";
 interface CashFlowForecastProps {
   income: number;
   bills: Bill[];
+  viewMonth?: string; // "YYYY-MM"
 }
 
 function fmt(n: number) {
@@ -20,10 +21,12 @@ const tooltipStyle = {
   fontSize: "13px",
 };
 
-export default function CashFlowForecast({ income, bills }: CashFlowForecastProps) {
+export default function CashFlowForecast({ income, bills, viewMonth }: CashFlowForecastProps) {
   const now = new Date();
-  const currentDay = now.getDate();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const viewYear = viewMonth ? parseInt(viewMonth.split("-")[0]) : now.getFullYear();
+  const viewMo = viewMonth ? parseInt(viewMonth.split("-")[1]) - 1 : now.getMonth();
+  const currentDay = (!viewMonth || viewMonth === `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`) ? now.getDate() : null;
+  const daysInMonth = new Date(viewYear, viewMo + 1, 0).getDate();
 
   // Calculate total monthly bills using the same normalization as BudgetOverview
   const totalMonthlyBills = bills.reduce((s, b) => s + getMonthlyAmount(b.amount, b.frequency), 0);
@@ -76,7 +79,7 @@ export default function CashFlowForecast({ income, bills }: CashFlowForecastProp
   const forecast: { month: string; projected: number }[] = [];
   let projBalance = runningBalance;
   for (let i = 1; i <= 6; i++) {
-    const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const m = new Date(viewYear, viewMo + i, 1);
     projBalance += monthlyNet;
     forecast.push({
       month: m.toLocaleString("default", { month: "short", year: "2-digit" }),
@@ -84,7 +87,7 @@ export default function CashFlowForecast({ income, bills }: CashFlowForecastProp
     });
   }
 
-  const monthName = now.toLocaleString("default", { month: "long" });
+  const monthName = new Date(viewYear, viewMo, 1).toLocaleString("default", { month: "long" });
 
   return (
     <div className="space-y-6">
@@ -115,7 +118,7 @@ export default function CashFlowForecast({ income, bills }: CashFlowForecastProp
               labelFormatter={(day) => `Day ${day}`}
               contentStyle={tooltipStyle}
             />
-            <ReferenceLine x={currentDay} stroke="hsl(152, 60%, 48%)" strokeDasharray="5 5" label={{ value: "Today", fill: "hsl(152, 60%, 48%)", fontSize: 11 }} />
+            {currentDay && <ReferenceLine x={currentDay} stroke="hsl(152, 60%, 48%)" strokeDasharray="5 5" label={{ value: "Today", fill: "hsl(152, 60%, 48%)", fontSize: 11 }} />}
             <ReferenceLine y={0} stroke="hsl(0, 72%, 55%)" strokeDasharray="3 3" />
             <Line type="monotone" dataKey="balance" stroke="hsl(200, 80%, 55%)" strokeWidth={2} dot={false} />
           </LineChart>

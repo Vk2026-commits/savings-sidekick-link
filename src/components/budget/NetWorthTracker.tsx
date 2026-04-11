@@ -28,7 +28,7 @@ function fmt(n: number) {
 }
 
 const assetIcons: Record<Asset["type"], typeof Building2> = {
-  cash: Wallet, investment: TrendingUp, property: Building2, vehicle: Car, other: Package,
+  cash: Wallet, investment: TrendingUp, retirement: PiggyBank, property: Building2, rental_property: Home, vehicle: Car, whole_life_insurance: Shield, business_equity: Briefcase, jewelry_collectibles: Gem, cryptocurrency: Bitcoin, other: Package,
 };
 
 // Categories from bills that map to potential assets

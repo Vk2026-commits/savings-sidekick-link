@@ -362,11 +362,13 @@ const Index = () => {
         )}
 
         {activeTab === "transactions" && (
-          <TransactionLog
-            transactions={budget.transactions}
-            onAdd={budget.addTransaction}
-            onDelete={budget.deleteTransaction}
-          />
+          <PinGate label="Transactions">
+            <TransactionLog
+              transactions={budget.transactions}
+              onAdd={budget.addTransaction}
+              onDelete={budget.deleteTransaction}
+            />
+          </PinGate>
         )}
 
         {activeTab === "savings" && (

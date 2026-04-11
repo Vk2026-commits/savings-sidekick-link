@@ -121,6 +121,7 @@ const Index = () => {
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth(); // 0-indexed
+            const currentYM = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
             const monthsElapsed = currentMonth + 1; // Jan=1, Feb=2, etc.
             const ytdIncome = budget.monthlyIncome * monthsElapsed;
             const ytdBills = budget.bills
@@ -131,6 +132,7 @@ const Index = () => {
               })
               .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
             const ytdRemaining = ytdIncome - ytdBills;
+            const currentMonthBills = budget.bills.filter((b) => getAssignedBillMonth(b) === currentYM);
             return (
               <>
                 <SummaryCards
@@ -140,8 +142,8 @@ const Index = () => {
                   totalSaved={budget.totalSaved}
                 />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <BudgetOverview bills={budget.bills} income={budget.monthlyIncome} />
-                  <CashFlowForecast income={budget.monthlyIncome} bills={budget.bills} />
+                  <BudgetOverview bills={currentMonthBills} income={budget.monthlyIncome} />
+                  <CashFlowForecast income={budget.monthlyIncome} bills={currentMonthBills} />
                 </div>
                 
               </>

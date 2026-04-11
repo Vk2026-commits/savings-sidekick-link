@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, RefreshCw, CheckCircle2, ChevronDown, Search, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount, ExpenseGroup } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getAssignedBillMonth, getMonthlyAmount, getYearMonthFromDateInput, suggestCategoryFromName } from "@/types/budget";
 
@@ -67,6 +71,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
   const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [duplicateWarning, setDuplicateWarning] = useState<{ bill: Omit<Bill, "id">; match: Bill } | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -122,26 +127,43 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
     setShowSuggestions(false);
   };
 
+  const addBillWithRecurring = (newBill: Omit<Bill, "id">) => {
+    onAdd(newBill);
+    if (newBill.isRecurring && selectedMonth) {
+      const nextMonth = shiftMonth(selectedMonth, 1);
+      onAdd({ ...newBill, month: nextMonth, isPaid: false, isRecurring: true, pendingReview: true });
+    }
+    setForm(emptyBill(owner, selectedMonth));
+    setShowForm(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || form.amount <= 0) return;
     const newBill: Omit<Bill, "id"> = { ...form, month: selectedMonth || form.month };
-    onAdd(newBill);
 
-    // If recurring, also add to next month with pendingReview
-    if (form.isRecurring && selectedMonth) {
-      const nextMonth = shiftMonth(selectedMonth, 1);
-      onAdd({
-        ...newBill,
-        month: nextMonth,
-        isPaid: false,
-        isRecurring: true,
-        pendingReview: true,
-      });
+    // Check for duplicate: same name, category, and month
+    const targetMonth = selectedMonth || form.month;
+    const duplicate = filteredBills.find(
+      (b) =>
+        b.name.toLowerCase() === form.name.toLowerCase() &&
+        b.category === form.category &&
+        getAssignedBillMonth(b) === targetMonth
+    );
+
+    if (duplicate) {
+      setDuplicateWarning({ bill: newBill, match: duplicate });
+      return;
     }
 
-    setForm(emptyBill(owner, selectedMonth));
-    setShowForm(false);
+    addBillWithRecurring(newBill);
+  };
+
+  const confirmDuplicate = () => {
+    if (duplicateWarning) {
+      addBillWithRecurring(duplicateWarning.bill);
+      setDuplicateWarning(null);
+    }
   };
 
   const startEdit = (bill: Bill) => {
@@ -634,6 +656,24 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
           </AnimatePresence>
         </div>
       ) : null}
+      {/* Duplicate Warning Dialog */}
+      <AlertDialog open={!!duplicateWarning} onOpenChange={(o) => !o && setDuplicateWarning(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Possible Duplicate Bill
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              A bill named "<strong>{duplicateWarning?.match.name}</strong>" in the same category ({CATEGORY_LABELS[duplicateWarning?.match.category as keyof typeof CATEGORY_LABELS] || duplicateWarning?.match.category}) already exists this month for {fmt(duplicateWarning?.match.amount || 0)}. Do you still want to add this bill?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDuplicate}>Add Anyway</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

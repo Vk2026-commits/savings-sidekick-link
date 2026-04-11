@@ -1,15 +1,19 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function UserMenu() {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
+  const navigate = useNavigate();
   if (!user) return null;
 
   const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "User";
@@ -26,6 +30,11 @@ export default function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem className="text-xs text-muted-foreground">{user.email}</DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate("/admin")}>
+            <Shield className="h-4 w-4 mr-2" /> Admin Portal
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={signOut} className="text-destructive">
           <LogOut className="h-4 w-4 mr-2" /> Sign Out
         </DropdownMenuItem>

@@ -624,7 +624,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 8 }}
-                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto] gap-2 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -634,7 +634,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {CATEGORY_LABELS[bill.category]} · {FREQUENCY_LABELS[bill.frequency]}
+                      {CATEGORY_LABELS[bill.category]} · {fmt(getMonthlyAmount(bill.amount, bill.frequency))}/mo · {FREQUENCY_LABELS[bill.frequency]}
                       {bill.autoPay && " · Auto"}
                       {bill.paymentAccountId && paymentAccounts.length > 0 && (() => {
                         const acc = paymentAccounts.find(a => a.id === bill.paymentAccountId);
@@ -642,12 +642,9 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       })()}
                     </p>
                   </div>
-                  <span className="w-20 text-right font-mono text-sm">{fmt(bill.amount)}</span>
-                  <span className="w-20 text-right font-mono text-sm text-muted-foreground">
-                    {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
-                  </span>
-                  <span className="w-16 text-center text-xs font-medium">{bill.dueDate}{bill.dueDate === 1 ? "st" : bill.dueDate === 2 ? "nd" : bill.dueDate === 3 ? "rd" : "th"}</span>
-                  <div className="w-24 flex justify-center">
+                  <span className="w-16 text-right font-mono text-sm">{fmt(bill.amount)}</span>
+                  <span className="w-10 text-center text-xs font-medium">{bill.dueDate}{bill.dueDate === 1 ? "st" : bill.dueDate === 2 ? "nd" : bill.dueDate === 3 ? "rd" : "th"}</span>
+                  <div className="w-20 flex justify-center">
                     <input
                       type="date"
                       value={bill.paidDate ?? ""}
@@ -662,7 +659,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       className="w-full text-xs bg-transparent border-none text-center text-muted-foreground focus:text-foreground focus:outline-none"
                     />
                   </div>
-                  <div className="w-16 flex justify-center">
+                  <div className="w-10 flex justify-center">
                     <button
                       onClick={() => {
                         const nowPaid = !bill.isPaid;
@@ -680,11 +677,11 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                     </button>
                   </div>
                   {/* Recurring dropdown */}
-                  <div className="w-8">
+                  <div className="w-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className={`text-muted-foreground hover:text-primary transition-colors ${bill.isRecurring ? 'text-primary' : ''}`} title="Recurring options">
-                          <RefreshCw className="h-4 w-4" />
+                          <RefreshCw className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-popover border border-border shadow-lg z-50">
@@ -702,12 +699,14 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  <button onClick={() => startEdit(bill)} className="w-8 text-muted-foreground hover:text-primary transition-colors">
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => setDeleteConfirmId(bill.id)} className="w-8 text-muted-foreground hover:text-destructive transition-colors">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="w-14 flex gap-1">
+                    <button onClick={() => startEdit(bill)} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => setDeleteConfirmId(bill.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}

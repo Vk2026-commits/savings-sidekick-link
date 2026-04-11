@@ -174,8 +174,8 @@ export default function NetWorthTracker({
     setDismissedSuggestions(prev => new Set([...prev, s.billId]));
   };
 
-  const dismissSuggestion = (billId: string) => {
-    setDismissedSuggestions(prev => new Set([...prev, billId]));
+  const dismissSuggestion = (key: string) => {
+    setDismissedSuggestions(prev => new Set([...prev, key]));
   };
 
   return (

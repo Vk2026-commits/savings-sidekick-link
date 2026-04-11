@@ -127,26 +127,43 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
     setShowSuggestions(false);
   };
 
+  const addBillWithRecurring = (newBill: Omit<Bill, "id">) => {
+    onAdd(newBill);
+    if (newBill.isRecurring && selectedMonth) {
+      const nextMonth = shiftMonth(selectedMonth, 1);
+      onAdd({ ...newBill, month: nextMonth, isPaid: false, isRecurring: true, pendingReview: true });
+    }
+    setForm(emptyBill(owner, selectedMonth));
+    setShowForm(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || form.amount <= 0) return;
     const newBill: Omit<Bill, "id"> = { ...form, month: selectedMonth || form.month };
-    onAdd(newBill);
 
-    // If recurring, also add to next month with pendingReview
-    if (form.isRecurring && selectedMonth) {
-      const nextMonth = shiftMonth(selectedMonth, 1);
-      onAdd({
-        ...newBill,
-        month: nextMonth,
-        isPaid: false,
-        isRecurring: true,
-        pendingReview: true,
-      });
+    // Check for duplicate: same name, category, and month
+    const targetMonth = selectedMonth || form.month;
+    const duplicate = filteredBills.find(
+      (b) =>
+        b.name.toLowerCase() === form.name.toLowerCase() &&
+        b.category === form.category &&
+        getAssignedBillMonth(b) === targetMonth
+    );
+
+    if (duplicate) {
+      setDuplicateWarning({ bill: newBill, match: duplicate });
+      return;
     }
 
-    setForm(emptyBill(owner, selectedMonth));
-    setShowForm(false);
+    addBillWithRecurring(newBill);
+  };
+
+  const confirmDuplicate = () => {
+    if (duplicateWarning) {
+      addBillWithRecurring(duplicateWarning.bill);
+      setDuplicateWarning(null);
+    }
   };
 
   const startEdit = (bill: Bill) => {

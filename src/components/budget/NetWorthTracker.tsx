@@ -88,14 +88,17 @@ export default function NetWorthTracker({
     const existingAssetNames = new Set(assets.map(a => a.name.toLowerCase()));
     const existingLiabNames = new Set(liabilities.map(l => l.name.toLowerCase()));
     const results: Suggestion[] = [];
+    const seen = new Set<string>(); // dedupe by "name|target"
 
     for (const bill of bills) {
       const name = bill.name.toLowerCase();
-      if (dismissedSuggestions.has(bill.id)) continue;
+      if (dismissedSuggestions.has(name)) continue;
 
       // Check for potential assets
+      const assetKey = `${name}|asset`;
       const isAssetCandidate = ASSET_BILL_CATEGORIES.has(bill.category) || ASSET_BILL_KEYWORDS.some(k => name.includes(k));
-      if (isAssetCandidate && !existingAssetNames.has(bill.name.toLowerCase())) {
+      if (isAssetCandidate && !existingAssetNames.has(name) && !seen.has(assetKey)) {
+        seen.add(assetKey);
         const type = inferAssetType(bill);
         let reason = "";
         if (type === "property") reason = "You're making payments on this — the property itself is an asset worth tracking.";
@@ -103,12 +106,14 @@ export default function NetWorthTracker({
         else if (type === "investment") reason = "This appears to be an investment or retirement contribution.";
         else reason = "This bill may relate to something of value you own.";
 
-        results.push({ billId: bill.id, billName: bill.name, amount: bill.amount * 100, target: "asset", type, reason });
+        results.push({ billId: name, billName: bill.name, amount: bill.amount * 100, target: "asset", type, reason });
       }
 
       // Check for potential liabilities
+      const liabKey = `${name}|liability`;
       const isLiabCandidate = LIABILITY_BILL_CATEGORIES.has(bill.category) || LIABILITY_BILL_KEYWORDS.some(k => name.includes(k));
-      if (isLiabCandidate && !existingLiabNames.has(bill.name.toLowerCase())) {
+      if (isLiabCandidate && !existingLiabNames.has(name) && !seen.has(liabKey)) {
+        seen.add(liabKey);
         const type = inferLiabilityType(bill);
         let reason = "";
         if (type === "mortgage") reason = "Your mortgage is a liability — track the remaining balance here.";
@@ -116,7 +121,7 @@ export default function NetWorthTracker({
         else if (type === "credit_card") reason = "Credit card balances are liabilities with interest charges.";
         else reason = "This bill may represent a debt or loan balance.";
 
-        results.push({ billId: bill.id, billName: bill.name, amount: bill.amount, target: "liability", type, reason });
+        results.push({ billId: name, billName: bill.name, amount: bill.amount, target: "liability", type, reason });
       }
     }
     return results;
@@ -169,8 +174,8 @@ export default function NetWorthTracker({
     setDismissedSuggestions(prev => new Set([...prev, s.billId]));
   };
 
-  const dismissSuggestion = (billId: string) => {
-    setDismissedSuggestions(prev => new Set([...prev, billId]));
+  const dismissSuggestion = (key: string) => {
+    setDismissedSuggestions(prev => new Set([...prev, key]));
   };
 
   return (

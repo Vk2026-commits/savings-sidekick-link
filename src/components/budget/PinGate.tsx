@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { Lock, Eye, EyeOff, KeyRound, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-interface PinGateProps {
-  children: React.ReactNode;
-}
+const PIN_LENGTH = 7;
 
-// Simple hash for PIN (not cryptographic-grade but sufficient for app-level gating)
+// Simple hash for PIN
 async function hashPin(pin: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(pin + "dough-dreams-salt");
@@ -19,10 +17,30 @@ async function hashPin(pin: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export default function PinGate({ children }: PinGateProps) {
-  const { user } = useAuth();
-  const [hasPin, setHasPin] = useState<boolean | null>(null); // null = loading
+// Context to share unlock state across multiple PinGate instances
+const PinUnlockContext = createContext<{
+  unlocked: boolean;
+  setUnlocked: (v: boolean) => void;
+}>({ unlocked: false, setUnlocked: () => {} });
+
+export function PinUnlockProvider({ children }: { children: ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
+  return (
+    <PinUnlockContext.Provider value={{ unlocked, setUnlocked }}>
+      {children}
+    </PinUnlockContext.Provider>
+  );
+}
+
+interface PinGateProps {
+  children: ReactNode;
+  label?: string;
+}
+
+export default function PinGate({ children, label = "this section" }: PinGateProps) {
+  const { user } = useAuth();
+  const { unlocked, setUnlocked } = useContext(PinUnlockContext);
+  const [hasPin, setHasPin] = useState<boolean | null>(null);
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [showPin, setShowPin] = useState(false);
@@ -30,9 +48,9 @@ export default function PinGate({ children }: PinGateProps) {
   const [mode, setMode] = useState<"check" | "setup" | "enter">("check");
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || unlocked) return;
     checkPin();
-  }, [user]);
+  }, [user, unlocked]);
 
   const checkPin = async () => {
     if (!user) return;
@@ -58,8 +76,8 @@ export default function PinGate({ children }: PinGateProps) {
   };
 
   const handleSetup = async () => {
-    if (pin.length !== 6 || !/^\d{6}$/.test(pin)) {
-      toast.error("PIN must be exactly 6 digits");
+    if (pin.length !== PIN_LENGTH || !/^\d+$/.test(pin)) {
+      toast.error(`PIN must be exactly ${PIN_LENGTH} digits`);
       return;
     }
     if (pin !== confirmPin) {
@@ -85,8 +103,8 @@ export default function PinGate({ children }: PinGateProps) {
   };
 
   const handleEnter = async () => {
-    if (pin.length !== 6) {
-      toast.error("Enter your 6-digit PIN");
+    if (pin.length !== PIN_LENGTH) {
+      toast.error(`Enter your ${PIN_LENGTH}-digit PIN`);
       return;
     }
     setLoading(true);
@@ -143,7 +161,7 @@ export default function PinGate({ children }: PinGateProps) {
             <div>
               <h2 className="text-xl font-bold mb-1">Set Up Your PIN</h2>
               <p className="text-sm text-muted-foreground">
-                Create a 6-digit PIN to protect your Net Worth information.
+                Create a {PIN_LENGTH}-digit PIN to protect your Income, Transactions, and Net Worth data.
               </p>
             </div>
             <div className="w-full space-y-3" onKeyDown={handleKeyDown}>
@@ -151,11 +169,11 @@ export default function PinGate({ children }: PinGateProps) {
                 <Input
                   type={showPin ? "text" : "password"}
                   inputMode="numeric"
-                  maxLength={6}
-                  placeholder="Enter 6-digit PIN"
+                  maxLength={PIN_LENGTH}
+                  placeholder={`Enter ${PIN_LENGTH}-digit PIN`}
                   value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="text-center text-2xl tracking-[0.5em] font-mono pr-10"
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH))}
+                  className="text-center text-2xl tracking-[0.4em] font-mono pr-10"
                 />
                 <button
                   type="button"
@@ -168,17 +186,17 @@ export default function PinGate({ children }: PinGateProps) {
               <Input
                 type={showPin ? "text" : "password"}
                 inputMode="numeric"
-                maxLength={6}
+                maxLength={PIN_LENGTH}
                 placeholder="Confirm PIN"
                 value={confirmPin}
-                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="text-center text-2xl tracking-[0.5em] font-mono"
+                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH))}
+                className="text-center text-2xl tracking-[0.4em] font-mono"
               />
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 shrink-0" />
                 <span>Your PIN is encrypted and stored securely.</span>
               </div>
-              <Button onClick={handleSetup} disabled={loading || pin.length !== 6} className="w-full">
+              <Button onClick={handleSetup} disabled={loading || pin.length !== PIN_LENGTH} className="w-full">
                 {loading ? "Setting PIN..." : "Set PIN & Continue"}
               </Button>
             </div>
@@ -188,7 +206,7 @@ export default function PinGate({ children }: PinGateProps) {
             <div>
               <h2 className="text-xl font-bold mb-1">Enter Your PIN</h2>
               <p className="text-sm text-muted-foreground">
-                Enter your 6-digit PIN to access Net Worth.
+                Enter your {PIN_LENGTH}-digit PIN to access {label}.
               </p>
             </div>
             <div className="w-full space-y-3" onKeyDown={handleKeyDown}>
@@ -196,11 +214,11 @@ export default function PinGate({ children }: PinGateProps) {
                 <Input
                   type={showPin ? "text" : "password"}
                   inputMode="numeric"
-                  maxLength={6}
-                  placeholder="••••••"
+                  maxLength={PIN_LENGTH}
+                  placeholder={"•".repeat(PIN_LENGTH)}
                   value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="text-center text-2xl tracking-[0.5em] font-mono pr-10"
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH))}
+                  className="text-center text-2xl tracking-[0.4em] font-mono pr-10"
                   autoFocus
                 />
                 <button
@@ -211,7 +229,7 @@ export default function PinGate({ children }: PinGateProps) {
                   {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <Button onClick={handleEnter} disabled={loading || pin.length !== 6} className="w-full">
+              <Button onClick={handleEnter} disabled={loading || pin.length !== PIN_LENGTH} className="w-full">
                 {loading ? "Verifying..." : "Unlock"}
               </Button>
             </div>

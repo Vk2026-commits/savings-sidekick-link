@@ -626,7 +626,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 8 }}
-                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto,auto] gap-3 items-center px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -636,7 +636,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {CATEGORY_LABELS[bill.category]} · Due {bill.dueDate}th · {FREQUENCY_LABELS[bill.frequency]}
+                      {CATEGORY_LABELS[bill.category]} · {FREQUENCY_LABELS[bill.frequency]}
                       {bill.autoPay && " · Auto"}
                       {bill.paymentAccountId && paymentAccounts.length > 0 && (() => {
                         const acc = paymentAccounts.find(a => a.id === bill.paymentAccountId);
@@ -648,6 +648,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   <span className="w-20 text-right font-mono text-sm text-muted-foreground">
                     {fmt(getMonthlyAmount(bill.amount, bill.frequency))}
                   </span>
+                  <span className="w-16 text-center text-xs font-medium">{bill.dueDate}{bill.dueDate === 1 ? "st" : bill.dueDate === 2 ? "nd" : bill.dueDate === 3 ? "rd" : "th"}</span>
                   <div className="w-24 flex justify-center">
                     <input
                       type="date"

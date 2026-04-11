@@ -76,7 +76,7 @@ export interface Asset {
   id: string;
   name: string;
   value: number;
-  type: "cash" | "investment" | "property" | "vehicle" | "other";
+  type: "cash" | "investment" | "property" | "vehicle" | "whole_life_insurance" | "business_equity" | "jewelry_collectibles" | "rental_property" | "cryptocurrency" | "retirement" | "other";
 }
 
 export interface Liability {
@@ -85,7 +85,7 @@ export interface Liability {
   balance: number;
   interestRate: number;
   minimumPayment: number;
-  type: "credit_card" | "student_loan" | "mortgage" | "auto_loan" | "personal_loan" | "other";
+  type: "credit_card" | "student_loan" | "mortgage" | "auto_loan" | "personal_loan" | "medical_debt" | "heloc" | "tax_debt" | "collections" | "business_loan" | "other";
 }
 
 export interface BudgetState {
@@ -226,8 +226,14 @@ export const FREQUENCY_LABELS: Record<BillFrequency, string> = {
 export const ASSET_TYPE_LABELS: Record<Asset["type"], string> = {
   cash: "Cash & Savings",
   investment: "Investments",
+  retirement: "Retirement Accounts",
   property: "Real Estate",
+  rental_property: "Rental Property",
   vehicle: "Vehicles",
+  whole_life_insurance: "Whole Life Insurance",
+  business_equity: "Business Equity",
+  jewelry_collectibles: "Jewelry & Collectibles",
+  cryptocurrency: "Cryptocurrency",
   other: "Other Assets",
 };
 
@@ -237,6 +243,11 @@ export const LIABILITY_TYPE_LABELS: Record<Liability["type"], string> = {
   mortgage: "Mortgage",
   auto_loan: "Auto Loan",
   personal_loan: "Personal Loan",
+  medical_debt: "Medical Debt",
+  heloc: "Home Equity Loan / HELOC",
+  tax_debt: "Tax Debt",
+  collections: "Collections",
+  business_loan: "Business Loan",
   other: "Other",
 };
 

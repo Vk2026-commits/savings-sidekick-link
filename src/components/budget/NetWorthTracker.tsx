@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Trash2, X, TrendingUp, TrendingDown, Building2, Car, Wallet, Package, Pencil, Check, Lightbulb, ArrowRight, Info } from "lucide-react";
+import { Plus, Trash2, X, TrendingUp, TrendingDown, Building2, Car, Wallet, Package, Pencil, Check, Lightbulb, Info, Shield, Briefcase, Gem, Home, Bitcoin, PiggyBank } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ function fmt(n: number) {
 }
 
 const assetIcons: Record<Asset["type"], typeof Building2> = {
-  cash: Wallet, investment: TrendingUp, property: Building2, vehicle: Car, other: Package,
+  cash: Wallet, investment: TrendingUp, retirement: PiggyBank, property: Building2, rental_property: Home, vehicle: Car, whole_life_insurance: Shield, business_equity: Briefcase, jewelry_collectibles: Gem, cryptocurrency: Bitcoin, other: Package,
 };
 
 // Categories from bills that map to potential assets

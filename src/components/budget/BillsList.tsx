@@ -59,6 +59,7 @@ const emptyBill = (owner: BillOwner = "household", month?: string) => ({
   paymentAccountId: "" as string,
   month: month || "",
   isRecurring: false,
+  paidDate: undefined as string | undefined,
 });
 
 export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, title = "Bills & Expenses", owner = "household", paymentAccounts = [], expenseGroups = [], selectedMonth, groupTotal, onMarkAllPaid }: BillsListProps) {

@@ -43,20 +43,25 @@ export default function SpendingAnalytics({ bills, transactions, monthlyIncome }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate spending by category from bills and transactions
+  // Calculate spending by category from current month's bills and transactions
   const spendingByCategory = useMemo(() => {
     const cats: Record<string, number> = {};
-
-    // Add monthly bill amounts
-    bills.forEach((b) => {
-      const monthly = getMonthlyAmount(b.amount, b.frequency);
-      const cat = b.category || "Other";
-      cats[cat] = (cats[cat] || 0) + monthly;
-    });
-
-    // Add current month's expense transactions
     const now = new Date();
     const curMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+    // Only include bills assigned to the current month
+    bills
+      .filter((b) => {
+        const billMonth = b.month || curMonth;
+        return billMonth === curMonth;
+      })
+      .forEach((b) => {
+        const monthly = getMonthlyAmount(b.amount, b.frequency);
+        const cat = b.category || "Other";
+        cats[cat] = (cats[cat] || 0) + monthly;
+      });
+
+    // Add current month's expense transactions
     transactions
       .filter((t) => t.type === "expense" && t.date.startsWith(curMonth))
       .forEach((t) => {

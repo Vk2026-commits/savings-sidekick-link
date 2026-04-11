@@ -77,6 +77,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [duplicateWarning, setDuplicateWarning] = useState<{ bill: Omit<Bill, "id">; match: Bill } | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -475,7 +476,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                     <Button size="sm" variant="outline" onClick={() => startReviewEdit(bill)} title="Edit amount or due date">
                       <Pencil className="h-4 w-4 mr-1" /> Edit
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onDelete(bill.id)} title="Remove">
+                    <Button size="sm" variant="ghost" onClick={() => setDeleteConfirmId(bill.id)} title="Remove">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -667,8 +668,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                         const nowPaid = !bill.isPaid;
                         const today = new Date().toISOString().split("T")[0];
                         const paidDate = nowPaid ? (bill.paidDate || today) : undefined;
-                        const monthUpdate = paidDate ? getYearMonthFromDateInput(paidDate) : getAssignedBillMonth(bill);
-                        onUpdate(bill.id, { isPaid: nowPaid, paidDate, month: monthUpdate });
+                        onUpdate(bill.id, { isPaid: nowPaid, paidDate });
                       }}
                       className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                         bill.isPaid
@@ -705,7 +705,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                   <button onClick={() => startEdit(bill)} className="w-8 text-muted-foreground hover:text-primary transition-colors">
                     <Pencil className="h-4 w-4" />
                   </button>
-                  <button onClick={() => onDelete(bill.id)} className="w-8 text-muted-foreground hover:text-destructive transition-colors">
+                  <button onClick={() => setDeleteConfirmId(bill.id)} className="w-8 text-muted-foreground hover:text-destructive transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </motion.div>
@@ -729,6 +729,23 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDuplicate}>Add Anyway</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this bill. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (deleteConfirmId) { onDelete(deleteConfirmId); setDeleteConfirmId(null); } }}>
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

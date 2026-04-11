@@ -83,7 +83,7 @@ function DashboardView({ budget }: { budget: ReturnType<typeof useBudget> }) {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <BudgetOverview bills={viewBills} income={budget.monthlyIncome} />
-        <CashFlowForecast income={budget.monthlyIncome} bills={viewBills} />
+        <CashFlowForecast income={budget.monthlyIncome} bills={viewBills} viewMonth={dashMonth} />
       </div>
     </>
   );

@@ -6,6 +6,7 @@ import { getMonthlyAmount } from "@/types/budget";
 interface CashFlowForecastProps {
   income: number;
   bills: Bill[];
+  viewMonth?: string; // "YYYY-MM"
 }
 
 function fmt(n: number) {

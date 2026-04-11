@@ -574,14 +574,36 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
                     )}
                     <div className="col-span-2 md:col-span-1">
                       <label className="text-xs text-muted-foreground mb-1 block">Date Paid</label>
-                      <Input
-                        type="date"
-                        value={editForm.paidDate ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value || undefined;
-                          setEditForm({ ...editForm, paidDate: val, month: val ? getYearMonthFromDateInput(val) : editForm.month });
-                        }}
-                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !editForm.paidDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {editForm.paidDate ? format(new Date(editForm.paidDate + "T00:00:00"), "MMM d, yyyy") : "Pick date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={editForm.paidDate ? new Date(editForm.paidDate + "T00:00:00") : undefined}
+                            onSelect={(date) => {
+                              if (date) {
+                                const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                                setEditForm({ ...editForm, paidDate: iso, dueDate: date.getDate(), month: getYearMonthFromDateInput(iso) });
+                              } else {
+                                setEditForm({ ...editForm, paidDate: undefined });
+                              }
+                            }}
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="flex gap-2 col-span-2 md:col-span-1">
                       <Button size="sm" onClick={() => saveEdit(bill.id)}>

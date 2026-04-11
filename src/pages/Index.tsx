@@ -117,38 +117,7 @@ const Index = () => {
       {/* Main */}
       <main className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
         {activeTab === "dashboard" && (
-          (() => {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth(); // 0-indexed
-            const currentYM = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
-            const monthsElapsed = currentMonth + 1; // Jan=1, Feb=2, etc.
-            const ytdIncome = budget.monthlyIncome * monthsElapsed;
-            const ytdBills = budget.bills
-              .filter((b) => {
-                if (!b.month) return false;
-                const [y] = b.month.split("-").map(Number);
-                return y === currentYear;
-              })
-              .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
-            const ytdRemaining = ytdIncome - ytdBills;
-            const currentMonthBills = budget.bills.filter((b) => getAssignedBillMonth(b) === currentYM);
-            return (
-              <>
-                <SummaryCards
-                  ytdIncome={ytdIncome}
-                  ytdBills={ytdBills}
-                  ytdRemaining={ytdRemaining}
-                  totalSaved={budget.totalSaved}
-                />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <BudgetOverview bills={currentMonthBills} income={budget.monthlyIncome} />
-                  <CashFlowForecast income={budget.monthlyIncome} bills={currentMonthBills} />
-                </div>
-                
-              </>
-            );
-          })()
+          <DashboardView budget={budget} />
         )}
 
         {activeTab === "income" && (

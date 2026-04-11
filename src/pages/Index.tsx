@@ -22,7 +22,7 @@ import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import PlaidLink from "@/components/budget/PlaidLink";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
-import PinGate from "@/components/budget/PinGate";
+import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,6 +122,7 @@ const Index = () => {
       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
   }, [budget.bills, selectedMonth]);
   return (
+    <PinUnlockProvider>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-md sticky top-0 z-10 bg-background/80">
@@ -166,13 +167,15 @@ const Index = () => {
         )}
 
         {activeTab === "income" && (
-          <IncomeManager
-            sources={budget.incomeSources}
-            onAdd={budget.addIncomeSource}
-            onUpdate={budget.updateIncomeSource}
-            onDelete={budget.deleteIncomeSource}
-            totalMonthlyIncome={budget.monthlyIncome}
-          />
+          <PinGate label="Income">
+            <IncomeManager
+              sources={budget.incomeSources}
+              onAdd={budget.addIncomeSource}
+              onUpdate={budget.updateIncomeSource}
+              onDelete={budget.deleteIncomeSource}
+              totalMonthlyIncome={budget.monthlyIncome}
+            />
+          </PinGate>
         )}
 
         {activeTab === "bills" && (
@@ -360,11 +363,13 @@ const Index = () => {
         )}
 
         {activeTab === "transactions" && (
-          <TransactionLog
-            transactions={budget.transactions}
-            onAdd={budget.addTransaction}
-            onDelete={budget.deleteTransaction}
-          />
+          <PinGate label="Transactions">
+            <TransactionLog
+              transactions={budget.transactions}
+              onAdd={budget.addTransaction}
+              onDelete={budget.deleteTransaction}
+            />
+          </PinGate>
         )}
 
         {activeTab === "savings" && (
@@ -377,7 +382,7 @@ const Index = () => {
         )}
 
         {activeTab === "networth" && (
-          <PinGate>
+          <PinGate label="Net Worth">
             <NetWorthTracker
               bills={budget.bills}
               assets={budget.assets}
@@ -428,6 +433,7 @@ const Index = () => {
         )}
       </main>
     </div>
+    </PinUnlockProvider>
   );
 };
 

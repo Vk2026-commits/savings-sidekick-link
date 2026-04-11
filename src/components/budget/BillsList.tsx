@@ -491,16 +491,14 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
         <p className="text-muted-foreground text-sm text-center py-8">No expenses added yet. Click "Add Bill" to get started.</p>
       ) : confirmedBills.length > 0 ? (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto,auto,auto] gap-3 text-xs text-muted-foreground font-medium px-3 pb-1">
+          <div className="grid grid-cols-[1fr,auto,auto,auto,auto,auto,auto] gap-2 text-xs text-muted-foreground font-medium px-3 pb-1">
             <span>Name</span>
-            <span className="w-20 text-right">Amount</span>
-            <span className="w-20 text-right">Monthly</span>
-            <span className="w-16 text-center">Due Date</span>
-            <span className="w-24 text-center">Paid On</span>
-            <span className="w-16 text-center">Paid</span>
-            <span className="w-8" />
-            <span className="w-8" />
-            <span className="w-8" />
+            <span className="w-16 text-right">Amount</span>
+            <span className="w-10 text-center">Due</span>
+            <span className="w-20 text-center">Paid On</span>
+            <span className="w-10 text-center">Paid</span>
+            <span className="w-6" />
+            <span className="w-14" />
           </div>
           <AnimatePresence>
             {[...confirmedBills].reverse().map((bill) => {

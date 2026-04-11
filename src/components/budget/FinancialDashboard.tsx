@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Button } from "@/components/ui/button";
 import type { Transaction, Bill } from "@/types/budget";
 import { CATEGORY_LABELS, getMonthlyAmount } from "@/types/budget";
 
@@ -27,15 +30,32 @@ const tooltipStyle = {
   fontSize: "13px",
 };
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 export default function FinancialDashboard({ transactions, bills, income }: FinancialDashboardProps) {
-  // Monthly spending by category from transactions
   const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
+  const [viewMonth, setViewMonth] = useState(now.getMonth());
+  const [viewYear, setViewYear] = useState(now.getFullYear());
+
+  const goBack = () => {
+    setViewMonth((m) => {
+      if (m === 0) { setViewYear((y) => y - 1); return 11; }
+      return m - 1;
+    });
+  };
+  const goForward = () => {
+    setViewMonth((m) => {
+      if (m === 11) { setViewYear((y) => y + 1); return 0; }
+      return m + 1;
+    });
+  };
 
   const monthlyTxns = transactions.filter((t) => {
     const d = new Date(t.date);
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
   });
 
   const spendingByCategory = monthlyTxns
@@ -52,10 +72,10 @@ export default function FinancialDashboard({ transactions, bills, income }: Fina
     }))
     .sort((a, b) => b.value - a.value);
 
-  // Last 6 months trend
+  // Last 6 months trend ending at viewed month
   const monthlyTrend: { month: string; income: number; expenses: number }[] = [];
   for (let i = 5; i >= 0; i--) {
-    const m = new Date(currentYear, currentMonth - i, 1);
+    const m = new Date(viewYear, viewMonth - i, 1);
     const mStr = m.toLocaleString("default", { month: "short" });
     const mTxns = transactions.filter((t) => {
       const d = new Date(t.date);
@@ -68,7 +88,6 @@ export default function FinancialDashboard({ transactions, bills, income }: Fina
     });
   }
 
-  // Bills vs actual spending
   const totalBillsMonthly = bills.reduce((s, b) => s + getMonthlyAmount(b.amount, b.frequency), 0);
   const totalActualExpenses = monthlyTxns.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const totalActualIncome = monthlyTxns.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
@@ -77,7 +96,20 @@ export default function FinancialDashboard({ transactions, bills, income }: Fina
     <div className="space-y-6">
       {/* Summary stats */}
       <div className="glass-card p-5">
-        <h2 className="text-lg font-semibold mb-4">Financial Reports — {now.toLocaleString("default", { month: "long", year: "numeric" })}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Financial Reports</h2>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={goBack} className="h-8 w-8">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="font-medium text-sm min-w-[140px] text-center">
+              {MONTH_NAMES[viewMonth]} {viewYear}
+            </span>
+            <Button variant="ghost" size="icon" onClick={goForward} className="h-8 w-8">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="p-3 rounded-lg bg-secondary/50">
             <p className="text-xs text-muted-foreground mb-1">Budgeted Income</p>

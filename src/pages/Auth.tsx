@@ -152,7 +152,7 @@ export default function Auth() {
                 </button>
               </div>
             </div>
-          )
+          )}
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
           </Button>

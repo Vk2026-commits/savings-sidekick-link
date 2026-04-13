@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Mail, Lock, User } from "lucide-react";
+import { Wallet, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -15,7 +15,9 @@ export default function Auth() {
   const [isForgot, setIsForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -37,6 +39,10 @@ export default function Auth() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords don't match", description: "Please make sure both passwords are the same.", variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -129,9 +135,24 @@ export default function Auth() {
             <Label htmlFor="password">Password</Label>
             <div className="relative mt-1">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} className="pl-10" required minLength={6} />
+              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
+          {!isLogin && (
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input id="confirmPassword" type={showPassword ? "text" : "password"} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
           </Button>

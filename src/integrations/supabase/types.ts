@@ -837,6 +837,30 @@ export type Database = {
         }
         Relationships: []
       }
+      plaid_secrets: {
+        Row: {
+          access_token: string
+          created_at: string
+          id: string
+          linked_account_id: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          id?: string
+          linked_account_id: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          linked_account_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -989,7 +1013,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      linked_accounts_safe: {
+        Row: {
+          account_ids: string[] | null
+          created_at: string | null
+          id: string | null
+          institution_id: string | null
+          institution_name: string | null
+          item_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_ids?: string[] | null
+          created_at?: string | null
+          id?: string | null
+          institution_id?: string | null
+          institution_name?: string | null
+          item_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_ids?: string[] | null
+          created_at?: string | null
+          id?: string | null
+          institution_id?: string | null
+          institution_name?: string | null
+          item_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

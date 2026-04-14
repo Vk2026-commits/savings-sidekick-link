@@ -27,6 +27,7 @@ import MobileBottomNav from "@/components/budget/MobileBottomNav";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import UserMenu from "@/components/UserMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 

@@ -70,7 +70,7 @@ export default function EstateDocumentVaultTab({ disableAdd = false }: { disable
           <Input placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} className="flex-1" />
           <div>
             <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleUpload} />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading || disableAdd}>
               <Plus className="h-4 w-4 mr-1" /> {uploading ? "Uploading..." : "Choose File"}
             </Button>
           </div>

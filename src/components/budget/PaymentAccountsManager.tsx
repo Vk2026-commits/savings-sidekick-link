@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Check, X, Pencil, CreditCard, ChevronDown, Users } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil, CreditCard, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ interface PaymentAccountsManagerProps {
   onAdd: (account: Omit<PaymentAccount, "id">) => void;
   onUpdate: (id: string, updates: Partial<PaymentAccount>) => void;
   onDelete: (id: string) => void;
-  onAddExpenseGroup?: (name: string) => void;
 }
 
 const emptyAccount = (): Omit<PaymentAccount, "id"> => ({

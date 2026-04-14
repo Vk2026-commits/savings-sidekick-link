@@ -75,6 +75,20 @@ export function useBudget() {
   const [liabilities, setLiabilities] = useState<Liability[]>([]);
   const [loaded, setLoaded] = useState(false);
 
+  // Reset all state when user changes
+  useEffect(() => {
+    setBills([]);
+    setIncomeSources([]);
+    setSavingsGoals([]);
+    setCategoryBudgets([]);
+    setTransactions([]);
+    setExpenseGroups([]);
+    setPaymentAccounts([]);
+    setAssets([]);
+    setLiabilities([]);
+    setLoaded(false);
+  }, [uid]);
+
   // Load all data on mount
   useEffect(() => {
     if (!uid) return;

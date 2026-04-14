@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Landmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const ACCOUNT_TYPES = [
   { value: "bank", label: "Bank Account" },

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const POLICY_TYPES = [
   { value: "life", label: "Life" }, { value: "ltc", label: "Long-Term Care" },

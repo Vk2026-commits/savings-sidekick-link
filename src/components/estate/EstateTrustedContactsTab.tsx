@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Trash2, ShieldCheck, Clock, Check, X, ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 export default function EstateTrustedContactsTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { user } = useAuth();

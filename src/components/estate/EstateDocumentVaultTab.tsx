@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Download, Upload, FileText, File } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["will", "trust", "insurance", "financial", "property", "medical", "identification", "other"];

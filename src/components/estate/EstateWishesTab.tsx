@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const WISH_TYPES = [
   { value: "funeral", label: "Funeral Arrangements" }, { value: "burial", label: "Burial / Cremation" },

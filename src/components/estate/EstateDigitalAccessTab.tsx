@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Trash2, Pencil, Globe, Eye, EyeOff, Lock, AlertTriangle } from "lucide-react";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 import { encryptSecret, decryptSecret } from "@/lib/vault-crypto";
 import { useToast } from "@/hooks/use-toast";
 

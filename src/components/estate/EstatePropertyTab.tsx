@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Home } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const PROPERTY_TYPES = [
   { value: "real_estate", label: "Real Estate" }, { value: "vehicle", label: "Vehicle" },

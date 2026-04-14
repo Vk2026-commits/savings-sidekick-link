@@ -15,7 +15,7 @@ const PROPERTY_TYPES = [
   { value: "other", label: "Other" },
 ];
 
-export default function EstatePropertyTab() {
+export default function EstatePropertyTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, update, remove } = useEstateProperty();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -46,7 +46,7 @@ export default function EstatePropertyTab() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><Home className="h-5 w-5" /> Property & Assets</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Property</Button></DialogTrigger>
+          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Property</Button></DialogTrigger> }
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Property</DialogTitle></DialogHeader>
             <div className="space-y-3">

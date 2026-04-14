@@ -1,9 +1,11 @@
 import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
+import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
+import UpgradePrompt from "@/components/budget/UpgradePrompt";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";
@@ -111,9 +113,12 @@ const tabs = [
 
 type TabId = typeof tabs[number]["id"];
 
+const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
+
 const Index = () => {
   const budget = useBudget();
   const isMobile = useIsMobile();
+  const { isFree, isPro } = useSubscription();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");
@@ -148,20 +153,27 @@ const Index = () => {
         {/* Tab Navigation - hidden on mobile, shown on md+ */}
         <div className="container max-w-7xl mx-auto px-4 hidden md:block">
           <nav className="flex gap-1 overflow-x-auto pb-0 -mb-px scrollbar-none">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const isRestricted = isFree && RESTRICTED_TABS.includes(tab.id);
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => !isRestricted && setActiveTab(tab.id)}
+                  disabled={isRestricted}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    isRestricted
+                      ? "border-transparent text-muted-foreground/40 cursor-not-allowed"
+                      : activeTab === tab.id
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                  }`}
+                >
+                  {isRestricted ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-4 w-4" />}
+                  <span>{tab.label}</span>
+                  {isRestricted && <span className="text-[10px] ml-1 bg-muted px-1.5 py-0.5 rounded-full">Pro</span>}
+                </button>
+              );
+            })}
           </nav>
         </div>
       </header>
@@ -376,13 +388,27 @@ const Index = () => {
         )}
 
         {activeTab === "budget" && (
-          <CategoryBudgets
-            budgets={budget.categoryBudgets}
-            transactions={budget.transactions}
-            onAdd={budget.addCategoryBudget}
-            onUpdate={budget.updateCategoryBudget}
-            onDelete={budget.deleteCategoryBudget}
-          />
+          isFree && budget.categoryBudgets.length >= FREE_LIMITS.budgetItems ? (
+            <div>
+              <CategoryBudgets
+                budgets={budget.categoryBudgets}
+                transactions={budget.transactions}
+                onAdd={budget.addCategoryBudget}
+                onUpdate={budget.updateCategoryBudget}
+                onDelete={budget.deleteCategoryBudget}
+                maxItems={FREE_LIMITS.budgetItems}
+              />
+            </div>
+          ) : (
+            <CategoryBudgets
+              budgets={budget.categoryBudgets}
+              transactions={budget.transactions}
+              onAdd={budget.addCategoryBudget}
+              onUpdate={budget.updateCategoryBudget}
+              onDelete={budget.deleteCategoryBudget}
+              maxItems={isFree ? FREE_LIMITS.budgetItems : undefined}
+            />
+          )
         )}
 
         {activeTab === "transactions" && (
@@ -433,22 +459,30 @@ const Index = () => {
         )}
 
         {activeTab === "reports" && (
-          <FinancialDashboard
-            transactions={budget.transactions}
-            bills={budget.bills}
-            income={budget.monthlyIncome}
-          />
+          isFree ? (
+            <UpgradePrompt message="Unlock detailed financial reports and charts with a Pro subscription." />
+          ) : (
+            <FinancialDashboard
+              transactions={budget.transactions}
+              bills={budget.bills}
+              income={budget.monthlyIncome}
+            />
+          )
         )}
 
         {activeTab === "analytics" && (
-          <SpendingAnalytics
-            bills={budget.bills}
-            transactions={budget.transactions}
-            monthlyIncome={budget.monthlyIncome}
-          />
+          isFree ? (
+            <UpgradePrompt message="Unlock advanced spending analytics and insights with a Pro subscription." />
+          ) : (
+            <SpendingAnalytics
+              bills={budget.bills}
+              transactions={budget.transactions}
+              monthlyIncome={budget.monthlyIncome}
+            />
+          )
         )}
 
-        {activeTab === "estate" && <EstateInlineContent />}
+        {activeTab === "estate" && <EstateInlineContent isFree={isFree} />}
 
         {activeTab === "bank" && (
           <div className="space-y-6">

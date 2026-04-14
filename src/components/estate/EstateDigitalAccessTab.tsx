@@ -10,7 +10,7 @@ import { Plus, Trash2, Pencil, Globe, Eye, EyeOff, Lock, AlertTriangle } from "l
 import { encryptSecret, decryptSecret } from "@/lib/vault-crypto";
 import { useToast } from "@/hooks/use-toast";
 
-export default function EstateDigitalAccessTab() {
+export default function EstateDigitalAccessTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, update, remove } = useEstateDigitalAccess();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function EstateDigitalAccessTab() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><Globe className="h-5 w-5" /> Digital Access</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Account</Button></DialogTrigger>
+          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Account</Button></DialogTrigger> }
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Digital Account</DialogTitle></DialogHeader>
             <div className="space-y-3">

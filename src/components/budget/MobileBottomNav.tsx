@@ -1,9 +1,10 @@
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Landmark, LineChart, MoreHorizontal, ScrollText
+  Landmark, LineChart, MoreHorizontal, ScrollText, Lock
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -33,6 +34,8 @@ interface MobileBottomNavProps {
 
 export default function MobileBottomNav({ activeTab, onTabChange }: MobileBottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const { isFree } = useSubscription();
+  const RESTRICTED_TABS = ["reports", "analytics"];
   const isOverflowActive = OVERFLOW_TABS.some(t => t.id === activeTab);
 
   return (
@@ -70,23 +73,31 @@ export default function MobileBottomNav({ activeTab, onTabChange }: MobileBottom
               <SheetTitle>More Tabs</SheetTitle>
             </SheetHeader>
             <div className="grid grid-cols-4 gap-3 pt-4">
-              {OVERFLOW_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    onTabChange(tab.id);
-                    setMoreOpen(false);
-                  }}
-                  className={`flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-secondary"
-                  }`}
-                >
-                  <tab.icon className="h-6 w-6" />
-                  <span className="text-xs font-medium">{tab.label}</span>
-                </button>
-              ))}
+              {OVERFLOW_TABS.map((tab) => {
+                const isRestricted = isFree && RESTRICTED_TABS.includes(tab.id);
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      if (isRestricted) return;
+                      onTabChange(tab.id);
+                      setMoreOpen(false);
+                    }}
+                    disabled={isRestricted}
+                    className={`flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors ${
+                      isRestricted
+                        ? "text-muted-foreground/40 cursor-not-allowed"
+                        : activeTab === tab.id
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {isRestricted ? <Lock className="h-5 w-5" /> : <tab.icon className="h-6 w-6" />}
+                    <span className="text-xs font-medium">{tab.label}</span>
+                    {isRestricted && <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full">Pro</span>}
+                  </button>
+                );
+              })}
             </div>
           </SheetContent>
         </Sheet>

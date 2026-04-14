@@ -21,7 +21,7 @@ const ROLES = [
   { value: "other", label: "Other" },
 ];
 
-export default function EstatePeopleTab() {
+export default function EstatePeopleTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, update, remove } = useEstatePeople();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -60,9 +60,9 @@ export default function EstatePeopleTab() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5" /> People</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          <DialogTrigger asChild>
+          {!disableAdd && <DialogTrigger asChild>
             <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Person</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Person" : "Add Person"}</DialogTitle>

@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["will", "trust", "insurance", "financial", "property", "medical", "identification", "other"];
 
-export default function EstateDocumentVaultTab() {
+export default function EstateDocumentVaultTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, remove, refetch } = useEstateDocuments();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -70,7 +70,7 @@ export default function EstateDocumentVaultTab() {
           <Input placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} className="flex-1" />
           <div>
             <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleUpload} />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading || disableAdd}>
               <Plus className="h-4 w-4 mr-1" /> {uploading ? "Uploading..." : "Choose File"}
             </Button>
           </div>

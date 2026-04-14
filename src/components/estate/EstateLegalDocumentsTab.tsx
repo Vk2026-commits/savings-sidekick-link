@@ -16,7 +16,7 @@ const DOC_TYPES = [
   { value: "beneficiary_designation", label: "Beneficiary Designation" }, { value: "other", label: "Other" },
 ];
 
-export default function EstateLegalDocumentsTab() {
+export default function EstateLegalDocumentsTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, update, remove } = useEstateLegalDocuments();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -45,7 +45,7 @@ export default function EstateLegalDocumentsTab() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><FileText className="h-5 w-5" /> Legal Documents</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Document</Button></DialogTrigger>
+          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Document</Button></DialogTrigger> }
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Legal Document</DialogTitle></DialogHeader>
             <div className="space-y-3">

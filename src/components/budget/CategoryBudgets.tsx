@@ -14,13 +14,14 @@ interface CategoryBudgetsProps {
   onAdd: (budget: Omit<CategoryBudget, "id">) => void;
   onUpdate: (id: string, updates: Partial<CategoryBudget>) => void;
   onDelete: (id: string) => void;
+  maxItems?: number;
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate, onDelete }: CategoryBudgetsProps) {
+export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate, onDelete, maxItems }: CategoryBudgetsProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ category: "food" as BillCategory, limit: 0 });
 
@@ -54,11 +55,14 @@ export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Category Budgets</h2>
-        {availableCategories.length > 0 && (
+        {availableCategories.length > 0 && (!maxItems || budgets.length < maxItems) && (
           <Button size="sm" onClick={() => setShowForm(!showForm)}>
             {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
             {showForm ? "Cancel" : "Set Limit"}
           </Button>
+        )}
+        {maxItems && budgets.length >= maxItems && (
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Free limit: {maxItems} budgets · Upgrade to Pro for unlimited</span>
         )}
       </div>
 

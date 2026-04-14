@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Trash2, Pencil, UserCheck, Link } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export default function EstateBeneficiariesTab() {
+export default function EstateBeneficiariesTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, update, remove } = useEstateBeneficiaries();
   const accounts = useEstateAccounts();
   const insurance = useEstateInsurance();
@@ -49,7 +49,7 @@ export default function EstateBeneficiariesTab() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><UserCheck className="h-5 w-5" /> Beneficiaries</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Beneficiary</Button></DialogTrigger>
+          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Beneficiary</Button></DialogTrigger> }
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Beneficiary</DialogTitle></DialogHeader>
             <div className="space-y-3">

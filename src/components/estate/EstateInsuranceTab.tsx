@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const POLICY_TYPES = [
   { value: "life", label: "Life" }, { value: "ltc", label: "Long-Term Care" },
@@ -47,7 +48,7 @@ export default function EstateInsuranceTab({ disableAdd = false }: { disableAdd?
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><Shield className="h-5 w-5" /> Insurance Policies</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Policy</Button></DialogTrigger> }
+          {disableAdd ? <EstateUpgradeDialog label="Add Policy" /> : <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Policy</Button></DialogTrigger>}
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Policy</DialogTitle></DialogHeader>
             <div className="space-y-3">

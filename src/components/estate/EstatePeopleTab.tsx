@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Users, Phone, Mail, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const ROLES = [
   { value: "next_of_kin", label: "Next of Kin" },
@@ -60,7 +61,7 @@ export default function EstatePeopleTab({ disableAdd = false }: { disableAdd?: b
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5" /> People</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          {!disableAdd && <DialogTrigger asChild>
+          {disableAdd ? <EstateUpgradeDialog label="Add Person" /> : <DialogTrigger asChild>
             <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Person</Button>
           </DialogTrigger>}
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">

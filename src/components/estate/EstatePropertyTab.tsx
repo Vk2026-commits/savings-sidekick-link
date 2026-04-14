@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Home } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 const PROPERTY_TYPES = [
   { value: "real_estate", label: "Real Estate" }, { value: "vehicle", label: "Vehicle" },
@@ -46,7 +47,7 @@ export default function EstatePropertyTab({ disableAdd = false }: { disableAdd?:
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><Home className="h-5 w-5" /> Property & Assets</h3>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditing(null); resetForm(); } }}>
-          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Property</Button></DialogTrigger> }
+          {disableAdd ? <EstateUpgradeDialog label="Add Property" /> : <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Property</Button></DialogTrigger>}
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Property</DialogTitle></DialogHeader>
             <div className="space-y-3">

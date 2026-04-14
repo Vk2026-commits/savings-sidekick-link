@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Trash2, ShieldCheck, Clock, Check, X, ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 
 export default function EstateTrustedContactsTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { user } = useAuth();
@@ -71,7 +72,7 @@ export default function EstateTrustedContactsTab({ disableAdd = false }: { disab
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2"><ShieldCheck className="h-5 w-5" /> Trusted Contacts</h3>
         <Dialog open={open} onOpenChange={setOpen}>
-          {!disableAdd && <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Contact</Button></DialogTrigger> }
+          {disableAdd ? <EstateUpgradeDialog label="Add Contact" /> : <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Contact</Button></DialogTrigger>}
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Add Trusted Contact</DialogTitle></DialogHeader>
             <div className="space-y-3">

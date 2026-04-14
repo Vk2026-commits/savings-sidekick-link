@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Download, Upload, FileText, File } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EstateUpgradeDialog from "./EstateUpgradeDialog";
 import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["will", "trust", "insurance", "financial", "property", "medical", "identification", "other"];
@@ -70,9 +71,9 @@ export default function EstateDocumentVaultTab({ disableAdd = false }: { disable
           <Input placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} className="flex-1" />
           <div>
             <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleUpload} />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading || disableAdd}>
+            {disableAdd ? <EstateUpgradeDialog label="Upload File" /> : <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
               <Plus className="h-4 w-4 mr-1" /> {uploading ? "Uploading..." : "Choose File"}
-            </Button>
+            </Button>}
           </div>
         </div>
       </div>

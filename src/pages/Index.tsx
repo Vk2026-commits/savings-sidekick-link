@@ -388,13 +388,27 @@ const Index = () => {
         )}
 
         {activeTab === "budget" && (
-          <CategoryBudgets
-            budgets={budget.categoryBudgets}
-            transactions={budget.transactions}
-            onAdd={budget.addCategoryBudget}
-            onUpdate={budget.updateCategoryBudget}
-            onDelete={budget.deleteCategoryBudget}
-          />
+          isFree && budget.categoryBudgets.length >= FREE_LIMITS.budgetItems ? (
+            <div>
+              <CategoryBudgets
+                budgets={budget.categoryBudgets}
+                transactions={budget.transactions}
+                onAdd={budget.addCategoryBudget}
+                onUpdate={budget.updateCategoryBudget}
+                onDelete={budget.deleteCategoryBudget}
+                maxItems={FREE_LIMITS.budgetItems}
+              />
+            </div>
+          ) : (
+            <CategoryBudgets
+              budgets={budget.categoryBudgets}
+              transactions={budget.transactions}
+              onAdd={budget.addCategoryBudget}
+              onUpdate={budget.updateCategoryBudget}
+              onDelete={budget.deleteCategoryBudget}
+              maxItems={isFree ? FREE_LIMITS.budgetItems : undefined}
+            />
+          )
         )}
 
         {activeTab === "transactions" && (
@@ -445,22 +459,30 @@ const Index = () => {
         )}
 
         {activeTab === "reports" && (
-          <FinancialDashboard
-            transactions={budget.transactions}
-            bills={budget.bills}
-            income={budget.monthlyIncome}
-          />
+          isFree ? (
+            <UpgradePrompt message="Unlock detailed financial reports and charts with a Pro subscription." />
+          ) : (
+            <FinancialDashboard
+              transactions={budget.transactions}
+              bills={budget.bills}
+              income={budget.monthlyIncome}
+            />
+          )
         )}
 
         {activeTab === "analytics" && (
-          <SpendingAnalytics
-            bills={budget.bills}
-            transactions={budget.transactions}
-            monthlyIncome={budget.monthlyIncome}
-          />
+          isFree ? (
+            <UpgradePrompt message="Unlock advanced spending analytics and insights with a Pro subscription." />
+          ) : (
+            <SpendingAnalytics
+              bills={budget.bills}
+              transactions={budget.transactions}
+              monthlyIncome={budget.monthlyIncome}
+            />
+          )
         )}
 
-        {activeTab === "estate" && <EstateInlineContent />}
+        {activeTab === "estate" && <EstateInlineContent isFree={isFree} />}
 
         {activeTab === "bank" && (
           <div className="space-y-6">

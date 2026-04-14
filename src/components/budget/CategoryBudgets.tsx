@@ -24,8 +24,6 @@ function fmt(n: number) {
 export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate, onDelete, maxItems }: CategoryBudgetsProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ category: "food" as BillCategory, limit: 0 });
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ category: "food" as BillCategory, limit: 0 });
 
   const now = new Date();
   const currentMonth = now.getMonth();

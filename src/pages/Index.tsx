@@ -1,9 +1,11 @@
 import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
+import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
+import UpgradePrompt from "@/components/budget/UpgradePrompt";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";
@@ -111,9 +113,12 @@ const tabs = [
 
 type TabId = typeof tabs[number]["id"];
 
+const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
+
 const Index = () => {
   const budget = useBudget();
   const isMobile = useIsMobile();
+  const { isFree, isPro } = useSubscription();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import SummaryCards from "@/components/budget/SummaryCards";
@@ -27,6 +27,7 @@ import MobileBottomNav from "@/components/budget/MobileBottomNav";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import UserMenu from "@/components/UserMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -239,15 +240,68 @@ const Index = () => {
             {/* Budget Overview for selected month */}
             <BudgetOverview bills={budget.bills.filter(b => billMatchesMonth(b, selectedMonth))} income={budget.monthlyIncome} />
 
-            {/* Payment Accounts & Expense Groups Manager */}
+            {/* Payment Accounts Manager */}
             <PaymentAccountsManager
               accounts={budget.paymentAccounts}
               bills={budget.bills}
               onAdd={budget.addPaymentAccount}
               onUpdate={budget.updatePaymentAccount}
               onDelete={budget.deletePaymentAccount}
-              onAddExpenseGroup={budget.addExpenseGroup}
             />
+
+            {/* Add Expense Group - separate collapsible */}
+            <Collapsible className="glass-card">
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-5 py-3 hover:bg-secondary/30 transition-colors rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">Expense Groups</span>
+                  <span className="text-xs text-muted-foreground">({budget.expenseGroups.length})</span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-5 pb-4">
+                <div className="space-y-2 mb-3">
+                  {budget.expenseGroups.map((g) => (
+                    <div key={g.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary/50 text-sm">
+                      <span>{g.name}</span>
+                    </div>
+                  ))}
+                </div>
+                {showAddGroup ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="New group name..."
+                      value={newGroupName}
+                      onChange={(e) => setNewGroupName(e.target.value)}
+                      className="flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newGroupName.trim()) {
+                          budget.addExpenseGroup(newGroupName.trim());
+                          setNewGroupName("");
+                          setShowAddGroup(false);
+                        }
+                      }}
+                    />
+                    <Button size="sm" onClick={() => {
+                      if (newGroupName.trim()) {
+                        budget.addExpenseGroup(newGroupName.trim());
+                        setNewGroupName("");
+                        setShowAddGroup(false);
+                      }
+                    }}>
+                      <Check className="h-4 w-4 mr-1" /> Add
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setShowAddGroup(false); setNewGroupName(""); }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button size="sm" variant="outline" onClick={() => setShowAddGroup(true)}>
+                    <Plus className="h-4 w-4 mr-1" /> Add Expense Group
+                  </Button>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Dynamic expense group boxes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

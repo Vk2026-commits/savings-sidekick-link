@@ -131,6 +131,553 @@ export type Database = {
         }
         Relationships: []
       }
+      estate_access_requests: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          requested_at: string
+          requester_email: string
+          resolved_at: string | null
+          status: string
+          trusted_contact_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          requested_at?: string
+          requester_email: string
+          resolved_at?: string | null
+          status?: string
+          trusted_contact_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          requested_at?: string
+          requester_email?: string
+          resolved_at?: string | null
+          status?: string
+          trusted_contact_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estate_access_requests_trusted_contact_id_fkey"
+            columns: ["trusted_contact_id"]
+            isOneToOne: false
+            referencedRelation: "estate_trusted_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estate_accounts: {
+        Row: {
+          account_number_last4: string | null
+          account_type: string
+          created_at: string
+          estimated_value: number | null
+          id: string
+          institution: string
+          notes: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_number_last4?: string | null
+          account_type?: string
+          created_at?: string
+          estimated_value?: number | null
+          id?: string
+          institution?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_number_last4?: string | null
+          account_type?: string
+          created_at?: string
+          estimated_value?: number | null
+          id?: string
+          institution?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          resource_id: string | null
+          resource_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_beneficiaries: {
+        Row: {
+          beneficiary_type: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          percentage: number
+          relationship: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          beneficiary_type?: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          percentage?: number
+          relationship?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          beneficiary_type?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          percentage?: number
+          relationship?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_beneficiary_links: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          id: string
+          linked_id: string
+          linked_type: string
+          user_id: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          id?: string
+          linked_id: string
+          linked_type: string
+          user_id: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          id?: string
+          linked_id?: string
+          linked_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estate_beneficiary_links_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "estate_beneficiaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estate_digital_access: {
+        Row: {
+          created_at: string
+          email: string | null
+          encrypted_secret: string | null
+          encryption_iv: string | null
+          encryption_salt: string | null
+          id: string
+          notes: string | null
+          service_name: string
+          updated_at: string
+          url: string | null
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          encrypted_secret?: string | null
+          encryption_iv?: string | null
+          encryption_salt?: string | null
+          id?: string
+          notes?: string | null
+          service_name?: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          encrypted_secret?: string | null
+          encryption_iv?: string | null
+          encryption_salt?: string | null
+          id?: string
+          notes?: string | null
+          service_name?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      estate_documents: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_insurance: {
+        Row: {
+          agent_name: string | null
+          agent_phone: string | null
+          coverage_amount: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          policy_number: string | null
+          policy_type: string
+          premium: number | null
+          premium_frequency: string | null
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_name?: string | null
+          agent_phone?: string | null
+          coverage_amount?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          policy_number?: string | null
+          policy_type?: string
+          premium?: number | null
+          premium_frequency?: string | null
+          provider?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_name?: string | null
+          agent_phone?: string | null
+          coverage_amount?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          policy_number?: string | null
+          policy_type?: string
+          premium?: number | null
+          premium_frequency?: string | null
+          provider?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_legal_documents: {
+        Row: {
+          attorney: string | null
+          created_at: string
+          date_signed: string | null
+          document_type: string
+          expiration_date: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attorney?: string | null
+          created_at?: string
+          date_signed?: string | null
+          document_type?: string
+          expiration_date?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attorney?: string | null
+          created_at?: string
+          date_signed?: string | null
+          document_type?: string
+          expiration_date?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_people: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          relationship: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          relationship?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          relationship?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_property: {
+        Row: {
+          created_at: string
+          description: string
+          estimated_value: number | null
+          id: string
+          location: string | null
+          notes: string | null
+          property_type: string
+          title_holder: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          estimated_value?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          property_type?: string
+          title_holder?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          estimated_value?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          property_type?: string
+          title_holder?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_tab_status: {
+        Row: {
+          created_at: string
+          id: string
+          is_complete: boolean
+          last_reviewed_at: string | null
+          tab_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          last_reviewed_at?: string | null
+          tab_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          last_reviewed_at?: string | null
+          tab_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      estate_trusted_contacts: {
+        Row: {
+          accepted_at: string | null
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          invited_at: string
+          revoked_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          waiting_period_days: number
+        }
+        Insert: {
+          accepted_at?: string | null
+          contact_email: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          invited_at?: string
+          revoked_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          waiting_period_days?: number
+        }
+        Update: {
+          accepted_at?: string | null
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          invited_at?: string
+          revoked_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          waiting_period_days?: number
+        }
+        Relationships: []
+      }
+      estate_wishes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+          wish_type: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+          wish_type?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          wish_type?: string
+        }
+        Relationships: []
+      }
       expense_groups: {
         Row: {
           created_at: string

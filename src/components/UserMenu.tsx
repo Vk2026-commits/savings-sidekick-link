@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User, Shield } from "lucide-react";
+import { LogOut, User, Shield, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -35,6 +35,9 @@ export default function UserMenu() {
             <Shield className="h-4 w-4 mr-2" /> Admin Portal
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem onClick={() => navigate("/estate")}>
+          <ScrollText className="h-4 w-4 mr-2" /> Estate & Legacy
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={signOut} className="text-destructive">
           <LogOut className="h-4 w-4 mr-2" /> Sign Out
         </DropdownMenuItem>

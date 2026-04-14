@@ -21,7 +21,7 @@ const ROLES = [
   { value: "other", label: "Other" },
 ];
 
-export default function EstatePeopleTab() {
+export default function EstatePeopleTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, update, remove } = useEstatePeople();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);

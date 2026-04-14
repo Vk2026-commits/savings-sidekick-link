@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["will", "trust", "insurance", "financial", "property", "medical", "identification", "other"];
 
-export default function EstateDocumentVaultTab() {
+export default function EstateDocumentVaultTab({ disableAdd = false }: { disableAdd?: boolean } = {}) {
   const { data, loading, add, remove, refetch } = useEstateDocuments();
   const { user } = useAuth();
   const { toast } = useToast();

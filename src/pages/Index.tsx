@@ -153,20 +153,27 @@ const Index = () => {
         {/* Tab Navigation - hidden on mobile, shown on md+ */}
         <div className="container max-w-7xl mx-auto px-4 hidden md:block">
           <nav className="flex gap-1 overflow-x-auto pb-0 -mb-px scrollbar-none">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const isRestricted = isFree && RESTRICTED_TABS.includes(tab.id);
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => !isRestricted && setActiveTab(tab.id)}
+                  disabled={isRestricted}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    isRestricted
+                      ? "border-transparent text-muted-foreground/40 cursor-not-allowed"
+                      : activeTab === tab.id
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                  }`}
+                >
+                  {isRestricted ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-4 w-4" />}
+                  <span>{tab.label}</span>
+                  {isRestricted && <span className="text-[10px] ml-1 bg-muted px-1.5 py-0.5 rounded-full">Pro</span>}
+                </button>
+              );
+            })}
           </nav>
         </div>
       </header>

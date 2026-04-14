@@ -15,6 +15,14 @@ import EstateDocumentVaultTab from "./EstateDocumentVaultTab";
 import EstateWishesTab from "./EstateWishesTab";
 import EstateTrustedContactsTab from "./EstateTrustedContactsTab";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FREE_LIMITS } from "@/hooks/useSubscription";
+import {
+  useEstatePeople, useEstateBeneficiaries, useEstateAccounts,
+  useEstateInsurance, useEstateProperty, useEstateDigitalAccess,
+  useEstateLegalDocuments, useEstateDocuments, useEstateWishes,
+  useEstateTrustedContacts
+} from "@/hooks/useEstate";
+import UpgradePrompt from "@/components/budget/UpgradePrompt";
 
 const estateTabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,6 +40,18 @@ const estateTabs = [
 
 type EstateTabId = typeof estateTabs[number]["id"];
 
+function FreeLimitBanner({ count, max }: { count: number; max: number }) {
+  if (count < max) return null;
+  return (
+    <div className="mb-4 p-3 rounded-lg bg-muted/50 border border-border text-center">
+      <p className="text-sm text-muted-foreground">
+        Free plan limit: <strong>{max} entry</strong> per section.{" "}
+        <span className="text-primary font-medium">Upgrade to Pro ($9.99/mo)</span> for unlimited entries.
+      </p>
+    </div>
+  );
+}
+
 interface EstateInlineContentProps {
   isFree?: boolean;
 }
@@ -40,6 +60,34 @@ export default function EstateInlineContent({ isFree = false }: EstateInlineCont
   const [activeTab, setActiveTab] = useState<EstateTabId>("dashboard");
   const isMobile = useIsMobile();
 
+  // Load counts for free-tier limits
+  const people = useEstatePeople();
+  const beneficiaries = useEstateBeneficiaries();
+  const accounts = useEstateAccounts();
+  const insurance = useEstateInsurance();
+  const property = useEstateProperty();
+  const digital = useEstateDigitalAccess();
+  const legal = useEstateLegalDocuments();
+  const documents = useEstateDocuments();
+  const wishes = useEstateWishes();
+  const trusted = useEstateTrustedContacts();
+
+  const tabCounts: Record<string, number> = {
+    people: people.data.length,
+    beneficiaries: beneficiaries.data.length,
+    accounts: accounts.data.length,
+    insurance: insurance.data.length,
+    property: property.data.length,
+    digital: digital.data.length,
+    legal: legal.data.length,
+    documents: documents.data.length,
+    wishes: wishes.data.length,
+    trusted: trusted.data.length,
+  };
+
+  const limit = FREE_LIMITS.estateEntriesPerTab;
+  const isAtLimit = (tab: string) => isFree && (tabCounts[tab] || 0) >= limit;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-2">
@@ -47,6 +95,7 @@ export default function EstateInlineContent({ isFree = false }: EstateInlineCont
           <ScrollText className="h-5 w-5 text-primary" />
         </div>
         <h2 className="text-xl font-bold tracking-tight">Estate & Legacy Planning</h2>
+        {isFree && <span className="text-xs bg-muted px-2 py-1 rounded-full text-muted-foreground">Free: 1 entry per section</span>}
       </div>
 
       <nav className="flex gap-1 overflow-x-auto pb-0 -mb-px scrollbar-none border-b border-border/50">
@@ -68,16 +117,36 @@ export default function EstateInlineContent({ isFree = false }: EstateInlineCont
 
       <div className="pt-2">
         {activeTab === "dashboard" && <EstateDashboardTab onNavigate={(tab) => setActiveTab(tab as EstateTabId)} />}
-        {activeTab === "people" && <EstatePeopleTab />}
-        {activeTab === "beneficiaries" && <EstateBeneficiariesTab />}
-        {activeTab === "accounts" && <EstateAccountsTab />}
-        {activeTab === "insurance" && <EstateInsuranceTab />}
-        {activeTab === "property" && <EstatePropertyTab />}
-        {activeTab === "digital" && <EstateDigitalAccessTab />}
-        {activeTab === "legal" && <EstateLegalDocumentsTab />}
-        {activeTab === "documents" && <EstateDocumentVaultTab />}
-        {activeTab === "wishes" && <EstateWishesTab />}
-        {activeTab === "trusted" && <EstateTrustedContactsTab />}
+        {activeTab === "people" && (
+          <>{isAtLimit("people") && <FreeLimitBanner count={tabCounts.people} max={limit} />}<EstatePeopleTab /></>
+        )}
+        {activeTab === "beneficiaries" && (
+          <>{isAtLimit("beneficiaries") && <FreeLimitBanner count={tabCounts.beneficiaries} max={limit} />}<EstateBeneficiariesTab /></>
+        )}
+        {activeTab === "accounts" && (
+          <>{isAtLimit("accounts") && <FreeLimitBanner count={tabCounts.accounts} max={limit} />}<EstateAccountsTab /></>
+        )}
+        {activeTab === "insurance" && (
+          <>{isAtLimit("insurance") && <FreeLimitBanner count={tabCounts.insurance} max={limit} />}<EstateInsuranceTab /></>
+        )}
+        {activeTab === "property" && (
+          <>{isAtLimit("property") && <FreeLimitBanner count={tabCounts.property} max={limit} />}<EstatePropertyTab /></>
+        )}
+        {activeTab === "digital" && (
+          <>{isAtLimit("digital") && <FreeLimitBanner count={tabCounts.digital} max={limit} />}<EstateDigitalAccessTab /></>
+        )}
+        {activeTab === "legal" && (
+          <>{isAtLimit("legal") && <FreeLimitBanner count={tabCounts.legal} max={limit} />}<EstateLegalDocumentsTab /></>
+        )}
+        {activeTab === "documents" && (
+          <>{isAtLimit("documents") && <FreeLimitBanner count={tabCounts.documents} max={limit} />}<EstateDocumentVaultTab /></>
+        )}
+        {activeTab === "wishes" && (
+          <>{isAtLimit("wishes") && <FreeLimitBanner count={tabCounts.wishes} max={limit} />}<EstateWishesTab /></>
+        )}
+        {activeTab === "trusted" && (
+          <>{isAtLimit("trusted") && <FreeLimitBanner count={tabCounts.trusted} max={limit} />}<EstateTrustedContactsTab /></>
+        )}
       </div>
     </div>
   );

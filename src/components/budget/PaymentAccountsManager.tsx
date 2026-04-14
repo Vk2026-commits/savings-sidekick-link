@@ -175,6 +175,48 @@ export default function PaymentAccountsManager({ accounts, bills, onAdd, onUpdat
             })}
           </div>
         )}
+        {/* Add Expense Group */}
+        {onAddExpenseGroup && (
+          <div className="mt-4 pt-3 border-t border-border/50">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold">Expense Groups</span>
+            </div>
+            {showAddGroup ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="New group name..."
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newGroupName.trim()) {
+                      onAddExpenseGroup(newGroupName.trim());
+                      setNewGroupName("");
+                      setShowAddGroup(false);
+                    }
+                  }}
+                />
+                <Button size="sm" onClick={() => {
+                  if (newGroupName.trim()) {
+                    onAddExpenseGroup(newGroupName.trim());
+                    setNewGroupName("");
+                    setShowAddGroup(false);
+                  }
+                }}>
+                  <Check className="h-4 w-4 mr-1" /> Add
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => { setShowAddGroup(false); setNewGroupName(""); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => setShowAddGroup(true)}>
+                <Plus className="h-4 w-4 mr-1" /> Add Expense Group
+              </Button>
+            )}
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );

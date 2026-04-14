@@ -20,6 +20,7 @@ import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import PlaidLink from "@/components/budget/PlaidLink";
+import EstateInlineContent from "@/components/estate/EstateInlineContent";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
@@ -446,6 +447,8 @@ const Index = () => {
             monthlyIncome={budget.monthlyIncome}
           />
         )}
+
+        {activeTab === "estate" && <EstateInlineContent />}
 
         {activeTab === "bank" && (
           <div className="space-y-6">

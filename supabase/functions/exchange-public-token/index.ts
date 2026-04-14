@@ -60,19 +60,32 @@ Deno.serve(async (req) => {
     const accountsData = await accountsRes.json();
     const accountIds = accountsData.accounts?.map((a: { account_id: string }) => a.account_id) || [];
 
-    // Store in database
-    const { error: insertError } = await supabase
+    // Store linked account (without access token)
+    const { data: linkedAccount, error: insertError } = await supabase
       .from("linked_accounts")
       .insert({
         user_id: user.id,
         institution_name: institution?.name || "Unknown",
         institution_id: institution?.institution_id || null,
-        access_token: exchangeData.access_token,
+        access_token: "SECURED", // placeholder, real token in plaid_secrets
         item_id: exchangeData.item_id,
         account_ids: accountIds,
-      });
+      })
+      .select("id")
+      .single();
 
     if (insertError) throw new Error(`DB error: ${insertError.message}`);
+
+    // Store access token securely in plaid_secrets
+    const { error: secretError } = await supabase
+      .from("plaid_secrets")
+      .insert({
+        user_id: user.id,
+        linked_account_id: linkedAccount.id,
+        access_token: exchangeData.access_token,
+      });
+
+    if (secretError) throw new Error(`Secret storage error: ${secretError.message}`);
 
     return new Response(JSON.stringify({ success: true, accounts: accountsData.accounts }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

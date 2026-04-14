@@ -236,53 +236,17 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Add Group Button */}
-            <div className="flex items-center gap-3">
-              {showAddGroup ? (
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="New group name..."
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    className="w-64"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && newGroupName.trim()) {
-                        budget.addExpenseGroup(newGroupName.trim());
-                        setNewGroupName("");
-                        setShowAddGroup(false);
-                      }
-                    }}
-                  />
-                  <Button size="sm" onClick={() => {
-                    if (newGroupName.trim()) {
-                      budget.addExpenseGroup(newGroupName.trim());
-                      setNewGroupName("");
-                      setShowAddGroup(false);
-                    }
-                  }}>
-                    <Check className="h-4 w-4 mr-1" /> Add
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => { setShowAddGroup(false); setNewGroupName(""); }}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <Button size="sm" variant="outline" onClick={() => setShowAddGroup(true)}>
-                  <Plus className="h-4 w-4 mr-1" /> Add Expense Group
-                </Button>
-              )}
-            </div>
-
             {/* Budget Overview for selected month */}
             <BudgetOverview bills={budget.bills.filter(b => billMatchesMonth(b, selectedMonth))} income={budget.monthlyIncome} />
 
-            {/* Payment Accounts Manager */}
+            {/* Payment Accounts & Expense Groups Manager */}
             <PaymentAccountsManager
               accounts={budget.paymentAccounts}
               bills={budget.bills}
               onAdd={budget.addPaymentAccount}
               onUpdate={budget.updatePaymentAccount}
               onDelete={budget.deletePaymentAccount}
+              onAddExpenseGroup={budget.addExpenseGroup}
             />
 
             {/* Dynamic expense group boxes */}

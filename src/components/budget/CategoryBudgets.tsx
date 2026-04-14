@@ -61,6 +61,9 @@ export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate
             {showForm ? "Cancel" : "Set Limit"}
           </Button>
         )}
+        {maxItems && budgets.length >= maxItems && (
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Free limit: {maxItems} budgets · Upgrade to Pro for unlimited</span>
+        )}
       </div>
 
       <AnimatePresence>

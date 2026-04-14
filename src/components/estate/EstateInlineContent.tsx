@@ -118,34 +118,34 @@ export default function EstateInlineContent({ isFree = false }: EstateInlineCont
       <div className="pt-2">
         {activeTab === "dashboard" && <EstateDashboardTab onNavigate={(tab) => setActiveTab(tab as EstateTabId)} />}
         {activeTab === "people" && (
-          <>{isAtLimit("people") && <FreeLimitBanner count={tabCounts.people} max={limit} />}<EstatePeopleTab /></>
+          <>{isAtLimit("people") && <FreeLimitBanner count={tabCounts.people} max={limit} />}<EstatePeopleTab disableAdd={isAtLimit("people")} /></>
         )}
         {activeTab === "beneficiaries" && (
-          <>{isAtLimit("beneficiaries") && <FreeLimitBanner count={tabCounts.beneficiaries} max={limit} />}<EstateBeneficiariesTab /></>
+          <>{isAtLimit("beneficiaries") && <FreeLimitBanner count={tabCounts.beneficiaries} max={limit} />}<EstateBeneficiariesTab disableAdd={isAtLimit("beneficiaries")} /></>
         )}
         {activeTab === "accounts" && (
-          <>{isAtLimit("accounts") && <FreeLimitBanner count={tabCounts.accounts} max={limit} />}<EstateAccountsTab /></>
+          <>{isAtLimit("accounts") && <FreeLimitBanner count={tabCounts.accounts} max={limit} />}<EstateAccountsTab disableAdd={isAtLimit("accounts")} /></>
         )}
         {activeTab === "insurance" && (
-          <>{isAtLimit("insurance") && <FreeLimitBanner count={tabCounts.insurance} max={limit} />}<EstateInsuranceTab /></>
+          <>{isAtLimit("insurance") && <FreeLimitBanner count={tabCounts.insurance} max={limit} />}<EstateInsuranceTab disableAdd={isAtLimit("insurance")} /></>
         )}
         {activeTab === "property" && (
-          <>{isAtLimit("property") && <FreeLimitBanner count={tabCounts.property} max={limit} />}<EstatePropertyTab /></>
+          <>{isAtLimit("property") && <FreeLimitBanner count={tabCounts.property} max={limit} />}<EstatePropertyTab disableAdd={isAtLimit("property")} /></>
         )}
         {activeTab === "digital" && (
-          <>{isAtLimit("digital") && <FreeLimitBanner count={tabCounts.digital} max={limit} />}<EstateDigitalAccessTab /></>
+          <>{isAtLimit("digital") && <FreeLimitBanner count={tabCounts.digital} max={limit} />}<EstateDigitalAccessTab disableAdd={isAtLimit("digital")} /></>
         )}
         {activeTab === "legal" && (
-          <>{isAtLimit("legal") && <FreeLimitBanner count={tabCounts.legal} max={limit} />}<EstateLegalDocumentsTab /></>
+          <>{isAtLimit("legal") && <FreeLimitBanner count={tabCounts.legal} max={limit} />}<EstateLegalDocumentsTab disableAdd={isAtLimit("legal")} /></>
         )}
         {activeTab === "documents" && (
-          <>{isAtLimit("documents") && <FreeLimitBanner count={tabCounts.documents} max={limit} />}<EstateDocumentVaultTab /></>
+          <>{isAtLimit("documents") && <FreeLimitBanner count={tabCounts.documents} max={limit} />}<EstateDocumentVaultTab disableAdd={isAtLimit("documents")} /></>
         )}
         {activeTab === "wishes" && (
-          <>{isAtLimit("wishes") && <FreeLimitBanner count={tabCounts.wishes} max={limit} />}<EstateWishesTab /></>
+          <>{isAtLimit("wishes") && <FreeLimitBanner count={tabCounts.wishes} max={limit} />}<EstateWishesTab disableAdd={isAtLimit("wishes")} /></>
         )}
         {activeTab === "trusted" && (
-          <>{isAtLimit("trusted") && <FreeLimitBanner count={tabCounts.trusted} max={limit} />}<EstateTrustedContactsTab /></>
+          <>{isAtLimit("trusted") && <FreeLimitBanner count={tabCounts.trusted} max={limit} />}<EstateTrustedContactsTab disableAdd={isAtLimit("trusted")} /></>
         )}
       </div>
     </div>

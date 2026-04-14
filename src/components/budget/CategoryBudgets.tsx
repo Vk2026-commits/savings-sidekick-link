@@ -55,7 +55,7 @@ export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Category Budgets</h2>
-        {availableCategories.length > 0 && (
+        {availableCategories.length > 0 && (!maxItems || budgets.length < maxItems) && (
           <Button size="sm" onClick={() => setShowForm(!showForm)}>
             {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
             {showForm ? "Cancel" : "Set Limit"}

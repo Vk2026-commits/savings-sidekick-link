@@ -32,7 +32,11 @@ const estateTabs = [
 
 type EstateTabId = typeof estateTabs[number]["id"];
 
-export default function EstateInlineContent() {
+interface EstateInlineContentProps {
+  isFree?: boolean;
+}
+
+export default function EstateInlineContent({ isFree = false }: EstateInlineContentProps) {
   const [activeTab, setActiveTab] = useState<EstateTabId>("dashboard");
   const isMobile = useIsMobile();
 

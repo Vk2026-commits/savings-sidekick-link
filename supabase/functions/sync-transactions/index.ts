@@ -49,9 +49,10 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error("Unauthorized");
 
+    // Get linked accounts metadata
     const { data: linkedAccounts, error: fetchError } = await supabase
       .from("linked_accounts")
-      .select("*")
+      .select("id, institution_name")
       .eq("user_id", user.id);
 
     if (fetchError) throw new Error(`DB error: ${fetchError.message}`);
@@ -61,6 +62,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get access tokens from secure table
+    const { data: secrets, error: secretsError } = await supabase
+      .from("plaid_secrets")
+      .select("linked_account_id, access_token")
+      .eq("user_id", user.id);
+
+    if (secretsError) throw new Error(`Secrets error: ${secretsError.message}`);
+    const tokenMap = new Map(secrets?.map(s => [s.linked_account_id, s.access_token]) || []);
+
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split("T")[0];
     const endDate = now.toISOString().split("T")[0];
@@ -69,13 +79,16 @@ Deno.serve(async (req) => {
     let importedCount = 0;
 
     for (const account of linkedAccounts) {
+      const accessToken = tokenMap.get(account.id);
+      if (!accessToken) continue;
+
       const txRes = await fetch(`${PLAID_BASE_URL}/transactions/get`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           client_id: plaidClientId,
           secret: plaidSecret,
-          access_token: account.access_token,
+          access_token: accessToken,
           start_date: startDate,
           end_date: endDate,
           options: { count: 100, offset: 0 },

@@ -27,12 +27,14 @@ function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-export default function PaymentAccountsManager({ accounts, bills, onAdd, onUpdate, onDelete }: PaymentAccountsManagerProps) {
+export default function PaymentAccountsManager({ accounts, bills, onAdd, onUpdate, onDelete, onAddExpenseGroup }: PaymentAccountsManagerProps) {
   const [open, setOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyAccount());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<PaymentAccount>>({});
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

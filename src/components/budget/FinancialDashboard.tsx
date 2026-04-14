@@ -65,6 +65,18 @@ export default function FinancialDashboard({ transactions, bills, income }: Fina
       return acc;
     }, {} as Record<string, number>);
 
+  // Also include bills for the viewed month
+  const viewMonthStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`;
+  bills
+    .filter((b) => {
+      const billMonth = b.month || viewMonthStr;
+      return billMonth === viewMonthStr;
+    })
+    .forEach((b) => {
+      const cat = b.category || "other";
+      spendingByCategory[cat] = (spendingByCategory[cat] || 0) + getMonthlyAmount(b.amount, b.frequency);
+    });
+
   const categoryData = Object.entries(spendingByCategory)
     .map(([cat, amount]) => ({
       name: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] || cat,

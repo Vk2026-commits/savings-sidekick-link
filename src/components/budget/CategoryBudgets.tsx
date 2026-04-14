@@ -14,13 +14,16 @@ interface CategoryBudgetsProps {
   onAdd: (budget: Omit<CategoryBudget, "id">) => void;
   onUpdate: (id: string, updates: Partial<CategoryBudget>) => void;
   onDelete: (id: string) => void;
+  maxItems?: number;
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate, onDelete }: CategoryBudgetsProps) {
+export default function CategoryBudgets({ budgets, transactions, onAdd, onUpdate, onDelete, maxItems }: CategoryBudgetsProps) {
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ category: "food" as BillCategory, limit: 0 });
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ category: "food" as BillCategory, limit: 0 });
 

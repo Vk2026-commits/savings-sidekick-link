@@ -518,8 +518,16 @@ const Index = () => {
 
         {activeTab === "bank" && (
           <div className="space-y-6">
-            <PlaidLink />
-            <ReconcileTransactions />
+            <div className="glass-card p-8 text-center space-y-4">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Landmark className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold">Bank Integration</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Securely link your bank accounts and credit cards for automatic transaction syncing and reconciliation.
+              </p>
+              <p className="text-sm text-muted-foreground">Integration coming soon — stay tuned for updates.</p>
+            </div>
           </div>
         )}
 

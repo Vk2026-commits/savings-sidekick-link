@@ -19,6 +19,7 @@ import EstateWishesTab from "@/components/estate/EstateWishesTab";
 import EstateTrustedContactsTab from "@/components/estate/EstateTrustedContactsTab";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
+import ExpiredPlanBanner from "@/components/budget/ExpiredPlanBanner";
 import {
   useEstatePeople, useEstateBeneficiaries, useEstateAccounts,
   useEstateInsurance, useEstateProperty, useEstateDigitalAccess,
@@ -47,7 +48,7 @@ export default function Estate() {
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { isFree, isTrial, trialExpiresAt } = useSubscription();
+  const { isFree, isTrial, trialExpiresAt, expiredFromPro, tier } = useSubscription();
 
   // Load counts for free-tier limit enforcement
   const people = useEstatePeople();

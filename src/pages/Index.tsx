@@ -511,6 +511,21 @@ const Index = () => {
             <ReconcileTransactions />
           </div>
         )}
+
+        {activeTab === "network" && (
+          <div className="space-y-6">
+            <div className="glass-card p-8 text-center space-y-4">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Globe className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold">Faithnancial Network</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Connect, invest, and grow with others. Access community resources, shared financial wisdom, and collaborative tools.
+              </p>
+              <p className="text-sm text-muted-foreground">Coming soon — stay tuned for updates.</p>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Mobile Bottom Navigation */}

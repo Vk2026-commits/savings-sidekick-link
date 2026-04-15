@@ -18,6 +18,14 @@ import EstateDocumentVaultTab from "@/components/estate/EstateDocumentVaultTab";
 import EstateWishesTab from "@/components/estate/EstateWishesTab";
 import EstateTrustedContactsTab from "@/components/estate/EstateTrustedContactsTab";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
+import {
+  useEstatePeople, useEstateBeneficiaries, useEstateAccounts,
+  useEstateInsurance, useEstateProperty, useEstateDigitalAccess,
+  useEstateLegalDocuments, useEstateDocuments, useEstateWishes,
+  useEstateTrustedContacts,
+} from "@/hooks/useEstate";
+import { Badge } from "@/components/ui/badge";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -39,6 +47,38 @@ export default function Estate() {
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { isFree, isTrial, trialExpiresAt } = useSubscription();
+
+  // Load counts for free-tier limit enforcement
+  const people = useEstatePeople();
+  const beneficiaries = useEstateBeneficiaries();
+  const accounts = useEstateAccounts();
+  const insurance = useEstateInsurance();
+  const property = useEstateProperty();
+  const digital = useEstateDigitalAccess();
+  const legal = useEstateLegalDocuments();
+  const documents = useEstateDocuments();
+  const wishes = useEstateWishes();
+  const trusted = useEstateTrustedContacts();
+
+  const limit = FREE_LIMITS.estateEntriesPerTab;
+
+  const isAtLimit = (tab: string): boolean => {
+    if (!isFree) return false;
+    const counts: Record<string, number> = {
+      people: people.data.length,
+      beneficiaries: beneficiaries.data.length,
+      accounts: accounts.data.length,
+      insurance: insurance.data.length,
+      property: property.data.length,
+      digital: digital.data.length,
+      legal: legal.data.length,
+      documents: documents.data.length,
+      wishes: wishes.data.length,
+      trusted: trusted.data.length,
+    };
+    return (counts[tab] || 0) >= limit;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,6 +92,9 @@ export default function Estate() {
               <ScrollText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold tracking-tight">Estate & Legacy</h1>
+            {isFree && (
+              <Badge variant="outline" className="text-xs">Free: 1 entry per section</Badge>
+            )}
           </div>
           <UserMenu />
         </div>
@@ -78,16 +121,16 @@ export default function Estate() {
 
       <main className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {activeTab === "dashboard" && <EstateDashboardTab onNavigate={(tab) => setActiveTab(tab as TabId)} />}
-        {activeTab === "people" && <EstatePeopleTab />}
-        {activeTab === "beneficiaries" && <EstateBeneficiariesTab />}
-        {activeTab === "accounts" && <EstateAccountsTab />}
-        {activeTab === "insurance" && <EstateInsuranceTab />}
-        {activeTab === "property" && <EstatePropertyTab />}
-        {activeTab === "digital" && <EstateDigitalAccessTab />}
-        {activeTab === "legal" && <EstateLegalDocumentsTab />}
-        {activeTab === "documents" && <EstateDocumentVaultTab />}
-        {activeTab === "wishes" && <EstateWishesTab />}
-        {activeTab === "trusted" && <EstateTrustedContactsTab />}
+        {activeTab === "people" && <EstatePeopleTab disableAdd={isAtLimit("people")} />}
+        {activeTab === "beneficiaries" && <EstateBeneficiariesTab disableAdd={isAtLimit("beneficiaries")} />}
+        {activeTab === "accounts" && <EstateAccountsTab disableAdd={isAtLimit("accounts")} />}
+        {activeTab === "insurance" && <EstateInsuranceTab disableAdd={isAtLimit("insurance")} />}
+        {activeTab === "property" && <EstatePropertyTab disableAdd={isAtLimit("property")} />}
+        {activeTab === "digital" && <EstateDigitalAccessTab disableAdd={isAtLimit("digital")} />}
+        {activeTab === "legal" && <EstateLegalDocumentsTab disableAdd={isAtLimit("legal")} />}
+        {activeTab === "documents" && <EstateDocumentVaultTab disableAdd={isAtLimit("documents")} />}
+        {activeTab === "wishes" && <EstateWishesTab disableAdd={isAtLimit("wishes")} />}
+        {activeTab === "trusted" && <EstateTrustedContactsTab disableAdd={isAtLimit("trusted")} />}
       </main>
     </div>
   );

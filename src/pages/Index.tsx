@@ -129,6 +129,9 @@ const Index = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem("faithnancial_onboarded");
+  });
   const billMatchesMonth = (bill: (typeof budget.bills)[number], month: string) => getAssignedBillMonth(bill) === month;
 
   const monthlyBillsTotal = useMemo(() => {
@@ -136,6 +139,16 @@ const Index = () => {
       .filter((b) => billMatchesMonth(b, selectedMonth))
       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
   }, [budget.bills, selectedMonth]);
+
+  if (showOnboarding) {
+    return (
+      <OnboardingWizard onComplete={() => {
+        localStorage.setItem("faithnancial_onboarded", "true");
+        setShowOnboarding(false);
+      }} />
+    );
+  }
+
   return (
     <PinUnlockProvider>
     <div className="min-h-screen bg-background">

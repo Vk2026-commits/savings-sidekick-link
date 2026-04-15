@@ -11,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify admin role
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -21,7 +20,6 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
 
-    // Verify user with their JWT
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -30,7 +28,6 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Check admin role
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: roleData } = await adminClient.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
     if (!roleData) {
@@ -43,10 +40,13 @@ Deno.serve(async (req) => {
       case "list_users": {
         const { data, error } = await adminClient.auth.admin.listUsers({ page: params.page || 1, perPage: params.perPage || 50 });
         if (error) throw error;
-        // Also get profiles for display names
         const userIds = (data.users || []).map((u: any) => u.id);
-        const { data: profiles } = await adminClient.from("profiles").select("user_id, display_name, email").in("user_id", userIds);
+        const [{ data: profiles }, { data: subscriptions }] = await Promise.all([
+          adminClient.from("profiles").select("user_id, display_name, email").in("user_id", userIds),
+          adminClient.from("user_subscriptions").select("user_id, tier").in("user_id", userIds),
+        ]);
         const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+        const subMap = new Map((subscriptions || []).map((s: any) => [s.user_id, s.tier]));
         const users = (data.users || []).map((u: any) => ({
           id: u.id,
           email: u.email,
@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
           banned: u.banned_until ? true : false,
           banned_until: u.banned_until,
           display_name: profileMap.get(u.id)?.display_name || null,
+          tier: subMap.get(u.id) || "free",
         }));
         return new Response(JSON.stringify({ users }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
@@ -72,12 +73,29 @@ Deno.serve(async (req) => {
         if (!params.userId) {
           return new Response(JSON.stringify({ error: "userId required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
-        const banUntil = params.ban ? "2999-12-31T23:59:59Z" : "none";
         const { error } = await adminClient.auth.admin.updateUserById(params.userId, {
           ban_duration: params.ban ? "876000h" : "none",
         });
         if (error) throw error;
         return new Response(JSON.stringify({ success: true, banned: params.ban }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      case "upgrade_plan": {
+        if (!params.userId || !params.tier) {
+          return new Response(JSON.stringify({ error: "userId and tier required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        const validTiers = ["free", "pro"];
+        if (!validTiers.includes(params.tier)) {
+          return new Response(JSON.stringify({ error: "Invalid tier" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        // Upsert subscription
+        const { data: existing } = await adminClient.from("user_subscriptions").select("id").eq("user_id", params.userId).maybeSingle();
+        if (existing) {
+          await adminClient.from("user_subscriptions").update({ tier: params.tier, updated_at: new Date().toISOString() }).eq("user_id", params.userId);
+        } else {
+          await adminClient.from("user_subscriptions").insert({ user_id: params.userId, tier: params.tier });
+        }
+        return new Response(JSON.stringify({ success: true, tier: params.tier }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
       case "delete_user_data": {

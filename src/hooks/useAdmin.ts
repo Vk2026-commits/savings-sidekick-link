@@ -10,6 +10,7 @@ export interface AdminUser {
   banned: boolean;
   banned_until: string | null;
   display_name: string | null;
+  tier: string;
 }
 
 export interface UserStats {
@@ -62,6 +63,11 @@ export function useAdmin() {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, banned: ban } : u));
   }, [invokeAdmin]);
 
+  const upgradePlan = useCallback(async (userId: string, tier: string) => {
+    await invokeAdmin("upgrade_plan", { userId, tier });
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier } : u));
+  }, [invokeAdmin]);
+
   const deleteUserData = useCallback(async (userId: string) => {
     return invokeAdmin("delete_user_data", { userId });
   }, [invokeAdmin]);
@@ -70,5 +76,5 @@ export function useAdmin() {
     return invokeAdmin("get_user_stats", { userId });
   }, [invokeAdmin]);
 
-  return { isAdmin, loading, users, usersLoading, loadUsers, resetPassword, toggleBan, deleteUserData, getUserStats };
+  return { isAdmin, loading, users, usersLoading, loadUsers, resetPassword, toggleBan, upgradePlan, deleteUserData, getUserStats };
 }

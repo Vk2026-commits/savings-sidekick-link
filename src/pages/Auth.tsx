@@ -83,7 +83,7 @@ export default function Auth() {
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Wallet className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">BudgetFlow</h1>
+            <h1 className="text-2xl font-bold gradient-text">Faithnancial</h1>
           </div>
           <h2 className="text-center text-lg font-semibold">Reset Password</h2>
           <form onSubmit={handleForgotPassword} className="space-y-4">
@@ -111,7 +111,7 @@ export default function Auth() {
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Wallet className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">BudgetFlow</h1>
+          <h1 className="text-2xl font-bold gradient-text">Faithnancial</h1>
         </div>
         <h2 className="text-center text-lg font-semibold">{isLogin ? "Sign In" : "Create Account"}</h2>
 

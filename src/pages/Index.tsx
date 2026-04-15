@@ -6,7 +6,7 @@ import {
 import { useBudget } from "@/hooks/useBudget";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
 import UpgradePrompt from "@/components/budget/UpgradePrompt";
-import ExpiredPlanBanner from "@/components/budget/ExpiredPlanBanner";
+import ReactivationBanner from "@/components/budget/ReactivationBanner";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";

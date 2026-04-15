@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import UserMenu from "@/components/UserMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -124,6 +125,7 @@ const Index = () => {
   const budget = useBudget();
   const isMobile = useIsMobile();
   const { isFree, isPro, expiredFromPro, trialExpiresAt, tier } = useSubscription();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");

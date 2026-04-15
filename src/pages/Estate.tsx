@@ -121,6 +121,7 @@ export default function Estate() {
       </header>
 
       <main className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        {expiredFromPro && <ExpiredPlanBanner trialExpiresAt={trialExpiresAt} tier={tier} />}
         {activeTab === "dashboard" && <EstateDashboardTab onNavigate={(tab) => setActiveTab(tab as TabId)} />}
         {activeTab === "people" && <EstatePeopleTab disableAdd={isAtLimit("people")} />}
         {activeTab === "beneficiaries" && <EstateBeneficiariesTab disableAdd={isAtLimit("beneficiaries")} />}

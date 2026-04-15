@@ -64,9 +64,10 @@ export function useAdmin() {
   }, [invokeAdmin]);
 
   const upgradePlan = useCallback(async (userId: string, tier: string) => {
-    await invokeAdmin("upgrade_plan", { userId, tier });
+    const { error } = await supabase.rpc("admin_upgrade_subscription" as any, { target_user_id: userId, new_tier: tier });
+    if (error) throw error;
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier } : u));
-  }, [invokeAdmin]);
+  }, []);
 
   const deleteUserData = useCallback(async (userId: string) => {
     return invokeAdmin("delete_user_data", { userId });

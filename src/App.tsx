@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import Estate from "./pages/Estate";
 import NotFound from "./pages/NotFound";
+import Policies from "./pages/Policies";
 
 const queryClient = new QueryClient();
 

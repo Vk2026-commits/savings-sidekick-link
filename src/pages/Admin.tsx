@@ -18,9 +18,30 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Shield, Users, Search, KeyRound, Ban, ShieldCheck, Trash2, BarChart3, ArrowLeft, Eye, EyeOff, Crown, LogIn,
+  Shield, Users, Search, KeyRound, Ban, ShieldCheck, Trash2, BarChart3, ArrowLeft, Eye, EyeOff, Crown, LogIn, Gift, Mail,
 } from "lucide-react";
 import UserMenu from "@/components/UserMenu";
+
+function getTierBadge(tier: string, trialExpiresAt: string | null) {
+  if (tier === "trial_30" || tier === "trial_90") {
+    const days = tier === "trial_30" ? 30 : 90;
+    const expires = trialExpiresAt ? new Date(trialExpiresAt) : null;
+    const remaining = expires ? Math.max(0, Math.ceil((expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : "?";
+    return (
+      <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30">
+        <Gift className="h-3 w-3 mr-1" /> Trial {days}d ({remaining}d left)
+      </Badge>
+    );
+  }
+  if (tier === "pro") {
+    return (
+      <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+        <Crown className="h-3 w-3 mr-1" /> Pro
+      </Badge>
+    );
+  }
+  return <Badge variant="outline">Free</Badge>;
+}
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth();
@@ -35,6 +56,9 @@ export default function Admin() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [upgradeDialog, setUpgradeDialog] = useState<AdminUser | null>(null);
   const [selectedTier, setSelectedTier] = useState("pro");
+  const [trialDialog, setTrialDialog] = useState<AdminUser | null>(null);
+  const [selectedTrialDays, setSelectedTrialDays] = useState("30");
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -52,7 +76,8 @@ export default function Admin() {
   );
 
   const proCount = admin.users.filter(u => u.tier === "pro").length;
-  const freeCount = admin.users.filter(u => u.tier !== "pro").length;
+  const trialCount = admin.users.filter(u => u.tier === "trial_30" || u.tier === "trial_90").length;
+  const freeCount = admin.users.filter(u => u.tier === "free").length;
 
   const handleResetPassword = async () => {
     if (!resetDialog || !newPassword || newPassword.length < 6) {
@@ -89,7 +114,7 @@ export default function Admin() {
     setActionLoading(true);
     try {
       await admin.upgradePlan(upgradeDialog.id, selectedTier);
-      toast({ title: "Success", description: `${upgradeDialog.email} upgraded to ${selectedTier}` });
+      toast({ title: "Success", description: `${upgradeDialog.email} updated to ${selectedTier}` });
       setUpgradeDialog(null);
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -123,6 +148,21 @@ export default function Admin() {
     }
   };
 
+  const handleGenerateCode = async () => {
+    if (!trialDialog) return;
+    setActionLoading(true);
+    setGeneratedCode(null);
+    try {
+      const result = await admin.sendTrialEmail(trialDialog.id, parseInt(selectedTrialDays));
+      setGeneratedCode(result.trialCode);
+      toast({ title: "Trial Activated!", description: `${selectedTrialDays}-day trial activated for ${trialDialog.email}. Code: ${result.trialCode}` });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const formatDate = (d: string | null) => {
     if (!d) return "Never";
     const date = new Date(d);
@@ -148,7 +188,7 @@ export default function Admin() {
 
       <main className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-6 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -179,6 +219,17 @@ export default function Admin() {
               <div>
                 <p className="text-2xl font-bold">{proCount}</p>
                 <p className="text-sm text-muted-foreground">Pro Users</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <Gift className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{trialCount}</p>
+                <p className="text-sm text-muted-foreground">On Trial</p>
               </div>
             </CardContent>
           </Card>
@@ -232,13 +283,7 @@ export default function Admin() {
                           {u.display_name && <p className="text-xs text-muted-foreground">{u.email}</p>}
                         </td>
                         <td className="py-3 px-2">
-                          {u.tier === "pro" ? (
-                            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30">
-                              <Crown className="h-3 w-3 mr-1" /> Pro
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">Free</Badge>
-                          )}
+                          {getTierBadge(u.tier, u.trial_expires_at)}
                         </td>
                         <td className="py-3 px-2">
                           {u.banned ? <Badge variant="destructive">Disabled</Badge> : <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">Active</Badge>}
@@ -249,6 +294,9 @@ export default function Admin() {
                           <div className="flex items-center justify-end gap-1">
                             <Button size="sm" variant="ghost" onClick={() => handleViewStats(u)} title="View stats">
                               <BarChart3 className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setTrialDialog(u); setSelectedTrialDays("30"); setGeneratedCode(null); }} title="Generate trial code">
+                              <Gift className="h-4 w-4 text-purple-500" />
                             </Button>
                             <Button size="sm" variant="ghost" onClick={() => { setUpgradeDialog(u); setSelectedTier(u.tier === "pro" ? "free" : "pro"); }} title="Change plan">
                               <Crown className="h-4 w-4 text-amber-500" />
@@ -274,6 +322,56 @@ export default function Admin() {
         </Card>
       </main>
 
+      {/* Generate Trial Code Dialog */}
+      <Dialog open={!!trialDialog} onOpenChange={(o) => { if (!o) { setTrialDialog(null); setGeneratedCode(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-purple-500" /> Generate Trial Code</DialogTitle>
+            <DialogDescription>Send a free Pro trial to {trialDialog?.email}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Trial Duration</label>
+              <Select value={selectedTrialDays} onValueChange={setSelectedTrialDays}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">30-Day Trial</SelectItem>
+                  <SelectItem value="90">90-Day Trial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground space-y-1">
+              <p>• User gets full Pro access for {selectedTrialDays} days</p>
+              <p>• After trial ends, they'll be billed $9.99/mo</p>
+              <p>• A notification email will be sent with the trial code</p>
+            </div>
+            {generatedCode && (
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Trial Code Generated</p>
+                <p className="text-xl font-mono font-bold text-purple-400 tracking-wider">{generatedCode}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  <Mail className="h-3 w-3 inline mr-1" />
+                  Trial activated & email sent to {trialDialog?.email}
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setTrialDialog(null); setGeneratedCode(null); }}>
+              {generatedCode ? "Close" : "Cancel"}
+            </Button>
+            {!generatedCode && (
+              <Button onClick={handleGenerateCode} disabled={actionLoading} className="bg-purple-600 hover:bg-purple-700">
+                <Gift className="h-4 w-4 mr-2" />
+                Generate & Send
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Upgrade Plan Dialog */}
       <Dialog open={!!upgradeDialog} onOpenChange={(o) => !o && setUpgradeDialog(null)}>
         <DialogContent>
@@ -282,7 +380,7 @@ export default function Admin() {
             <DialogDescription>Update subscription for {upgradeDialog?.email}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Current plan: <Badge variant="outline" className="ml-1">{upgradeDialog?.tier || "free"}</Badge></p>
+            <p className="text-sm text-muted-foreground">Current plan: {getTierBadge(upgradeDialog?.tier || "free", upgradeDialog?.trial_expires_at || null)}</p>
             <Select value={selectedTier} onValueChange={setSelectedTier}>
               <SelectTrigger>
                 <SelectValue />
@@ -290,6 +388,8 @@ export default function Admin() {
               <SelectContent>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="pro">Pro ($9.99/mo)</SelectItem>
+                <SelectItem value="trial_30">30-Day Trial</SelectItem>
+                <SelectItem value="trial_90">90-Day Trial</SelectItem>
               </SelectContent>
             </Select>
           </div>

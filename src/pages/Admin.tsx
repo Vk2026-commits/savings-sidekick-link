@@ -23,8 +23,8 @@ import {
 import UserMenu from "@/components/UserMenu";
 
 function getTierBadge(tier: string, trialExpiresAt: string | null) {
-  if (tier === "trial_30" || tier === "trial_90") {
-    const days = tier === "trial_30" ? 30 : 90;
+  if (tier === "trial_30") {
+    const days = 30;
     const expires = trialExpiresAt ? new Date(trialExpiresAt) : null;
     const remaining = expires ? Math.max(0, Math.ceil((expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : "?";
     return (
@@ -76,7 +76,7 @@ export default function Admin() {
   );
 
   const proCount = admin.users.filter(u => u.tier === "pro").length;
-  const trialCount = admin.users.filter(u => u.tier === "trial_30" || u.tier === "trial_90").length;
+  const trialCount = admin.users.filter(u => u.tier === "trial_30").length;
   const freeCount = admin.users.filter(u => u.tier === "free").length;
 
   const handleResetPassword = async () => {
@@ -389,7 +389,6 @@ export default function Admin() {
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="pro">Pro ($9.99/mo)</SelectItem>
                 <SelectItem value="trial_30">30-Day Trial</SelectItem>
-                <SelectItem value="trial_90">90-Day Trial</SelectItem>
               </SelectContent>
             </Select>
           </div>

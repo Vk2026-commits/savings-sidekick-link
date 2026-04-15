@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
     });
 
     // Apply the trial tier
-    const tier = trialDays === 30 ? "trial_30" : "trial_90";
+    const tier = "trial_30";
     const { data: existing } = await adminClient.from("user_subscriptions").select("id").eq("user_id", userId).maybeSingle();
     if (existing) {
       await adminClient.from("user_subscriptions").update({ 

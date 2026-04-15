@@ -69,9 +69,7 @@ export function useAdmin() {
     if (error) throw error;
     const trialExpires = tier === "trial_30" 
       ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-      : tier === "trial_90"
-        ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
-        : null;
+      : null;
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier, trial_expires_at: trialExpires } : u));
   }, []);
 
@@ -90,7 +88,7 @@ export function useAdmin() {
     });
     if (error) throw error;
     // Update local state
-    const tier = trialDays === 30 ? "trial_30" : "trial_90";
+    const tier = "trial_30";
     const trialExpires = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString();
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier, trial_expires_at: trialExpires } : u));
     return { ...data, trialCode: code };

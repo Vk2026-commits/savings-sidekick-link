@@ -159,7 +159,7 @@ const Index = () => {
             <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center">
               <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <h1 className="text-lg sm:text-xl font-bold tracking-tight">BudgetFlow</h1>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight gradient-text">Faithnancial</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <IncomeInput income={budget.monthlyIncome} onUpdate={budget.setMonthlyIncome} />

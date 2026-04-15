@@ -199,6 +199,9 @@ const Index = () => {
       <main className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
         {expiredFromPro && <ReactivationBanner expiredFromPro={expiredFromPro} />}
         {activeTab === "dashboard" && (
+          <EstateCompletionBanner onNavigate={(tab) => { setActiveTab("estate"); }} />
+        )}
+        {activeTab === "dashboard" && (
           <DashboardView budget={budget} />
         )}
 

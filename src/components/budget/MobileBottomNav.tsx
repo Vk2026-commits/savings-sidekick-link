@@ -1,6 +1,6 @@
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Landmark, LineChart, MoreHorizontal, ScrollText, Lock
+  Landmark, LineChart, MoreHorizontal, ScrollText, Lock, Globe
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -19,6 +19,7 @@ const tabs = [
   { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "estate", label: "Estate & Legacy", icon: ScrollText },
   { id: "bank", label: "Bank", icon: Landmark },
+  { id: "network", label: "Faithnancial Network", icon: Globe },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];

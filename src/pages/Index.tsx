@@ -1,12 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock, Globe
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
 import UpgradePrompt from "@/components/budget/UpgradePrompt";
 import ReactivationBanner from "@/components/budget/ReactivationBanner";
+import EstateCompletionBanner from "@/components/budget/EstateCompletionBanner";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";
@@ -28,6 +29,7 @@ import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
 import MobileBottomNav from "@/components/budget/MobileBottomNav";
+import OnboardingWizard from "@/components/OnboardingWizard";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

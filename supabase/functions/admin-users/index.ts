@@ -43,10 +43,10 @@ Deno.serve(async (req) => {
         const userIds = (data.users || []).map((u: any) => u.id);
         const [{ data: profiles }, { data: subscriptions }] = await Promise.all([
           adminClient.from("profiles").select("user_id, display_name, email").in("user_id", userIds),
-          adminClient.from("user_subscriptions").select("user_id, tier").in("user_id", userIds),
+          adminClient.from("user_subscriptions").select("user_id, tier, trial_expires_at").in("user_id", userIds),
         ]);
         const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
-        const subMap = new Map((subscriptions || []).map((s: any) => [s.user_id, s.tier]));
+        const subMap = new Map((subscriptions || []).map((s: any) => [s.user_id, { tier: s.tier, trial_expires_at: s.trial_expires_at }]));
         const users = (data.users || []).map((u: any) => ({
           id: u.id,
           email: u.email,
@@ -55,7 +55,8 @@ Deno.serve(async (req) => {
           banned: u.banned_until ? true : false,
           banned_until: u.banned_until,
           display_name: profileMap.get(u.id)?.display_name || null,
-          tier: subMap.get(u.id) || "free",
+          tier: subMap.get(u.id)?.tier || "free",
+          trial_expires_at: subMap.get(u.id)?.trial_expires_at || null,
         }));
         return new Response(JSON.stringify({ users }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }

@@ -69,5 +69,5 @@ export function useSubscription() {
   const isFree = !isPro;
   const isTrial = tier === "trial_30" || tier === "trial_90";
 
-  return { tier, isPro, isFree, isTrial, trialExpiresAt, loading };
+  return { tier, isPro, isFree, isTrial, trialExpiresAt, expiredFromPro, loading };
 }

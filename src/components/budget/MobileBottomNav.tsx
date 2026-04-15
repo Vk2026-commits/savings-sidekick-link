@@ -5,6 +5,7 @@ import {
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useToast } from "@/hooks/use-toast";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -36,7 +37,9 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ activeTab, onTabChange }: MobileBottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const { isFree } = useSubscription();
+  const { toast } = useToast();
   const RESTRICTED_TABS = ["reports", "analytics"];
+  const COMING_SOON_TABS = ["bank"];
   const isOverflowActive = OVERFLOW_TABS.some(t => t.id === activeTab);
 
   return (
@@ -76,17 +79,23 @@ export default function MobileBottomNav({ activeTab, onTabChange }: MobileBottom
             <div className="grid grid-cols-4 gap-3 pt-4">
               {OVERFLOW_TABS.map((tab) => {
                 const isRestricted = isFree && RESTRICTED_TABS.includes(tab.id);
+                const isComingSoon = COMING_SOON_TABS.includes(tab.id);
+                const isDisabled = isRestricted || isComingSoon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => {
+                      if (isComingSoon) {
+                        toast({ title: "Coming Soon", description: "Bank integration coming soon." });
+                        setMoreOpen(false);
+                        return;
+                      }
                       if (isRestricted) return;
                       onTabChange(tab.id);
                       setMoreOpen(false);
                     }}
-                    disabled={isRestricted}
                     className={`flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors ${
-                      isRestricted
+                      isDisabled
                         ? "text-muted-foreground/40 cursor-not-allowed"
                         : activeTab === tab.id
                           ? "bg-primary/10 text-primary"
@@ -96,6 +105,7 @@ export default function MobileBottomNav({ activeTab, onTabChange }: MobileBottom
                     {isRestricted ? <Lock className="h-5 w-5" /> : <tab.icon className="h-6 w-6" />}
                     <span className="text-xs font-medium">{tab.label}</span>
                     {isRestricted && <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full">Pro</span>}
+                    {isComingSoon && <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full">Soon</span>}
                   </button>
                 );
               })}

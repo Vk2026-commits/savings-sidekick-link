@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import UserMenu from "@/components/UserMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -118,11 +119,13 @@ const tabs = [
 type TabId = typeof tabs[number]["id"];
 
 const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
+const COMING_SOON_TABS: TabId[] = ["bank"];
 
 const Index = () => {
   const budget = useBudget();
   const isMobile = useIsMobile();
   const { isFree, isPro, expiredFromPro, trialExpiresAt, tier } = useSubscription();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");
@@ -172,13 +175,20 @@ const Index = () => {
           <nav className="flex gap-1 overflow-x-auto pb-0 -mb-px scrollbar-none">
             {tabs.map((tab) => {
               const isRestricted = isFree && RESTRICTED_TABS.includes(tab.id);
+              const isComingSoon = COMING_SOON_TABS.includes(tab.id);
+              const isDisabled = isRestricted || isComingSoon;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => !isRestricted && setActiveTab(tab.id)}
-                  disabled={isRestricted}
+                  onClick={() => {
+                    if (isComingSoon) {
+                      toast({ title: "Coming Soon", description: "Bank integration coming soon." });
+                    } else if (!isRestricted) {
+                      setActiveTab(tab.id);
+                    }
+                  }}
                   className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                    isRestricted
+                    isDisabled
                       ? "border-transparent text-muted-foreground/40 cursor-not-allowed"
                       : activeTab === tab.id
                         ? "border-primary text-primary"
@@ -188,6 +198,7 @@ const Index = () => {
                   {isRestricted ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-4 w-4" />}
                   <span>{tab.label}</span>
                   {isRestricted && <span className="text-[10px] ml-1 bg-muted px-1.5 py-0.5 rounded-full">Pro</span>}
+                  {isComingSoon && <span className="text-[10px] ml-1 bg-muted px-1.5 py-0.5 rounded-full">Soon</span>}
                 </button>
               );
             })}

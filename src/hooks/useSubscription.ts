@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type SubscriptionTier = "free" | "pro" | "trial_30" | "trial_90";
+export type SubscriptionTier = "free" | "pro" | "trial_30";
 
 export const FREE_LIMITS = {
   budgetItems: 3,

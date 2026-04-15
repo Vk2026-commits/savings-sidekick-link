@@ -1072,6 +1072,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_upgrade_subscription: {
+        Args: { new_tier: string; target_user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

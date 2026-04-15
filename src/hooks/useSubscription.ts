@@ -13,6 +13,7 @@ export function useSubscription() {
   const { user } = useAuth();
   const [tier, setTier] = useState<SubscriptionTier>("free");
   const [trialExpiresAt, setTrialExpiresAt] = useState<string | null>(null);
+  const [expiredFromPro, setExpiredFromPro] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,16 +37,21 @@ export function useSubscription() {
         if ((t === "trial_30" || t === "trial_90") && row.trial_expires_at) {
           const expiresAt = new Date(row.trial_expires_at);
           if (expiresAt < new Date()) {
-            // Trial expired — revert to free
+            // Trial expired — revert to free but keep trial_expires_at for banner
             await supabase.from("user_subscriptions" as any)
-              .update({ tier: "free", trial_expires_at: null } as any)
+              .update({ tier: "free" } as any)
               .eq("user_id", user.id);
             setTier("free");
-            setTrialExpiresAt(null);
+            setTrialExpiresAt(row.trial_expires_at);
+            setExpiredFromPro(true);
             setLoading(false);
             return;
           }
           setTrialExpiresAt(row.trial_expires_at);
+        } else if (t === "free" && row.trial_expires_at) {
+          // Was previously on a trial that expired
+          setTrialExpiresAt(row.trial_expires_at);
+          setExpiredFromPro(true);
         }
         
         setTier(["pro", "trial_30", "trial_90"].includes(t) ? t as SubscriptionTier : "free");
@@ -63,5 +69,5 @@ export function useSubscription() {
   const isFree = !isPro;
   const isTrial = tier === "trial_30" || tier === "trial_90";
 
-  return { tier, isPro, isFree, isTrial, trialExpiresAt, loading };
+  return { tier, isPro, isFree, isTrial, trialExpiresAt, expiredFromPro, loading };
 }

@@ -6,6 +6,7 @@ import {
 import { useBudget } from "@/hooks/useBudget";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
 import UpgradePrompt from "@/components/budget/UpgradePrompt";
+import ExpiredPlanBanner from "@/components/budget/ExpiredPlanBanner";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";
@@ -118,7 +119,7 @@ const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
 const Index = () => {
   const budget = useBudget();
   const isMobile = useIsMobile();
-  const { isFree, isPro } = useSubscription();
+  const { isFree, isPro, expiredFromPro, trialExpiresAt, tier } = useSubscription();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");
@@ -180,6 +181,7 @@ const Index = () => {
 
       {/* Main */}
       <main className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
+        {expiredFromPro && <ExpiredPlanBanner trialExpiresAt={trialExpiresAt} tier={tier} />}
         {activeTab === "dashboard" && (
           <DashboardView budget={budget} />
         )}

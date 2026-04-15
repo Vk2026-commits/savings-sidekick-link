@@ -89,11 +89,11 @@ export default function SpendingAnalytics({ bills, transactions, monthlyIncome }
     }
   };
 
-  const chartData = analysis?.comparisons.map((c) => ({
+  const chartData = (analysis?.comparisons ?? []).map((c) => ({
     category: c.category,
     You: c.userPercent,
     "US Average": c.usAvgPercent,
-  })) ?? [];
+  }));
 
   const getStatusIcon = (status: string) => {
     if (status === "under") return <CheckCircle className="h-4 w-4 text-green-500" />;

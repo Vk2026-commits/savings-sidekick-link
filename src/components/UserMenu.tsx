@@ -14,6 +14,7 @@ export default function UserMenu() {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
+
   if (!user) return null;
 
   const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "User";

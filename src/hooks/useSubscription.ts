@@ -15,7 +15,6 @@ export function useSubscription() {
   const [trialExpiresAt, setTrialExpiresAt] = useState<string | null>(null);
   const [expiredFromPro, setExpiredFromPro] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) { setTier("free"); setTrialExpiresAt(null); setLoading(false); return; }

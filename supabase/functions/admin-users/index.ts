@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
         const userIds = (data.users || []).map((u: any) => u.id);
         const [{ data: profiles }, { data: subscriptions }] = await Promise.all([
           adminClient.from("profiles").select("user_id, display_name, email").in("user_id", userIds),
-          adminClient.from("user_subscriptions").select("user_id, tier").in("user_id", userIds),
+          adminClient.from("user_subscriptions").select("user_id, tier, trial_expires_at").in("user_id", userIds),
         ]);
         const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
         const subMap = new Map((subscriptions || []).map((s: any) => [s.user_id, s.tier]));

@@ -34,7 +34,7 @@ export function useSubscription() {
         const t = row.tier as string;
         
         // Check if trial has expired
-        if ((t === "trial_30" || t === "trial_90") && row.trial_expires_at) {
+        if (t === "trial_30" && row.trial_expires_at) {
           const expiresAt = new Date(row.trial_expires_at);
           if (expiresAt < new Date()) {
             // Trial expired — revert to free but keep trial_expires_at for banner
@@ -54,7 +54,7 @@ export function useSubscription() {
           setExpiredFromPro(true);
         }
         
-        setTier(["pro", "trial_30", "trial_90"].includes(t) ? t as SubscriptionTier : "free");
+        setTier(["pro", "trial_30"].includes(t) ? t as SubscriptionTier : "free");
       } else {
         await supabase.from("user_subscriptions" as any).insert({ user_id: user.id, tier: "free" });
         setTier("free");
@@ -65,9 +65,9 @@ export function useSubscription() {
     return () => { cancelled = true; };
   }, [user]);
 
-  const isPro = tier === "pro" || tier === "trial_30" || tier === "trial_90";
+  const isPro = tier === "pro" || tier === "trial_30";
   const isFree = !isPro;
-  const isTrial = tier === "trial_30" || tier === "trial_90";
+  const isTrial = tier === "trial_30";
 
   return { tier, isPro, isFree, isTrial, trialExpiresAt, expiredFromPro, loading };
 }

@@ -1035,6 +1035,7 @@ export type Database = {
       user_subscriptions: {
         Row: {
           created_at: string
+          discount_expires_at: string | null
           id: string
           tier: string
           trial_expires_at: string | null
@@ -1043,6 +1044,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          discount_expires_at?: string | null
           id?: string
           tier?: string
           trial_expires_at?: string | null
@@ -1051,6 +1053,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          discount_expires_at?: string | null
           id?: string
           tier?: string
           trial_expires_at?: string | null

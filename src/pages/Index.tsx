@@ -119,7 +119,7 @@ const tabs = [
 type TabId = typeof tabs[number]["id"];
 
 const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
-const COMING_SOON_TABS: TabId[] = ["bank"];
+const COMING_SOON_TABS: TabId[] = [];
 
 const Index = () => {
   const budget = useBudget();

@@ -1,12 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock, Globe
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
 import UpgradePrompt from "@/components/budget/UpgradePrompt";
 import ReactivationBanner from "@/components/budget/ReactivationBanner";
+import EstateCompletionBanner from "@/components/budget/EstateCompletionBanner";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";
@@ -28,6 +29,7 @@ import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
 import MobileBottomNav from "@/components/budget/MobileBottomNav";
+import OnboardingWizard from "@/components/OnboardingWizard";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,6 +112,7 @@ const tabs = [
   { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "estate", label: "Estate & Legacy", icon: ScrollText },
   { id: "bank", label: "Bank", icon: Landmark },
+  { id: "network", label: "Faithnancial Network", icon: Globe },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];
@@ -126,6 +129,9 @@ const Index = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem("faithnancial_onboarded");
+  });
   const billMatchesMonth = (bill: (typeof budget.bills)[number], month: string) => getAssignedBillMonth(bill) === month;
 
   const monthlyBillsTotal = useMemo(() => {
@@ -133,6 +139,16 @@ const Index = () => {
       .filter((b) => billMatchesMonth(b, selectedMonth))
       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
   }, [budget.bills, selectedMonth]);
+
+  if (showOnboarding) {
+    return (
+      <OnboardingWizard onComplete={() => {
+        localStorage.setItem("faithnancial_onboarded", "true");
+        setShowOnboarding(false);
+      }} />
+    );
+  }
+
   return (
     <PinUnlockProvider>
     <div className="min-h-screen bg-background">
@@ -143,7 +159,7 @@ const Index = () => {
             <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center">
               <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <h1 className="text-lg sm:text-xl font-bold tracking-tight">BudgetFlow</h1>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight gradient-text">Faithnancial</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <IncomeInput income={budget.monthlyIncome} onUpdate={budget.setMonthlyIncome} />
@@ -182,6 +198,9 @@ const Index = () => {
       {/* Main */}
       <main className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
         {expiredFromPro && <ReactivationBanner expiredFromPro={expiredFromPro} />}
+        {activeTab === "dashboard" && (
+          <EstateCompletionBanner onNavigate={(tab) => { setActiveTab("estate"); }} />
+        )}
         {activeTab === "dashboard" && (
           <DashboardView budget={budget} />
         )}
@@ -490,6 +509,21 @@ const Index = () => {
           <div className="space-y-6">
             <PlaidLink />
             <ReconcileTransactions />
+          </div>
+        )}
+
+        {activeTab === "network" && (
+          <div className="space-y-6">
+            <div className="glass-card p-8 text-center space-y-4">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Globe className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold">Faithnancial Network</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Connect, invest, and grow with others. Access community resources, shared financial wisdom, and collaborative tools.
+              </p>
+              <p className="text-sm text-muted-foreground">Coming soon — stay tuned for updates.</p>
+            </div>
           </div>
         )}
       </main>

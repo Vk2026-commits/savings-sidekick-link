@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import { Navigate } from "react-router-dom";
 
 export default function Auth() {
   const { user, loading } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(!searchParams.get("signup"));
   const [isForgot, setIsForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,7 +83,7 @@ export default function Auth() {
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Wallet className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">BudgetFlow</h1>
+            <h1 className="text-2xl font-bold gradient-text">Faithnancial</h1>
           </div>
           <h2 className="text-center text-lg font-semibold">Reset Password</h2>
           <form onSubmit={handleForgotPassword} className="space-y-4">
@@ -110,7 +111,7 @@ export default function Auth() {
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Wallet className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">BudgetFlow</h1>
+          <h1 className="text-2xl font-bold gradient-text">Faithnancial</h1>
         </div>
         <h2 className="text-center text-lg font-semibold">{isLogin ? "Sign In" : "Create Account"}</h2>
 

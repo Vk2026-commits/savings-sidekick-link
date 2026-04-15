@@ -112,6 +112,7 @@ const tabs = [
   { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "estate", label: "Estate & Legacy", icon: ScrollText },
   { id: "bank", label: "Bank", icon: Landmark },
+  { id: "network", label: "Faithnancial Network", icon: Globe },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];

@@ -507,8 +507,7 @@ const Index = () => {
             <iframe
               src="https://heirloom.faithnancial.com"
               title="Faithnancial Estate Planning"
-              className="w-full border-0"
-              style={{ height: "calc(100vh - 220px)", minHeight: "600px" }}
+              className="block w-full border-0 h-[calc(100svh-200px)] md:h-[calc(100svh-220px)] min-h-[480px]"
               allow="clipboard-read; clipboard-write; fullscreen"
             />
           </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import {
-  Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock, Globe
+  Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, BarChart3,
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, LineChart, Users, ChevronDown, ScrollText, Lock
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
@@ -17,15 +17,15 @@ import CategoryBudgets from "@/components/budget/CategoryBudgets";
 import TransactionLog from "@/components/budget/TransactionLog";
 import NetWorthTracker from "@/components/budget/NetWorthTracker";
 import DebtPayoffPlanner from "@/components/budget/DebtPayoffPlanner";
-import BillCalendar from "@/components/budget/BillCalendar";
 import FinancialDashboard from "@/components/budget/FinancialDashboard";
+import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
-import PlaidLink from "@/components/budget/PlaidLink";
 import { Link } from "react-router-dom";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
+import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
 import MobileBottomNav from "@/components/budget/MobileBottomNav";

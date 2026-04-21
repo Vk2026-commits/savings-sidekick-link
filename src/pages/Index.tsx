@@ -24,7 +24,7 @@ import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
 import PlaidLink from "@/components/budget/PlaidLink";
-import EstateInlineContent from "@/components/estate/EstateInlineContent";
+import { Link } from "react-router-dom";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
@@ -514,7 +514,15 @@ const Index = () => {
           )
         )}
 
-        {activeTab === "estate" && <EstateInlineContent isFree={isFree} />}
+        {activeTab === "estate" && (
+          <div className="glass-card p-8 text-center space-y-4">
+            <h2 className="text-2xl font-bold">Estate & Legacy Planning</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Powered by Heirloom — create wills, trusts, healthcare directives, and more.
+            </p>
+            <Button asChild size="lg"><Link to="/estate">Open Estate Planner</Link></Button>
+          </div>
+        )}
 
         {activeTab === "bank" && (
           <div className="space-y-6">

@@ -47,12 +47,8 @@ export default function PinGate({ children, label = "this section" }: PinGatePro
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"check" | "setup" | "enter">("check");
 
-  // Lock when navigating away (unmount)
-  useEffect(() => {
-    return () => {
-      setUnlocked(false);
-    };
-  }, [setUnlocked]);
+  // PIN stays unlocked for the entire session (until sign out / page reload).
+  // No unmount-time lock — users shouldn't have to re-enter when switching tabs.
 
   useEffect(() => {
     if (!user || unlocked) return;
@@ -168,7 +164,7 @@ export default function PinGate({ children, label = "this section" }: PinGatePro
             <div>
               <h2 className="text-xl font-bold mb-1">Set Up Your PIN</h2>
               <p className="text-sm text-muted-foreground">
-                Create a {PIN_LENGTH}-digit PIN to protect your Income, Transactions, and Net Worth data.
+                Create a {PIN_LENGTH}-digit PIN to protect your Income and Net Worth data.
               </p>
             </div>
             <div className="w-full space-y-3" onKeyDown={handleKeyDown}>

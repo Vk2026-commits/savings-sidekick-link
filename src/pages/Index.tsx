@@ -497,12 +497,20 @@ const Index = () => {
         )}
 
         {activeTab === "estate" && (
-          <div className="glass-card p-8 text-center space-y-4">
-            <h2 className="text-2xl font-bold">Estate & Legacy Planning</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
-            </p>
-            <Button asChild size="lg"><Link to="/estate">Open Estate Planner</Link></Button>
+          <div className="glass-card overflow-hidden p-0">
+            <div className="px-4 py-3 border-b border-border">
+              <h2 className="text-lg font-semibold">Estate & Legacy Planning</h2>
+              <p className="text-xs text-muted-foreground">
+                Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
+              </p>
+            </div>
+            <iframe
+              src="https://heirloom.faithnancial.com"
+              title="Faithnancial Estate Planning"
+              className="w-full border-0"
+              style={{ height: "calc(100vh - 220px)", minHeight: "600px" }}
+              allow="clipboard-read; clipboard-write; fullscreen"
+            />
           </div>
         )}
 

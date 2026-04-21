@@ -105,15 +105,11 @@ const tabs = [
   { id: "income", label: "Income", icon: Wallet },
   { id: "bills", label: "Bills", icon: Receipt },
   { id: "budget", label: "Budget", icon: Target },
-  { id: "transactions", label: "Transactions", icon: ArrowRightLeft },
   { id: "savings", label: "Savings", icon: PiggyBank },
   { id: "networth", label: "Net Worth", icon: TrendingUp },
-  { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "estate", label: "Estate & Legacy", icon: ScrollText },
-  { id: "bank", label: "Bank", icon: Landmark },
-  { id: "network", label: "Faithnancial Network", icon: Globe },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];

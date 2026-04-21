@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import {
-  Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, Calendar, BarChart3, ArrowRightLeft,
-  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, Landmark, LineChart, Users, ChevronDown, ScrollText, Lock, Globe
+  Wallet, LayoutDashboard, Receipt, Target, PiggyBank, TrendingUp, BarChart3,
+  Plus, Pencil, Trash2, Check, X, ChevronLeft, ChevronRight, Copy, LineChart, Users, ChevronDown, ScrollText, Lock
 } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
@@ -17,13 +17,11 @@ import CategoryBudgets from "@/components/budget/CategoryBudgets";
 import TransactionLog from "@/components/budget/TransactionLog";
 import NetWorthTracker from "@/components/budget/NetWorthTracker";
 import DebtPayoffPlanner from "@/components/budget/DebtPayoffPlanner";
-import BillCalendar from "@/components/budget/BillCalendar";
 import FinancialDashboard from "@/components/budget/FinancialDashboard";
 import CashFlowForecast from "@/components/budget/CashFlowForecast";
 import DailySpendingChart from "@/components/budget/DailySpendingChart";
 import IncomeManager from "@/components/budget/IncomeManager";
 import PaymentAccountsManager from "@/components/budget/PaymentAccountsManager";
-import PlaidLink from "@/components/budget/PlaidLink";
 import { Link } from "react-router-dom";
 import ReconcileTransactions from "@/components/budget/ReconcileTransactions";
 import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
@@ -105,15 +103,11 @@ const tabs = [
   { id: "income", label: "Income", icon: Wallet },
   { id: "bills", label: "Bills", icon: Receipt },
   { id: "budget", label: "Budget", icon: Target },
-  { id: "transactions", label: "Transactions", icon: ArrowRightLeft },
   { id: "savings", label: "Savings", icon: PiggyBank },
   { id: "networth", label: "Net Worth", icon: TrendingUp },
-  { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "estate", label: "Estate & Legacy", icon: ScrollText },
-  { id: "bank", label: "Bank", icon: Landmark },
-  { id: "network", label: "Faithnancial Network", icon: Globe },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];
@@ -443,15 +437,6 @@ const Index = () => {
           )
         )}
 
-        {activeTab === "transactions" && (
-          <PinGate label="Transactions">
-            <TransactionLog
-              transactions={budget.transactions}
-              onAdd={budget.addTransaction}
-              onDelete={budget.deleteTransaction}
-            />
-          </PinGate>
-        )}
 
         {activeTab === "savings" && (
           <SavingsGoals
@@ -486,9 +471,6 @@ const Index = () => {
           </PinGate>
         )}
 
-        {activeTab === "calendar" && (
-          <BillCalendar bills={budget.bills} />
-        )}
 
         {activeTab === "reports" && (
           isFree ? (
@@ -524,35 +506,7 @@ const Index = () => {
           </div>
         )}
 
-        {activeTab === "bank" && (
-          <div className="space-y-6">
-            <div className="glass-card p-8 text-center space-y-4">
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Landmark className="h-7 w-7 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold">Bank Integration</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Securely link your bank accounts and credit cards for automatic transaction syncing and reconciliation.
-              </p>
-              <p className="text-sm text-muted-foreground">Integration coming soon — stay tuned for updates.</p>
-            </div>
-          </div>
-        )}
 
-        {activeTab === "network" && (
-          <div className="space-y-6">
-            <div className="glass-card p-8 text-center space-y-4">
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Globe className="h-7 w-7 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold">Faithnancial Network</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Connect, invest, and grow with others. Access community resources, shared financial wisdom, and collaborative tools.
-              </p>
-              <p className="text-sm text-muted-foreground">Coming soon — stay tuned for updates.</p>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Mobile Bottom Navigation */}

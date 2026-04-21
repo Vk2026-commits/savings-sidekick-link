@@ -500,7 +500,7 @@ const Index = () => {
           <div className="glass-card p-8 text-center space-y-4">
             <h2 className="text-2xl font-bold">Estate & Legacy Planning</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Powered by Heirloom — create wills, trusts, healthcare directives, and more.
+              Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
             </p>
             <Button asChild size="lg"><Link to="/estate">Open Estate Planner</Link></Button>
           </div>

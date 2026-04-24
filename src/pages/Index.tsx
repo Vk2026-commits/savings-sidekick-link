@@ -8,6 +8,9 @@ import { useSubscription, FREE_LIMITS } from "@/hooks/useSubscription";
 import UpgradePrompt from "@/components/budget/UpgradePrompt";
 import ReactivationBanner from "@/components/budget/ReactivationBanner";
 import EstateCompletionBanner from "@/components/budget/EstateCompletionBanner";
+import PreparednessCard from "@/components/budget/PreparednessCard";
+import FamilyReadinessChecklist from "@/components/budget/FamilyReadinessChecklist";
+import PreparednessBanner from "@/components/budget/PreparednessBanner";
 import SummaryCards from "@/components/budget/SummaryCards";
 import BillsList from "@/components/budget/BillsList";
 import BudgetOverview from "@/components/budget/BudgetOverview";
@@ -205,6 +208,12 @@ const Index = () => {
         {expiredFromPro && <ReactivationBanner expiredFromPro={expiredFromPro} />}
         {activeTab === "dashboard" && (
           <EstateCompletionBanner onNavigate={(tab) => { setActiveTab("estate"); }} />
+        )}
+        {activeTab === "dashboard" && (
+          <>
+            <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
+            <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />
+          </>
         )}
         {activeTab === "dashboard" && (
           <DashboardView budget={budget} />
@@ -507,6 +516,7 @@ const Index = () => {
               Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
             </p>
           </div>
+          <PreparednessBanner />
           <iframe
             src="https://heirloom.faithnancial.com"
             title="Faithnancial Estate Planning"

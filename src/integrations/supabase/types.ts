@@ -882,6 +882,39 @@ export type Database = {
         }
         Relationships: []
       }
+      preparedness_checklist: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          is_complete: boolean
+          item_key: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          item_key: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          item_key?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

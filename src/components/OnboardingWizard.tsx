@@ -44,8 +44,32 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
             </div>
           )}
 
-          {/* Step 2: Goal Selection */}
+          {/* Step 2: Preparedness Message */}
           {step === 2 && (
+            <div className="text-center space-y-5">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <ShieldCheck className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold">If something happened tomorrow, would everything be in order?</h2>
+              <p className="text-muted-foreground text-sm">
+                Faithnancial helps you organize your financial life so your family is prepared.
+              </p>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-left space-y-2">
+                <p className="text-xs font-medium text-primary">What we'll help you organize</p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Your budget, bills, and savings</li>
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Important documents and policies</li>
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Estate plans and family readiness</li>
+                </ul>
+              </div>
+              <Button size="lg" className="w-full" onClick={() => setStep(3)}>
+                Got it <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* Step 3: Goal Selection */}
+          {step === 3 && (
             <div className="space-y-5">
               <h2 className="text-xl font-bold text-center">What do you want to do first?</h2>
               <div className="space-y-3">
@@ -74,21 +98,21 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                   </button>
                 ))}
               </div>
-              <Button className="w-full" disabled={!selectedGoal} onClick={() => setStep(3)}>
+              <Button className="w-full" disabled={!selectedGoal} onClick={() => setStep(4)}>
                 Continue <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
           )}
 
-          {/* Step 3: Quick Setup */}
-          {step === 3 && (
+          {/* Step 4: Quick Setup */}
+          {step === 4 && (
             <div className="space-y-5">
               <h2 className="text-xl font-bold text-center">Let's get you set up</h2>
               <div className="space-y-4">
                 <div className="p-4 rounded-lg border border-border space-y-2">
                   <p className="text-sm font-medium">Connect bank accounts</p>
                   <p className="text-xs text-muted-foreground">Securely link your accounts for automatic tracking</p>
-                  <Button variant="outline" size="sm" onClick={() => setStep(4)}>Skip for now</Button>
+                  <Button variant="outline" size="sm" onClick={() => setStep(5)}>Skip for now</Button>
                 </div>
                 <div className="p-4 rounded-lg border border-border space-y-2">
                   <p className="text-sm font-medium">Add monthly income</p>
@@ -99,14 +123,14 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                   <p className="text-xs text-muted-foreground">Start with your biggest expense — like rent or mortgage</p>
                 </div>
               </div>
-              <Button className="w-full" onClick={() => setStep(4)}>
+              <Button className="w-full" onClick={() => setStep(5)}>
                 Continue <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
           )}
 
-          {/* Step 4: Estate Emphasis */}
-          {step === 4 && (
+          {/* Step 5: Estate Emphasis */}
+          {step === 5 && (
             <div className="space-y-5">
               <div className="text-center space-y-2">
                 <h2 className="text-xl font-bold">Protect what matters most</h2>
@@ -130,16 +154,16 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                 ))}
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(5)}>Skip</Button>
-                <Button className="flex-1" onClick={() => setStep(5)}>
+                <Button variant="outline" className="flex-1" onClick={() => setStep(6)}>Skip</Button>
+                <Button className="flex-1" onClick={() => setStep(6)}>
                   Continue <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Step 5: Value Reinforcement */}
-          {step === 5 && (
+          {/* Step 6: Value Reinforcement */}
+          {step === 6 && (
             <div className="text-center space-y-5">
               <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <Check className="h-7 w-7 text-primary" />

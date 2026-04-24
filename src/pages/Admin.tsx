@@ -182,7 +182,12 @@ export default function Admin() {
             </div>
             <h1 className="text-xl font-bold tracking-tight">Admin Portal</h1>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <Link to="/admin/onboarding-preview">
+              <Button variant="outline" size="sm">Preview Onboarding</Button>
+            </Link>
+            <UserMenu />
+          </div>
         </div>
       </header>
 

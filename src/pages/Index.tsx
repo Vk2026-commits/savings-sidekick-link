@@ -210,6 +210,12 @@ const Index = () => {
           <EstateCompletionBanner onNavigate={(tab) => { setActiveTab("estate"); }} />
         )}
         {activeTab === "dashboard" && (
+          <>
+            <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
+            <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />
+          </>
+        )}
+        {activeTab === "dashboard" && (
           <DashboardView budget={budget} />
         )}
 

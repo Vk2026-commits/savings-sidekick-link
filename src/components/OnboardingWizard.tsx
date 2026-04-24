@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { PiggyBank, Landmark, FileText, ScrollText, ChevronRight, Check, Upload } from "lucide-react";
+import { PiggyBank, Landmark, FileText, ScrollText, ChevronRight, Check, Upload, ShieldCheck } from "lucide-react";
 
 const goals = [
   { id: "budget", label: "Track my budget", icon: PiggyBank },
@@ -11,7 +11,7 @@ const goals = [
   { id: "estate", label: "Set up my estate plan", icon: ScrollText, highlight: true },
 ];
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 export default function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(1);

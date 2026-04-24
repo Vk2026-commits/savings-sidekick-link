@@ -702,6 +702,39 @@ export type Database = {
         }
         Relationships: []
       }
+      faith_devotional_log: {
+        Row: {
+          completed_at: string
+          created_at: string
+          devotional_date: string
+          devotional_id: string
+          id: string
+          reflection: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          devotional_date: string
+          devotional_id: string
+          id?: string
+          reflection?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          devotional_date?: string
+          devotional_id?: string
+          id?: string
+          reflection?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       income_sources: {
         Row: {
           amount: number
@@ -1015,6 +1048,42 @@ export type Database = {
           notes?: string | null
           source?: string
           type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_onboarding: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          first_action: string | null
+          goals: string[]
+          id: string
+          season: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          first_action?: string | null
+          goals?: string[]
+          id?: string
+          season?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          first_action?: string | null
+          goals?: string[]
+          id?: string
+          season?: string | null
           updated_at?: string
           user_id?: string
         }

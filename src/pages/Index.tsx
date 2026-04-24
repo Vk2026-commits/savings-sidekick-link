@@ -222,6 +222,8 @@ const Index = () => {
         {activeTab === "dashboard" && (
           <>
             <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
+            <FaithCard />
+            <PillarsCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
             <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />
           </>
         )}

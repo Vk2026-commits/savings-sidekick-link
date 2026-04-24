@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
+import OnboardingPreview from "./pages/OnboardingPreview";
 import Estate from "./pages/Estate";
 import NotFound from "./pages/NotFound";
 import Policies from "./pages/Policies";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/admin/onboarding-preview" element={<ProtectedRoute><OnboardingPreview /></ProtectedRoute>} />
             <Route path="/estate" element={<ProtectedRoute><Estate /></ProtectedRoute>} />
             <Route path="/policies" element={<Policies />} />
             <Route path="*" element={<NotFound />} />

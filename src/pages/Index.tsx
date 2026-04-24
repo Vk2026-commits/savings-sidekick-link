@@ -516,6 +516,7 @@ const Index = () => {
               Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
             </p>
           </div>
+          <PreparednessBanner />
           <iframe
             src="https://heirloom.faithnancial.com"
             title="Faithnancial Estate Planning"

@@ -118,7 +118,7 @@ export function usePreparedness() {
   }, [uid]);
 
   const items: PreparednessItem[] = useMemo(() => {
-    const hasGiving = budget.bills.some(b => /giv|tith|charit|donat/i.test(b.name) || b.category === "giving") ||
+    const hasGiving = budget.bills.some(b => /giv|tith|charit|donat/i.test(b.name) || /giv|tith|charit/i.test(String(b.category))) ||
       budget.categoryBudgets.some(c => /giv|tith|charit/i.test(c.category));
     const hasInvestmentAsset = budget.assets.some(a => /invest|retire|401|ira|brok|stock|bond/i.test(a.type) || /invest|retire|401|ira|brok/i.test(a.name));
 

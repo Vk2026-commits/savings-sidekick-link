@@ -496,22 +496,24 @@ const Index = () => {
           )
         )}
 
-        {activeTab === "estate" && (
-          <div className="glass-card overflow-hidden p-0">
-            <div className="px-4 py-3 border-b border-border">
-              <h2 className="text-lg font-semibold">Estate & Legacy Planning</h2>
-              <p className="text-xs text-muted-foreground">
-                Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
-              </p>
-            </div>
-            <iframe
-              src="https://heirloom.faithnancial.com"
-              title="Faithnancial Estate Planning"
-              className="block w-full border-0 h-[calc(100svh-200px)] md:h-[calc(100svh-220px)] min-h-[480px]"
-              allow="clipboard-read; clipboard-write; fullscreen"
-            />
+        {/* Estate iframe is always mounted to preserve its internal state/scroll position across tab switches */}
+        <div
+          className={`glass-card overflow-hidden p-0 ${activeTab === "estate" ? "block" : "hidden"}`}
+          aria-hidden={activeTab !== "estate"}
+        >
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-lg font-semibold">Estate & Legacy Planning</h2>
+            <p className="text-xs text-muted-foreground">
+              Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
+            </p>
           </div>
-        )}
+          <iframe
+            src="https://heirloom.faithnancial.com"
+            title="Faithnancial Estate Planning"
+            className="block w-full border-0 h-[calc(100svh-200px)] md:h-[calc(100svh-220px)] min-h-[480px]"
+            allow="clipboard-read; clipboard-write; fullscreen"
+          />
+        </div>
 
 
       </main>

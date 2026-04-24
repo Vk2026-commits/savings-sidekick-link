@@ -31,6 +31,9 @@ import SpendingAnalytics from "@/components/budget/SpendingAnalytics";
 import PinGate, { PinUnlockProvider } from "@/components/budget/PinGate";
 import MobileBottomNav from "@/components/budget/MobileBottomNav";
 import OnboardingWizard from "@/components/OnboardingWizard";
+import FaithCard from "@/components/budget/FaithCard";
+import PillarsCard from "@/components/budget/PillarsCard";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { getAssignedBillMonth, getMonthlyAmount } from "@/types/budget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,9 +132,7 @@ const Index = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem("faithnancial_onboarded");
-  });
+  const { state: onboardingState, loaded: onboardingLoaded, save: saveOnboarding } = useOnboarding();
   const billMatchesMonth = (bill: (typeof budget.bills)[number], month: string) => getAssignedBillMonth(bill) === month;
 
   const monthlyBillsTotal = useMemo(() => {
@@ -140,12 +141,21 @@ const Index = () => {
       .reduce((sum, b) => sum + getMonthlyAmount(b.amount, b.frequency), 0);
   }, [budget.bills, selectedMonth]);
 
-  if (showOnboarding) {
+  if (onboardingLoaded && onboardingState && !onboardingState.completed) {
     return (
-      <OnboardingWizard onComplete={() => {
-        localStorage.setItem("faithnancial_onboarded", "true");
-        setShowOnboarding(false);
-      }} />
+      <OnboardingWizard
+        onComplete={async (answers) => {
+          await saveOnboarding({ ...answers, completed: true });
+          // Route the user toward their first chosen action when sensible.
+          if (answers.firstAction === "spending_goal" || answers.firstAction === "giving_goal") {
+            setActiveTab("budget");
+          } else if (answers.firstAction === "group") {
+            setActiveTab("dashboard");
+          } else {
+            setActiveTab("dashboard");
+          }
+        }}
+      />
     );
   }
 
@@ -212,6 +222,8 @@ const Index = () => {
         {activeTab === "dashboard" && (
           <>
             <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
+            <FaithCard />
+            <PillarsCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
             <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />
           </>
         )}

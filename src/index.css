@@ -47,16 +47,16 @@
     --chart-savings: 200 80% 55%;
     --chart-bills: 38 92% 55%;
 
-    --glass: 220 18% 10% / 0.7;
-    --glass-border: 220 14% 22%;
+    --glass: 220 18% 21% / 0.7;
+    --glass-border: 220 14% 36%;
 
-    --sidebar-background: 220 18% 8%;
-    --sidebar-foreground: 210 20% 85%;
+    --sidebar-background: 220 18% 18%;
+    --sidebar-foreground: 210 20% 92%;
     --sidebar-primary: 152 60% 48%;
-    --sidebar-primary-foreground: 220 20% 6%;
-    --sidebar-accent: 220 14% 14%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 220 14% 18%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 220 14% 26%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 14% 32%;
     --sidebar-ring: 152 60% 48%;
   }
 }

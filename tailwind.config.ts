@@ -60,6 +60,11 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         "glass-border": "hsl(var(--glass-border))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          foreground: "hsl(var(--gold-foreground))",
+          soft: "hsl(var(--gold-soft))",
+        },
         "chart-income": "hsl(var(--chart-income))",
         "chart-expense": "hsl(var(--chart-expense))",
         "chart-savings": "hsl(var(--chart-savings))",

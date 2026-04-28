@@ -6,58 +6,81 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 20% 10%;
+    /* Faithnancial Design System
+       Backgrounds: #F7F9FB / #FFFFFF / #EEF2F6
+       Text: #1A1A1A / #4F5B67 / #8A97A3
+       Brand: Primary Green #1F7A5A, Secondary Green #2ECC71
+       Faith Accent (gold): #C8A951
+       Functional: Success #2ECC71, Warning #F39C12, Error #E74C3C
+       Borders: #E3E8EE / #D8DEE6 */
+
+    --background: 210 25% 98%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 152 60% 42%;
+    /* Primary Green #1F7A5A, Hover #17664B */
+    --primary: 158 60% 30%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 158 63% 25%;
+    --primary-glow: 145 63% 49%;
 
-    --secondary: 220 14% 94%;
-    --secondary-foreground: 220 20% 10%;
+    /* Secondary surface #EEF2F6 */
+    --secondary: 213 23% 95%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 40%;
+    --muted: 213 23% 95%;
+    --muted-foreground: 211 14% 36%;
+    --muted-text: 209 11% 59%; /* #8A97A3 placeholders */
 
-    --accent: 152 50% 42%;
+    /* Accent uses Secondary Green #2ECC71 for growth indicators */
+    --accent: 145 63% 49%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 50%;
+    /* Faith / Legacy Gold #C8A951 — use sparingly */
+    --gold: 45 53% 55%;
+    --gold-foreground: 0 0% 100%;
+    --gold-soft: 45 65% 69%;
+
+    --destructive: 6 78% 57%;
     --destructive-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 220 20% 10%;
+    --warning: 36 90% 51%;
+    --warning-foreground: 0 0% 100%;
 
-    --success: 152 60% 42%;
+    --success: 145 63% 49%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 14% 88%;
-    --input: 220 14% 88%;
-    --ring: 152 60% 42%;
+    --border: 213 22% 91%;
+    --input: 213 22% 91%;
+    --ring: 158 60% 30%;
 
     --radius: 0.75rem;
 
-    --chart-income: 152 60% 42%;
-    --chart-expense: 0 72% 50%;
-    --chart-savings: 200 80% 48%;
-    --chart-bills: 38 92% 50%;
+    --chart-income: 158 60% 30%;
+    --chart-expense: 6 78% 57%;
+    --chart-savings: 145 63% 49%;
+    --chart-bills: 36 90% 51%;
 
-    --glass: 0 0% 100% / 0.7;
-    --glass-border: 220 14% 88%;
+    --glass: 0 0% 100% / 0.85;
+    --glass-border: 213 22% 91%;
+
+    /* Brand gradients — use sparingly on headers / premium UI */
+    --gradient-growth: linear-gradient(135deg, hsl(158 60% 30%), hsl(145 63% 49%));
+    --gradient-faith: linear-gradient(135deg, hsl(45 53% 55%), hsl(45 65% 69%));
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 10%;
-    --sidebar-primary: 152 60% 42%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 158 60% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 94%;
-    --sidebar-accent-foreground: 220 20% 10%;
-    --sidebar-border: 220 14% 88%;
-    --sidebar-ring: 152 60% 42%;
+    --sidebar-accent: 213 23% 95%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 213 22% 91%;
+    --sidebar-ring: 158 60% 30%;
   }
 }
 
@@ -83,6 +106,23 @@
 
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .gradient-growth {
+    background: var(--gradient-growth);
+  }
+
+  .gradient-faith {
+    background: var(--gradient-faith);
+  }
+
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+    color: hsl(var(--gold-foreground));
   }
 
   .budget-grid {

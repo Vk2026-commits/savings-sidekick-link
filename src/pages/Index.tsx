@@ -214,7 +214,13 @@ const Index = () => {
       </header>
 
       {/* Main */}
-      <main className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
+      <main
+        className={
+          activeTab === "estate"
+            ? "w-full h-[calc(100svh-8rem)] md:h-[calc(100svh-5.875rem)] overflow-hidden pb-16 md:pb-0"
+            : "container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6"
+        }
+      >
         {expiredFromPro && <ReactivationBanner expiredFromPro={expiredFromPro} />}
         {activeTab === "dashboard" && (
           <EstateCompletionBanner onNavigate={(tab) => { setActiveTab("estate"); }} />
@@ -519,21 +525,17 @@ const Index = () => {
 
         {/* Estate iframe is always mounted to preserve its internal state/scroll position across tab switches */}
         <div
-          className={`glass-card overflow-hidden p-0 ${activeTab === "estate" ? "block" : "hidden"}`}
+          className={`${activeTab === "estate" ? "flex" : "hidden"} h-full w-full flex-col overflow-hidden bg-background`}
           aria-hidden={activeTab !== "estate"}
         >
-          <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-lg font-semibold">Estate & Legacy Planning</h2>
-            <p className="text-xs text-muted-foreground">
-              Powered by Faithnancial — create wills, trusts, healthcare directives, and more.
-            </p>
+          <div className="shrink-0 border-b border-border/50 bg-background">
+            <PreparednessBanner />
           </div>
-          <PreparednessBanner />
           <iframe
             src="https://heirloom.faithnancial.com"
             title="Faithnancial Estate Planning"
-            className="block w-full border-0 h-[calc(100svh-200px)] md:h-[calc(100svh-220px)] min-h-[480px]"
-            allow="clipboard-read; clipboard-write; fullscreen"
+            className="block min-h-0 w-full flex-1 border-0"
+            allow="clipboard-read; clipboard-write; fullscreen; payment"
           />
         </div>
 

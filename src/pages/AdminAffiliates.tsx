@@ -44,6 +44,12 @@ export default function AdminAffiliates() {
   const [commissionRate, setCommissionRate] = useState("20");
   const [payoutMonths, setPayoutMonths] = useState("12");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [invite, setInvite] = useState({
+    email: "", first_name: "", last_name: "", business_name: "",
+    partner_type: "individual", commission_rate: "20", payout_months: "12",
+  });
+  const [inviting, setInviting] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;

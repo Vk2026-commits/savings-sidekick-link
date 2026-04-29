@@ -78,9 +78,6 @@ export async function attributeSignup(userId: string, email: string, firstName?:
     conversion_status: "signed_up",
   });
 
-  // Increment partner counter (best-effort, not transactional)
-  await supabase.rpc("increment_partner_signups" as any, { p_partner_id: partner.id }).catch(() => {});
-
   // Clear so we don't re-attribute
   localStorage.removeItem(REF_STORAGE_KEY);
   localStorage.removeItem(REF_TIMESTAMP_KEY);

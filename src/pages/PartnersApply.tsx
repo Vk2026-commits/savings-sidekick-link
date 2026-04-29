@@ -75,7 +75,7 @@ export default function PartnersApply() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("affiliate_applications").insert(parsed.data);
+    const { error } = await supabase.from("affiliate_applications").insert([parsed.data] as any);
     setSubmitting(false);
     if (error) {
       toast({ title: "Submission failed", description: error.message, variant: "destructive" });

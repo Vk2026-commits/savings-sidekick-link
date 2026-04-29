@@ -226,20 +226,13 @@ const Index = () => {
           <EstateCompletionBanner onNavigate={(tab) => { setActiveTab("estate"); }} />
         )}
         {activeTab === "dashboard" && (
-          <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] xl:grid-cols-[22rem_1fr] gap-4 sm:gap-6 items-start">
-            {/* Left rail: 12 Pillars */}
-            <aside className="lg:sticky lg:top-24 order-2 lg:order-1">
-              <PillarsCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
-            </aside>
-
-            {/* Right column: priority dashboard content */}
-            <div className="order-1 lg:order-2 space-y-4 sm:space-y-6 min-w-0">
-              <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
-              <FaithCard />
-              <DashboardView budget={budget} />
-              <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />
-            </div>
-          </div>
+          <>
+            <DashboardView budget={budget} />
+            <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
+            <FaithCard />
+            <PillarsCard onNavigate={(tab) => setActiveTab(tab as TabId)} />
+            <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />
+          </>
         )}
 
         {activeTab === "income" && (

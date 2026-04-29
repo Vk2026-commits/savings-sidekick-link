@@ -21,6 +21,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount, ExpenseGroup } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getAssignedBillMonth, getMonthlyAmount, getYearMonthFromDateInput, suggestCategoryFromName } from "@/types/budget";
+import FilterSortDrawer, { DrawerSection, PillGroup } from "@/components/budget/FilterSortDrawer";
+
+type BillStatusFilter = "all" | "unpaid" | "paid" | "pending" | "recurring";
+type BillSortKey = "due_asc" | "due_desc" | "amount_asc" | "amount_desc" | "name_asc";
 
 interface BillsListProps {
   bills: Bill[];
@@ -76,6 +80,9 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
   const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<BillStatusFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState<BillCategory | "all">("all");
+  const [sortKey, setSortKey] = useState<BillSortKey>("due_asc");
   const [duplicateWarning, setDuplicateWarning] = useState<{ bill: Omit<Bill, "id">; match: Bill } | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);

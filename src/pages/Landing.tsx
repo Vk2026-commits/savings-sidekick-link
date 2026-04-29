@@ -132,9 +132,14 @@ export default function Landing() {
       <footer className="border-t border-border/30 py-6 px-4">
         <div className="container max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} Faithnancial. All rights reserved.</span>
-          <button onClick={() => navigate("/policies")} className="hover:text-foreground transition-colors">
-            Terms & Policies
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate("/partners/apply")} className="hover:text-foreground transition-colors">
+              Become a Partner
+            </button>
+            <button onClick={() => navigate("/policies")} className="hover:text-foreground transition-colors">
+              Terms & Policies
+            </button>
+          </div>
         </div>
       </footer>
     </div>

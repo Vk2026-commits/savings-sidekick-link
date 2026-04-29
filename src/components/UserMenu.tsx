@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User, Shield, ScrollText, Crown, XCircle, FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { LogOut, User, Shield, ScrollText, Crown, XCircle, FileText, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {

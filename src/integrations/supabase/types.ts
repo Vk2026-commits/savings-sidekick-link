@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_agreement_acceptances: {
+        Row: {
+          agreement_version: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          partner_id: string
+          signature_date: string
+          signature_name: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          agreement_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          partner_id: string
+          signature_date?: string
+          signature_name: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          agreement_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          partner_id?: string
+          signature_date?: string
+          signature_name?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       affiliate_applications: {
         Row: {
           admin_notes: string | null

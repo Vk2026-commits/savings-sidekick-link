@@ -69,13 +69,18 @@ export default function CancelFlowDialog({ open, onOpenChange, onCancelled }: Ca
   const handleFinalCancel = async () => {
     if (!user) return;
     setProcessing(true);
-    // Set discount window for reactivation
-    const discountExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-    await supabase.from("user_subscriptions" as any)
-      .update({ tier: "free", discount_expires_at: discountExpiry } as any)
-      .eq("user_id", user.id);
-    toast({ title: "Plan cancelled", description: "Your data is saved. You can reactivate anytime to restore full access." });
+    // Open Paddle customer portal so the user cancels through the billing provider.
+    // Paddle keeps access until current_period_end; webhook updates our subscriptions row.
+    const { data, error } = await supabase.functions.invoke("customer-portal", {
+      body: { environment: import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN?.startsWith("test_") ? "sandbox" : "live" },
+    });
     setProcessing(false);
+    if (error || !data?.url) {
+      toast({ title: "Couldn't open billing portal", description: "Please contact support.", variant: "destructive" });
+      return;
+    }
+    window.open(data.url, "_blank");
+    toast({ title: "Manage your plan", description: "Use the billing portal to cancel. You'll keep access until your period ends." });
     resetAndClose();
     onCancelled();
   };

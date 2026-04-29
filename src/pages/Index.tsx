@@ -174,6 +174,7 @@ function DashboardSections({
   setActiveTab: (tab: TabId) => void;
 }) {
   const [order, setOrder] = useState<DashboardSectionId[]>(() => loadDashboardOrder());
+  const [collapsedMap, setCollapsedMap] = useState<Record<string, boolean>>(() => loadCollapsedMap());
 
   useEffect(() => {
     try {
@@ -182,6 +183,14 @@ function DashboardSections({
       // ignore quota / privacy mode errors
     }
   }, [order]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DASHBOARD_COLLAPSED_KEY, JSON.stringify(collapsedMap));
+    } catch {
+      // ignore
+    }
+  }, [collapsedMap]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),

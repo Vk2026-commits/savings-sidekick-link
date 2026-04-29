@@ -183,6 +183,9 @@ export default function Admin() {
             <h1 className="text-xl font-bold tracking-tight">Admin Portal</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/admin/affiliates">
+              <Button variant="outline" size="sm">Affiliates</Button>
+            </Link>
             <Link to="/admin/onboarding-preview">
               <Button variant="outline" size="sm">Preview Onboarding</Button>
             </Link>

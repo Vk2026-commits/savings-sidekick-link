@@ -1,5 +1,6 @@
 import { Lock, Shield, Crown, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 
 interface UpgradePromptProps {
   message?: string;
@@ -22,6 +23,7 @@ const TRUST_ITEMS = [
 ];
 
 export default function UpgradePrompt({ message, className = "", showPricing = false }: UpgradePromptProps) {
+  const { openCheckout, loading } = usePaddleCheckout();
   if (showPricing) {
     return (
       <div className={`flex flex-col items-center justify-center py-12 px-4 text-center space-y-8 ${className}`}>
@@ -35,7 +37,7 @@ export default function UpgradePrompt({ message, className = "", showPricing = f
           <div className="flex-1 border border-border rounded-xl p-6 text-center">
             <p className="text-sm text-muted-foreground mb-1">Monthly</p>
             <p className="text-3xl font-bold">$9.99<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
-            <Button className="mt-4 w-full" variant="outline">Choose Monthly</Button>
+            <Button className="mt-4 w-full" variant="outline" disabled={loading} onClick={() => openCheckout("pro_monthly")}>Choose Monthly</Button>
           </div>
 
           {/* Annual */}
@@ -46,7 +48,7 @@ export default function UpgradePrompt({ message, className = "", showPricing = f
             <p className="text-sm text-muted-foreground mb-1">Annual</p>
             <p className="text-3xl font-bold text-primary">$99<span className="text-sm font-normal text-muted-foreground">/year</span></p>
             <p className="text-xs text-muted-foreground mt-1">Save ~17%</p>
-            <Button className="mt-4 w-full bg-primary">Choose Annual</Button>
+            <Button className="mt-4 w-full bg-primary" disabled={loading} onClick={() => openCheckout("pro_annual")}>Choose Annual</Button>
           </div>
         </div>
 
@@ -74,7 +76,7 @@ export default function UpgradePrompt({ message, className = "", showPricing = f
           </p>
         </div>
 
-        <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 text-lg px-8">
+        <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 text-lg px-8" disabled={loading} onClick={() => openCheckout("pro_annual")}>
           Start your 30-day free trial
         </Button>
       </div>
@@ -89,10 +91,10 @@ export default function UpgradePrompt({ message, className = "", showPricing = f
       <h3 className="text-lg font-semibold mb-2">Pro Feature</h3>
       <p className="text-muted-foreground text-sm mb-2 max-w-sm">{message || "Upgrade to Pro to unlock this feature"}</p>
       <div className="flex flex-col sm:flex-row gap-2 mt-2">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" disabled={loading} onClick={() => openCheckout("pro_monthly")}>
           $9.99/mo
         </Button>
-        <Button className="bg-primary" size="sm">
+        <Button className="bg-primary" size="sm" disabled={loading} onClick={() => openCheckout("pro_annual")}>
           <Crown className="h-3.5 w-3.5 mr-1" />
           $99/year — Save 17%
         </Button>

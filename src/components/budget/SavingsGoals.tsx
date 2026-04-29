@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Trash2, X, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import type { SavingsGoal } from "@/types/budget";
+import FilterSortDrawer, { DrawerSection, PillGroup } from "@/components/budget/FilterSortDrawer";
+
+type GoalStatusFilter = "all" | "in_progress" | "completed";
+type GoalSortKey = "progress_desc" | "progress_asc" | "target_desc" | "target_asc" | "name_asc";
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[];
@@ -22,6 +26,8 @@ const COLORS = ["hsl(152,60%,48%)", "hsl(200,80%,55%)", "hsl(38,92%,55%)", "hsl(
 export default function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", targetAmount: 0, currentAmount: 0 });
+  const [statusFilter, setStatusFilter] = useState<GoalStatusFilter>("all");
+  const [sortKey, setSortKey] = useState<GoalSortKey>("progress_desc");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,14 +37,72 @@ export default function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: Savin
     setShowForm(false);
   };
 
+  const visibleGoals = useMemo(() => {
+    const filtered = goals.filter((g) => {
+      const pct = g.targetAmount > 0 ? (g.currentAmount / g.targetAmount) * 100 : 0;
+      if (statusFilter === "completed") return pct >= 100;
+      if (statusFilter === "in_progress") return pct < 100;
+      return true;
+    });
+    const sorted = [...filtered];
+    sorted.sort((a, b) => {
+      const pa = a.targetAmount > 0 ? a.currentAmount / a.targetAmount : 0;
+      const pb = b.targetAmount > 0 ? b.currentAmount / b.targetAmount : 0;
+      switch (sortKey) {
+        case "progress_desc": return pb - pa;
+        case "progress_asc": return pa - pb;
+        case "target_desc": return b.targetAmount - a.targetAmount;
+        case "target_asc": return a.targetAmount - b.targetAmount;
+        case "name_asc": return a.name.localeCompare(b.name);
+      }
+    });
+    return sorted;
+  }, [goals, statusFilter, sortKey]);
+
+  const activeFilterCount =
+    (statusFilter !== "all" ? 1 : 0) + (sortKey !== "progress_desc" ? 1 : 0);
+
   return (
     <div className="glass-card p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-2">
         <h2 className="text-lg font-semibold">Savings Goals</h2>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-          {showForm ? "Cancel" : "Add Goal"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {goals.length > 1 && (
+            <FilterSortDrawer
+              activeCount={activeFilterCount}
+              onReset={() => { setStatusFilter("all"); setSortKey("progress_desc"); }}
+            >
+              <DrawerSection title="Status">
+                <PillGroup<GoalStatusFilter>
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "in_progress", label: "In progress" },
+                    { value: "completed", label: "Completed" },
+                  ]}
+                />
+              </DrawerSection>
+              <DrawerSection title="Sort by">
+                <PillGroup<GoalSortKey>
+                  value={sortKey}
+                  onChange={setSortKey}
+                  options={[
+                    { value: "progress_desc", label: "Progress (high→low)" },
+                    { value: "progress_asc", label: "Progress (low→high)" },
+                    { value: "target_desc", label: "Target (high→low)" },
+                    { value: "target_asc", label: "Target (low→high)" },
+                    { value: "name_asc", label: "Name (A–Z)" },
+                  ]}
+                />
+              </DrawerSection>
+            </FilterSortDrawer>
+          )}
+          <Button size="sm" onClick={() => setShowForm(!showForm)}>
+            {showForm ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+            {showForm ? "Cancel" : "Add Goal"}
+          </Button>
+        </div>
       </div>
 
       <AnimatePresence>

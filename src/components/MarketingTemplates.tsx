@@ -95,12 +95,12 @@ export default function MarketingTemplates({ referralUrl }: { referralUrl: strin
             ? `Subject: ${t.subject}\n\n${filledBody}`
             : filledBody;
           return (
-            <div key={t.id} className="border rounded-lg p-4 space-y-3 bg-card/50">
-              <div className="flex items-start justify-between gap-3">
-                <div>
+            <div key={t.id} className="border rounded-lg p-3 sm:p-4 space-y-3 bg-card/50">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                <div className="min-w-0">
                   <h4 className="font-semibold text-sm">{t.title}</h4>
                   {t.subject && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-muted-foreground mt-1 break-words">
                       <span className="font-medium">Subject:</span> {t.subject}
                     </p>
                   )}
@@ -109,6 +109,7 @@ export default function MarketingTemplates({ referralUrl }: { referralUrl: strin
                   size="sm"
                   variant={copiedId === t.id ? "default" : "secondary"}
                   onClick={() => copy(t.id, fullCopy)}
+                  className="sm:w-auto w-full sm:shrink-0"
                 >
                   {copiedId === t.id ? (
                     <><Check className="h-4 w-4 mr-1" /> Copied</>
@@ -117,7 +118,7 @@ export default function MarketingTemplates({ referralUrl }: { referralUrl: strin
                   )}
                 </Button>
               </div>
-              <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-sans bg-muted/40 rounded p-3 border">
+              <pre className="whitespace-pre-wrap text-xs sm:text-sm text-muted-foreground font-sans bg-muted/40 rounded p-3 border break-words">
                 {filledBody}
               </pre>
             </div>
@@ -145,9 +146,9 @@ export default function MarketingTemplates({ referralUrl }: { referralUrl: strin
             {(["email", "text", "social"] as const).map((c) => {
               const Icon = channelMeta[c].icon;
               return (
-                <TabsTrigger key={c} value={c} className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {channelMeta[c].label}
+                <TabsTrigger key={c} value={c} className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{channelMeta[c].label}</span>
                 </TabsTrigger>
               );
             })}

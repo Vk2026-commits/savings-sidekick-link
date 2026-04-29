@@ -19,6 +19,7 @@ import PartnersApply from "./pages/PartnersApply";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import { captureReferralFromUrl } from "@/lib/affiliate-tracking";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <PaymentTestModeBanner />
             <Routes>
               <Route path="/landing" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />

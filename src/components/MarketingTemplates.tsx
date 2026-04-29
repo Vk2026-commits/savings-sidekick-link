@@ -69,7 +69,7 @@ export default function MarketingTemplates({ referralUrl }: { referralUrl: strin
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const fillTemplate = (text: string) => text.replaceAll("[Referral Link]", referralUrl);
+  const fillTemplate = (text: string) => text.split("[Referral Link]").join(referralUrl);
 
   const copy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);

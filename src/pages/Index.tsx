@@ -441,17 +441,8 @@ const Index = () => {
         )}
 
         {activeTab === "budget" && (
-          isFree && budget.categoryBudgets.length >= FREE_LIMITS.budgetItems ? (
-            <div>
-              <CategoryBudgets
-                budgets={budget.categoryBudgets}
-                transactions={budget.transactions}
-                onAdd={budget.addCategoryBudget}
-                onUpdate={budget.updateCategoryBudget}
-                onDelete={budget.deleteCategoryBudget}
-                maxItems={FREE_LIMITS.budgetItems}
-              />
-            </div>
+          isFree ? (
+            <UpgradePrompt message="Unlock category budgeting with a Pro subscription." showPricing />
           ) : (
             <CategoryBudgets
               budgets={budget.categoryBudgets}
@@ -459,7 +450,20 @@ const Index = () => {
               onAdd={budget.addCategoryBudget}
               onUpdate={budget.updateCategoryBudget}
               onDelete={budget.deleteCategoryBudget}
-              maxItems={isFree ? FREE_LIMITS.budgetItems : undefined}
+            />
+          )
+        )}
+
+
+        {activeTab === "savings" && (
+          isFree ? (
+            <UpgradePrompt message="Unlock savings goals with a Pro subscription." showPricing />
+          ) : (
+            <SavingsGoals
+              goals={budget.savingsGoals}
+              onAdd={budget.addSavingsGoal}
+              onUpdate={budget.updateSavingsGoal}
+              onDelete={budget.deleteSavingsGoal}
             />
           )
         )}

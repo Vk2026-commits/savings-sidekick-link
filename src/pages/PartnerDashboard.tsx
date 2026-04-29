@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { maskEmail } from "@/lib/affiliate-tracking";
+import PartnerAgreement, { AGREEMENT_VERSION } from "@/components/PartnerAgreement";
 import {
   ArrowLeft, Copy, Link2, MousePointerClick, UserPlus, CreditCard,
   DollarSign, TrendingUp, CheckCircle2, Clock,

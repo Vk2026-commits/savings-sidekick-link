@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Handshake, Check, X, Copy, Pause, Play } from "lucide-react";
+import { ArrowLeft, Handshake, Check, X, Copy, Pause, Play, UserPlus } from "lucide-react";
 
 interface Application {
   id: string;

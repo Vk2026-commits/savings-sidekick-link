@@ -123,6 +123,38 @@ export default function AdminAffiliates() {
     toast({ title: "Referral link copied" });
   };
 
+  const submitInvite = async () => {
+    if (!invite.email.trim()) {
+      toast({ title: "Email required", variant: "destructive" });
+      return;
+    }
+    setInviting(true);
+    const { data, error } = await supabase.rpc("admin_invite_affiliate_partner" as any, {
+      p_email: invite.email.trim(),
+      p_first_name: invite.first_name.trim(),
+      p_last_name: invite.last_name.trim(),
+      p_partner_type: invite.partner_type,
+      p_business_name: invite.business_name.trim() || null,
+      p_commission_rate: parseFloat(invite.commission_rate),
+      p_payout_duration_months: parseInt(invite.payout_months, 10),
+    });
+    setInviting(false);
+    if (error) {
+      toast({ title: "Invite failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const code = (data as any)?.[0]?.referral_code;
+    const url = code ? `${window.location.origin}/auth?signup=true&ref=${code}` : "";
+    if (url) await navigator.clipboard.writeText(url).catch(() => {});
+    toast({
+      title: "Partner created",
+      description: code ? `Code ${code} • Referral link copied to clipboard` : "Partner created",
+    });
+    setInviteOpen(false);
+    setInvite({ email: "", first_name: "", last_name: "", business_name: "", partner_type: "individual", commission_rate: "20", payout_months: "12" });
+    setRefreshKey(k => k + 1);
+  };
+
   const pending = apps.filter(a => a.status === "pending");
 
   return (
@@ -136,6 +168,9 @@ export default function AdminAffiliates() {
               <h1 className="text-xl font-semibold">Affiliate Management</h1>
             </div>
           </div>
+          <Button size="sm" onClick={() => setInviteOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-1" /> Invite Partner
+          </Button>
         </div>
       </header>
 

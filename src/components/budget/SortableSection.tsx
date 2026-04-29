@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { ChevronDown, GripVertical } from "lucide-react";
 import { ReactNode } from "react";
 
 interface SortableSectionProps {
@@ -8,13 +8,26 @@ interface SortableSectionProps {
   children: ReactNode;
   /** When false, the drag handle is hidden and the section is not sortable. */
   enabled?: boolean;
+  /** Optional title shown in the collapsed header bar. */
+  title?: string;
+  /** Whether the section is currently collapsed. */
+  collapsed?: boolean;
+  /** Called with the next collapsed state when the user toggles. */
+  onToggleCollapsed?: (next: boolean) => void;
 }
 
 /**
- * Wraps a dashboard section so it can be reordered via a drag handle.
- * The handle is the only drag activator — content inside remains fully interactive.
+ * Wraps a dashboard section so it can be reordered via a drag handle and
+ * (optionally) collapsed/expanded without changing its position in the layout.
  */
-export default function SortableSection({ id, children, enabled = true }: SortableSectionProps) {
+export default function SortableSection({
+  id,
+  children,
+  enabled = true,
+  title,
+  collapsed = false,
+  onToggleCollapsed,
+}: SortableSectionProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled: !enabled,
@@ -25,6 +38,8 @@ export default function SortableSection({ id, children, enabled = true }: Sortab
     transition,
     zIndex: isDragging ? 50 : undefined,
   };
+
+  const collapsible = !!onToggleCollapsed;
 
   return (
     <div
@@ -43,7 +58,31 @@ export default function SortableSection({ id, children, enabled = true }: Sortab
           <GripVertical className="h-4 w-4" />
         </button>
       )}
-      {children}
+
+      {collapsible && (
+        <button
+          type="button"
+          aria-label={collapsed ? `Expand ${title ?? "section"}` : `Collapse ${title ?? "section"}`}
+          aria-expanded={!collapsed}
+          onClick={() => onToggleCollapsed!(!collapsed)}
+          className="absolute right-2 top-3 z-10 h-7 w-7 flex items-center justify-center rounded-md bg-card/70 border border-border/60 text-muted-foreground hover:text-foreground hover:bg-card opacity-70 hover:opacity-100 transition-opacity"
+        >
+          <ChevronDown className={`h-4 w-4 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+        </button>
+      )}
+
+      {collapsed ? (
+        <button
+          type="button"
+          onClick={() => onToggleCollapsed?.(false)}
+          className="w-full glass-card px-4 py-3 flex items-center justify-between text-left hover:bg-card/60 transition-colors"
+        >
+          <span className="text-sm font-semibold pl-4">{title ?? "Section"}</span>
+          <span className="text-xs text-muted-foreground pr-9">Collapsed — click to expand</span>
+        </button>
+      ) : (
+        children
+      )}
     </div>
   );
 }

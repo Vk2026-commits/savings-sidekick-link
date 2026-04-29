@@ -26,6 +26,7 @@ export default function Landing() {
         <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <span className="text-xl font-bold tracking-tight gradient-text">Faithnancial</span>
           <div className="flex items-center gap-3">
+            <Button size="sm" variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
             <Button size="sm" onClick={() => navigate("/auth?signup=true")}>Start Free Trial</Button>
           </div>
         </div>

@@ -248,7 +248,15 @@ function DashboardSections({
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
           <div className="space-y-4 sm:space-y-6 pl-3 sm:pl-4">
             {order.map((id) => (
-              <SortableSection key={id} id={id}>
+              <SortableSection
+                key={id}
+                id={id}
+                title={DASHBOARD_SECTION_TITLES[id]}
+                collapsed={!!collapsedMap[id]}
+                onToggleCollapsed={(next) =>
+                  setCollapsedMap((prev) => ({ ...prev, [id]: next }))
+                }
+              >
                 {renderSection(id)}
               </SortableSection>
             ))}

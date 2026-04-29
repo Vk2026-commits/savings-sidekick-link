@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Handshake, Check, X, Copy, Pause, Play } from "lucide-react";
+import { ArrowLeft, Handshake, Check, X, Copy, Pause, Play, UserPlus } from "lucide-react";
 
 interface Application {
   id: string;
@@ -44,6 +44,12 @@ export default function AdminAffiliates() {
   const [commissionRate, setCommissionRate] = useState("20");
   const [payoutMonths, setPayoutMonths] = useState("12");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [invite, setInvite] = useState({
+    email: "", first_name: "", last_name: "", business_name: "",
+    partner_type: "individual", commission_rate: "20", payout_months: "12",
+  });
+  const [inviting, setInviting] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -117,6 +123,38 @@ export default function AdminAffiliates() {
     toast({ title: "Referral link copied" });
   };
 
+  const submitInvite = async () => {
+    if (!invite.email.trim()) {
+      toast({ title: "Email required", variant: "destructive" });
+      return;
+    }
+    setInviting(true);
+    const { data, error } = await supabase.rpc("admin_invite_affiliate_partner" as any, {
+      p_email: invite.email.trim(),
+      p_first_name: invite.first_name.trim(),
+      p_last_name: invite.last_name.trim(),
+      p_partner_type: invite.partner_type,
+      p_business_name: invite.business_name.trim() || null,
+      p_commission_rate: parseFloat(invite.commission_rate),
+      p_payout_duration_months: parseInt(invite.payout_months, 10),
+    });
+    setInviting(false);
+    if (error) {
+      toast({ title: "Invite failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const code = (data as any)?.[0]?.referral_code;
+    const url = code ? `${window.location.origin}/auth?signup=true&ref=${code}` : "";
+    if (url) await navigator.clipboard.writeText(url).catch(() => {});
+    toast({
+      title: "Partner created",
+      description: code ? `Code ${code} • Referral link copied to clipboard` : "Partner created",
+    });
+    setInviteOpen(false);
+    setInvite({ email: "", first_name: "", last_name: "", business_name: "", partner_type: "individual", commission_rate: "20", payout_months: "12" });
+    setRefreshKey(k => k + 1);
+  };
+
   const pending = apps.filter(a => a.status === "pending");
 
   return (
@@ -130,6 +168,9 @@ export default function AdminAffiliates() {
               <h1 className="text-xl font-semibold">Affiliate Management</h1>
             </div>
           </div>
+          <Button size="sm" onClick={() => setInviteOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-1" /> Invite Partner
+          </Button>
         </div>
       </header>
 
@@ -212,6 +253,52 @@ export default function AdminAffiliates() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setReviewApp(null)}>Cancel</Button>
             <Button onClick={approve}>Approve & Generate Code</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Partner</DialogTitle>
+            <DialogDescription>Create an approved partner directly. Their referral code will be generated and copied to your clipboard.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>First name</Label>
+                <Input value={invite.first_name} onChange={e => setInvite({ ...invite, first_name: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Last name</Label>
+                <Input value={invite.last_name} onChange={e => setInvite({ ...invite, last_name: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input type="email" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} />
+              <p className="text-xs text-muted-foreground">When they sign up with this email, they'll be auto-linked to this partner record.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Business name (optional)</Label>
+              <Input value={invite.business_name} onChange={e => setInvite({ ...invite, business_name: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Commission rate (%)</Label>
+                <Input type="number" step="0.01" value={invite.commission_rate} onChange={e => setInvite({ ...invite, commission_rate: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Payout duration (months)</Label>
+                <Input type="number" value={invite.payout_months} onChange={e => setInvite({ ...invite, payout_months: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>
+            <Button onClick={submitInvite} disabled={inviting}>
+              {inviting ? "Creating…" : "Create & Copy Link"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

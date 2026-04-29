@@ -1693,6 +1693,22 @@ export type Database = {
       }
     }
     Functions: {
+      admin_invite_affiliate_partner: {
+        Args: {
+          p_business_name?: string
+          p_commission_rate?: number
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_partner_type?: string
+          p_payment_method?: string
+          p_payout_duration_months?: number
+        }
+        Returns: {
+          partner_id: string
+          referral_code: string
+        }[]
+      }
       admin_upgrade_subscription: {
         Args: { new_tier: string; target_user_id: string }
         Returns: undefined

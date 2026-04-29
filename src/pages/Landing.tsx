@@ -23,11 +23,14 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
       <header className="border-b border-border/30 backdrop-blur-md sticky top-0 z-20 bg-background/80">
-        <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-xl font-bold tracking-tight gradient-text">Faithnancial</span>
-          <div className="flex items-center gap-3">
+        <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+          <span className="text-lg sm:text-xl font-bold tracking-tight gradient-text">Faithnancial</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <Button size="sm" variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
-            <Button size="sm" onClick={() => navigate("/auth?signup=true")}>Start Free Trial</Button>
+            <Button size="sm" onClick={() => navigate("/auth?signup=true")}>
+              <span className="sm:hidden">Free Trial</span>
+              <span className="hidden sm:inline">Start Free Trial</span>
+            </Button>
           </div>
         </div>
       </header>

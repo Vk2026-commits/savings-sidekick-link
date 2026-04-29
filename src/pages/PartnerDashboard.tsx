@@ -149,15 +149,15 @@ export default function PartnerDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
-            <div>
-              <h1 className="text-xl font-semibold">Partner Dashboard</h1>
-              <p className="text-xs text-muted-foreground">Welcome back, {partner.first_name}</p>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link to="/" className="text-muted-foreground hover:text-foreground shrink-0"><ArrowLeft className="h-5 w-5" /></Link>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-semibold truncate">Partner Dashboard</h1>
+              <p className="text-xs text-muted-foreground truncate">Welcome back, {partner.first_name}</p>
             </div>
           </div>
-          <Badge className={partner.status === "active" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : ""} variant="outline">
+          <Badge className={partner.status === "active" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 shrink-0" : "shrink-0"} variant="outline">
             {partner.status}
           </Badge>
         </div>
@@ -167,14 +167,17 @@ export default function PartnerDashboard() {
         {/* Referral link card */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Link2 className="h-5 w-5 text-primary" /> Your Referral Link</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg"><Link2 className="h-5 w-5 text-primary" /> Your Referral Link</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input readOnly value={referralUrl} className="font-mono text-sm" />
-              <Button onClick={() => copy(referralUrl, "Link")} variant="secondary"><Copy className="h-4 w-4" /></Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input readOnly value={referralUrl} className="font-mono text-xs sm:text-sm" />
+              <Button onClick={() => copy(referralUrl, "Link")} variant="secondary" className="sm:w-auto w-full">
+                <Copy className="h-4 w-4 sm:mr-0 mr-2" />
+                <span className="sm:hidden">Copy link</span>
+              </Button>
             </div>
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span>Code: <code className="text-foreground font-mono">{partner.referral_code}</code></span>
               <span>Commission: <strong className="text-foreground">{partner.commission_rate}%</strong></span>
               <span>Duration: <strong className="text-foreground">{partner.payout_duration_months} months</strong></span>
@@ -187,7 +190,7 @@ export default function PartnerDashboard() {
 
 
         {/* Stat cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard icon={MousePointerClick} label="Total clicks" value={partner.total_clicks} />
           <StatCard icon={UserPlus} label="Signups" value={partner.total_signups} />
           <StatCard icon={Clock} label="On trial" value={trialCount} />
@@ -195,7 +198,7 @@ export default function PartnerDashboard() {
           <StatCard icon={Clock} label="Pending" value={`$${pendingCommission.toFixed(2)}`} accent="amber" />
           <StatCard icon={TrendingUp} label="Approved" value={`$${approvedCommission.toFixed(2)}`} accent="blue" />
           <StatCard icon={CheckCircle2} label="Paid out" value={`$${paidCommission.toFixed(2)}`} accent="emerald" />
-          <StatCard icon={DollarSign} label="Lifetime earnings" value={`$${(pendingCommission + approvedCommission + paidCommission).toFixed(2)}`} accent="emerald" />
+          <StatCard icon={DollarSign} label="Lifetime" value={`$${(pendingCommission + approvedCommission + paidCommission).toFixed(2)}`} accent="emerald" />
         </div>
 
         {/* Recent referrals */}

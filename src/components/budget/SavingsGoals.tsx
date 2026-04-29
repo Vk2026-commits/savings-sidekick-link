@@ -126,7 +126,7 @@ export default function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: Savin
         <p className="text-muted-foreground text-sm text-center py-8">No savings goals yet. Start planning for the future!</p>
       ) : (
         <div className="space-y-4">
-          {goals.map((goal) => {
+          {visibleGoals.map((goal) => {
             const pct = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
             return (
               <motion.div

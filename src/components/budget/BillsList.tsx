@@ -21,6 +21,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Bill, BillCategory, BillFrequency, BillOwner, PaymentAccount, ExpenseGroup } from "@/types/budget";
 import { CATEGORY_LABELS, FREQUENCY_LABELS, getAssignedBillMonth, getMonthlyAmount, getYearMonthFromDateInput, suggestCategoryFromName } from "@/types/budget";
+import FilterSortDrawer, { DrawerSection, PillGroup } from "@/components/budget/FilterSortDrawer";
+
+type BillStatusFilter = "all" | "unpaid" | "paid" | "pending" | "recurring";
+type BillSortKey = "due_asc" | "due_desc" | "amount_asc" | "amount_desc" | "name_asc";
 
 interface BillsListProps {
   bills: Bill[];
@@ -76,6 +80,9 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
   const [reviewForm, setReviewForm] = useState<{ amount: number; dueDate: number }>({ amount: 0, dueDate: 1 });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<BillStatusFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState<BillCategory | "all">("all");
+  const [sortKey, setSortKey] = useState<BillSortKey>("due_asc");
   const [duplicateWarning, setDuplicateWarning] = useState<{ bill: Omit<Bill, "id">; match: Bill } | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -240,9 +247,45 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
     );
   };
 
-  const pendingBills = filteredBills.filter((b) => b.pendingReview && matchesSearch(b));
-  const confirmedBills = filteredBills.filter((b) => !b.pendingReview && matchesSearch(b));
+  const matchesCategory = (bill: Bill) =>
+    categoryFilter === "all" ? true : bill.category === categoryFilter;
+
+  const matchesStatus = (bill: Bill) => {
+    switch (statusFilter) {
+      case "paid": return bill.isPaid;
+      case "unpaid": return !bill.isPaid && !bill.pendingReview;
+      case "pending": return !!bill.pendingReview;
+      case "recurring": return !!bill.isRecurring;
+      default: return true;
+    }
+  };
+
+  const sortBills = (list: Bill[]) => {
+    const arr = [...list];
+    switch (sortKey) {
+      case "due_asc": arr.sort((a, b) => a.dueDate - b.dueDate); break;
+      case "due_desc": arr.sort((a, b) => b.dueDate - a.dueDate); break;
+      case "amount_asc": arr.sort((a, b) => a.amount - b.amount); break;
+      case "amount_desc": arr.sort((a, b) => b.amount - a.amount); break;
+      case "name_asc": arr.sort((a, b) => a.name.localeCompare(b.name)); break;
+    }
+    return arr;
+  };
+
+  const pendingBills = sortBills(filteredBills.filter((b) => b.pendingReview && matchesSearch(b) && matchesCategory(b) && matchesStatus(b)));
+  const confirmedBills = sortBills(filteredBills.filter((b) => !b.pendingReview && matchesSearch(b) && matchesCategory(b) && matchesStatus(b)));
   const hasBills = filteredBills.length > 0;
+
+  const activeFilterCount =
+    (statusFilter !== "all" ? 1 : 0) +
+    (categoryFilter !== "all" ? 1 : 0) +
+    (sortKey !== "due_asc" ? 1 : 0);
+
+  const resetFilters = () => {
+    setStatusFilter("all");
+    setCategoryFilter("all");
+    setSortKey("due_asc");
+  };
 
   return (
     <div className="glass-card p-5">
@@ -398,24 +441,67 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
         )}
       </AnimatePresence>
 
-      {/* Search bar */}
+      {/* Search + Filter/Sort */}
       {hasBills && (
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or amount..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bills..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <FilterSortDrawer activeCount={activeFilterCount} onReset={resetFilters}>
+            <DrawerSection title="Status">
+              <PillGroup<BillStatusFilter>
+                value={statusFilter}
+                onChange={setStatusFilter}
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "unpaid", label: "Unpaid" },
+                  { value: "paid", label: "Paid" },
+                  { value: "pending", label: "Needs review" },
+                  { value: "recurring", label: "Recurring" },
+                ]}
+              />
+            </DrawerSection>
+            <DrawerSection title="Category">
+              <PillGroup<BillCategory | "all">
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                options={[
+                  { value: "all", label: "All" },
+                  ...Object.entries(CATEGORY_LABELS).map(([k, v]) => ({
+                    value: k as BillCategory,
+                    label: v as string,
+                  })),
+                ]}
+              />
+            </DrawerSection>
+            <DrawerSection title="Sort by">
+              <PillGroup<BillSortKey>
+                value={sortKey}
+                onChange={setSortKey}
+                options={[
+                  { value: "due_asc", label: "Due day ↑" },
+                  { value: "due_desc", label: "Due day ↓" },
+                  { value: "amount_desc", label: "Amount (high→low)" },
+                  { value: "amount_asc", label: "Amount (low→high)" },
+                  { value: "name_asc", label: "Name (A–Z)" },
+                ]}
+              />
+            </DrawerSection>
+          </FilterSortDrawer>
         </div>
       )}
 
@@ -501,7 +587,7 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
             <span className="w-14" />
           </div>
           <AnimatePresence>
-            {[...confirmedBills].reverse().map((bill) => {
+            {confirmedBills.map((bill) => {
               const isEditing = editingId === bill.id;
 
               if (isEditing) {

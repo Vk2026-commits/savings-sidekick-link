@@ -67,27 +67,36 @@ export default function PartnerDashboard() {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [hasSigned, setHasSigned] = useState<boolean | null>(null);
+
+  const loadData = async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data: p } = await supabase
+      .from("affiliate_partners")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (p) {
+      setPartner(p as any);
+      const [{ data: refs }, { data: comms }, { data: sig }] = await Promise.all([
+        supabase.from("affiliate_referrals").select("*").eq("partner_id", p.id).order("created_at", { ascending: false }).limit(50),
+        supabase.from("affiliate_commissions").select("*").eq("partner_id", p.id).order("collected_at", { ascending: false }).limit(50),
+        supabase.from("affiliate_agreement_acceptances").select("id").eq("partner_id", p.id).eq("agreement_version", AGREEMENT_VERSION).maybeSingle(),
+      ]);
+      setReferrals((refs as any) ?? []);
+      setCommissions((comms as any) ?? []);
+      setHasSigned(!!sig);
+    } else {
+      setHasSigned(null);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (!user) return;
-    (async () => {
-      setLoading(true);
-      const { data: p } = await supabase
-        .from("affiliate_partners")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (p) {
-        setPartner(p as any);
-        const [{ data: refs }, { data: comms }] = await Promise.all([
-          supabase.from("affiliate_referrals").select("*").eq("partner_id", p.id).order("created_at", { ascending: false }).limit(50),
-          supabase.from("affiliate_commissions").select("*").eq("partner_id", p.id).order("collected_at", { ascending: false }).limit(50),
-        ]);
-        setReferrals((refs as any) ?? []);
-        setCommissions((comms as any) ?? []);
-      }
-      setLoading(false);
-    })();
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;

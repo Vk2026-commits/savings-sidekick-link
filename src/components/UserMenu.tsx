@@ -37,6 +37,8 @@ export default function UserMenu() {
       .then(({ data }) => setIsPartner(!!data));
   }, [user]);
 
+  if (!user) return null;
+
   const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "User";
 
   return (

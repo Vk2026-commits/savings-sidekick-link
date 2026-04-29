@@ -69,18 +69,26 @@ export default function CancelFlowDialog({ open, onOpenChange, onCancelled }: Ca
   const handleFinalCancel = async () => {
     if (!user) return;
     setProcessing(true);
-    // Open Paddle customer portal so the user cancels through the billing provider.
-    // Paddle keeps access until current_period_end; webhook updates our subscriptions row.
-    const { data, error } = await supabase.functions.invoke("customer-portal", {
-      body: { environment: import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN?.startsWith("test_") ? "sandbox" : "live" },
+    const environment = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN?.startsWith("test_") ? "sandbox" : "live";
+    // Cancel directly via Paddle API (avoids the sandbox customer portal which is often
+    // blocked by ERR_BLOCKED_BY_RESPONSE). Cancellation is scheduled for period end —
+    // user keeps access until current_period_end. Webhook updates our subscriptions row.
+    const { data, error } = await supabase.functions.invoke("cancel-subscription", {
+      body: { environment },
     });
     setProcessing(false);
-    if (error || !data?.url) {
-      toast({ title: "Couldn't open billing portal", description: "Please contact support.", variant: "destructive" });
+    if (error || !data?.success) {
+      toast({
+        title: "Couldn't cancel subscription",
+        description: error?.message || "Please contact support.",
+        variant: "destructive",
+      });
       return;
     }
-    window.open(data.url, "_blank");
-    toast({ title: "Manage your plan", description: "Use the billing portal to cancel. You'll keep access until your period ends." });
+    toast({
+      title: "Subscription canceled",
+      description: "You'll keep Pro access until the end of your current billing period.",
+    });
     resetAndClose();
     onCancelled();
   };

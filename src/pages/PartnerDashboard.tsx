@@ -182,6 +182,10 @@ export default function PartnerDashboard() {
           </CardContent>
         </Card>
 
+        {/* Marketing templates */}
+        <MarketingTemplates referralUrl={referralUrl} />
+
+
         {/* Stat cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard icon={MousePointerClick} label="Total clicks" value={partner.total_clicks} />

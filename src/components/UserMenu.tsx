@@ -24,8 +24,18 @@ export default function UserMenu() {
   const navigate = useNavigate();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [isPartner, setIsPartner] = useState(false);
 
-  if (!user) return null;
+  useEffect(() => {
+    if (!user) { setIsPartner(false); return; }
+    supabase
+      .from("affiliate_partners")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle()
+      .then(({ data }) => setIsPartner(!!data));
+  }, [user]);
 
   const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "User";
 

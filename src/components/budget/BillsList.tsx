@@ -441,24 +441,67 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
         )}
       </AnimatePresence>
 
-      {/* Search bar */}
+      {/* Search + Filter/Sort */}
       {hasBills && (
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or amount..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bills..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <FilterSortDrawer activeCount={activeFilterCount} onReset={resetFilters}>
+            <DrawerSection title="Status">
+              <PillGroup<BillStatusFilter>
+                value={statusFilter}
+                onChange={setStatusFilter}
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "unpaid", label: "Unpaid" },
+                  { value: "paid", label: "Paid" },
+                  { value: "pending", label: "Needs review" },
+                  { value: "recurring", label: "Recurring" },
+                ]}
+              />
+            </DrawerSection>
+            <DrawerSection title="Category">
+              <PillGroup<BillCategory | "all">
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                options={[
+                  { value: "all", label: "All" },
+                  ...Object.entries(CATEGORY_LABELS).map(([k, v]) => ({
+                    value: k as BillCategory,
+                    label: v as string,
+                  })),
+                ]}
+              />
+            </DrawerSection>
+            <DrawerSection title="Sort by">
+              <PillGroup<BillSortKey>
+                value={sortKey}
+                onChange={setSortKey}
+                options={[
+                  { value: "due_asc", label: "Due day ↑" },
+                  { value: "due_desc", label: "Due day ↓" },
+                  { value: "amount_desc", label: "Amount (high→low)" },
+                  { value: "amount_asc", label: "Amount (low→high)" },
+                  { value: "name_asc", label: "Name (A–Z)" },
+                ]}
+              />
+            </DrawerSection>
+          </FilterSortDrawer>
         </div>
       )}
 

@@ -256,6 +256,52 @@ export default function AdminAffiliates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Partner</DialogTitle>
+            <DialogDescription>Create an approved partner directly. Their referral code will be generated and copied to your clipboard.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>First name</Label>
+                <Input value={invite.first_name} onChange={e => setInvite({ ...invite, first_name: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Last name</Label>
+                <Input value={invite.last_name} onChange={e => setInvite({ ...invite, last_name: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input type="email" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} />
+              <p className="text-xs text-muted-foreground">When they sign up with this email, they'll be auto-linked to this partner record.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Business name (optional)</Label>
+              <Input value={invite.business_name} onChange={e => setInvite({ ...invite, business_name: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Commission rate (%)</Label>
+                <Input type="number" step="0.01" value={invite.commission_rate} onChange={e => setInvite({ ...invite, commission_rate: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Payout duration (months)</Label>
+                <Input type="number" value={invite.payout_months} onChange={e => setInvite({ ...invite, payout_months: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>
+            <Button onClick={submitInvite} disabled={inviting}>
+              {inviting ? "Creating…" : "Create & Copy Link"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

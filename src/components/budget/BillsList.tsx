@@ -247,9 +247,45 @@ export default function BillsList({ bills, allBills, onAdd, onUpdate, onDelete, 
     );
   };
 
-  const pendingBills = filteredBills.filter((b) => b.pendingReview && matchesSearch(b));
-  const confirmedBills = filteredBills.filter((b) => !b.pendingReview && matchesSearch(b));
+  const matchesCategory = (bill: Bill) =>
+    categoryFilter === "all" ? true : bill.category === categoryFilter;
+
+  const matchesStatus = (bill: Bill) => {
+    switch (statusFilter) {
+      case "paid": return bill.isPaid;
+      case "unpaid": return !bill.isPaid && !bill.pendingReview;
+      case "pending": return !!bill.pendingReview;
+      case "recurring": return !!bill.isRecurring;
+      default: return true;
+    }
+  };
+
+  const sortBills = (list: Bill[]) => {
+    const arr = [...list];
+    switch (sortKey) {
+      case "due_asc": arr.sort((a, b) => a.dueDate - b.dueDate); break;
+      case "due_desc": arr.sort((a, b) => b.dueDate - a.dueDate); break;
+      case "amount_asc": arr.sort((a, b) => a.amount - b.amount); break;
+      case "amount_desc": arr.sort((a, b) => b.amount - a.amount); break;
+      case "name_asc": arr.sort((a, b) => a.name.localeCompare(b.name)); break;
+    }
+    return arr;
+  };
+
+  const pendingBills = sortBills(filteredBills.filter((b) => b.pendingReview && matchesSearch(b) && matchesCategory(b) && matchesStatus(b)));
+  const confirmedBills = sortBills(filteredBills.filter((b) => !b.pendingReview && matchesSearch(b) && matchesCategory(b) && matchesStatus(b)));
   const hasBills = filteredBills.length > 0;
+
+  const activeFilterCount =
+    (statusFilter !== "all" ? 1 : 0) +
+    (categoryFilter !== "all" ? 1 : 0) +
+    (sortKey !== "due_asc" ? 1 : 0);
+
+  const resetFilters = () => {
+    setStatusFilter("all");
+    setCategoryFilter("all");
+    setSortKey("due_asc");
+  };
 
   return (
     <div className="glass-card p-5">

@@ -18,6 +18,7 @@ import Policies from "./pages/Policies";
 import PartnersApply from "./pages/PartnersApply";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import AdminAffiliates from "./pages/AdminAffiliates";
+import Unsubscribe from "./pages/Unsubscribe";
 import { captureReferralFromUrl } from "@/lib/affiliate-tracking";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
@@ -45,6 +46,7 @@ const App = () => {
               <Route path="/partner-dashboard" element={<ProtectedRoute><PartnerDashboard /></ProtectedRoute>} />
               <Route path="/estate" element={<ProtectedRoute><Estate /></ProtectedRoute>} />
               <Route path="/policies" element={<Policies />} />
+              <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

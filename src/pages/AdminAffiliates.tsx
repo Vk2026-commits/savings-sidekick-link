@@ -69,7 +69,7 @@ export default function AdminAffiliates() {
 
   const approve = async () => {
     if (!reviewApp) return;
-    const { error } = await supabase.rpc("approve_affiliate_application" as any, {
+    const { data: newPartnerId, error } = await supabase.rpc("approve_affiliate_application" as any, {
       app_id: reviewApp.id,
       custom_commission_rate: parseFloat(commissionRate),
       custom_payout_months: parseInt(payoutMonths, 10),
@@ -78,7 +78,37 @@ export default function AdminAffiliates() {
       toast({ title: "Approval failed", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Partner approved", description: "Referral code generated." });
+
+    // Send welcome email
+    try {
+      const { data: partnerRow } = await supabase
+        .from("affiliate_partners")
+        .select("referral_code, commission_rate, payout_duration_months")
+        .eq("id", newPartnerId as any)
+        .maybeSingle();
+      const code = (partnerRow as any)?.referral_code;
+      if (code) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "affiliate-welcome",
+            recipientEmail: reviewApp.email,
+            idempotencyKey: `affiliate-welcome-${newPartnerId}`,
+            templateData: {
+              firstName: reviewApp.first_name || "",
+              referralCode: code,
+              referralLink: `${window.location.origin}/auth?signup=true&ref=${code}`,
+              commissionRate: (partnerRow as any)?.commission_rate ?? parseFloat(commissionRate),
+              payoutDurationMonths: (partnerRow as any)?.payout_duration_months ?? parseInt(payoutMonths, 10),
+              portalUrl: `${window.location.origin}/partner-dashboard`,
+            },
+          },
+        });
+      }
+    } catch (e: any) {
+      console.error("Welcome email failed", e);
+    }
+
+    toast({ title: "Partner approved", description: "Referral code generated and welcome email sent." });
     setReviewApp(null);
     setRefreshKey(k => k + 1);
   };
@@ -144,11 +174,36 @@ export default function AdminAffiliates() {
       return;
     }
     const code = (data as any)?.[0]?.referral_code;
+    const partnerId = (data as any)?.[0]?.partner_id;
     const url = code ? `${window.location.origin}/auth?signup=true&ref=${code}` : "";
     if (url) await navigator.clipboard.writeText(url).catch(() => {});
+
+    // Send welcome email
+    if (code) {
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "affiliate-welcome",
+            recipientEmail: invite.email.trim(),
+            idempotencyKey: `affiliate-welcome-${partnerId || code}`,
+            templateData: {
+              firstName: invite.first_name.trim(),
+              referralCode: code,
+              referralLink: url,
+              commissionRate: parseFloat(invite.commission_rate),
+              payoutDurationMonths: parseInt(invite.payout_months, 10),
+              portalUrl: `${window.location.origin}/partner-dashboard`,
+            },
+          },
+        });
+      } catch (e: any) {
+        console.error("Welcome email failed", e);
+      }
+    }
+
     toast({
       title: "Partner created",
-      description: code ? `Code ${code} • Referral link copied to clipboard` : "Partner created",
+      description: code ? `Code ${code} • Link copied & welcome email sent` : "Partner created",
     });
     setInviteOpen(false);
     setInvite({ email: "", first_name: "", last_name: "", business_name: "", partner_type: "individual", commission_rate: "20", payout_months: "12" });

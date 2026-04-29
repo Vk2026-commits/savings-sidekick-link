@@ -469,14 +469,6 @@ const Index = () => {
         )}
 
 
-        {activeTab === "savings" && (
-          <SavingsGoals
-            goals={budget.savingsGoals}
-            onAdd={budget.addSavingsGoal}
-            onUpdate={budget.updateSavingsGoal}
-            onDelete={budget.deleteSavingsGoal}
-          />
-        )}
 
         {activeTab === "networth" && (
           <PinGate label="Net Worth">

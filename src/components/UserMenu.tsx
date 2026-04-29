@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User, Shield, ScrollText, Crown, XCircle, FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { LogOut, User, Shield, ScrollText, Crown, XCircle, FileText, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,6 +24,18 @@ export default function UserMenu() {
   const navigate = useNavigate();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [isPartner, setIsPartner] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsPartner(false); return; }
+    supabase
+      .from("affiliate_partners")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle()
+      .then(({ data }) => setIsPartner(!!data));
+  }, [user]);
 
   if (!user) return null;
 
@@ -48,6 +61,11 @@ export default function UserMenu() {
           {isAdmin && (
             <DropdownMenuItem onClick={() => navigate("/admin")}>
               <Shield className="h-4 w-4 mr-2" /> Admin Portal
+            </DropdownMenuItem>
+          )}
+          {isPartner && (
+            <DropdownMenuItem onClick={() => navigate("/partner-dashboard")}>
+              <Handshake className="h-4 w-4 mr-2" /> Partner Dashboard
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => navigate("/estate")}>

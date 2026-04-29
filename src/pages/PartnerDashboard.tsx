@@ -120,7 +120,19 @@ export default function PartnerDashboard() {
     );
   }
 
+  if (hasSigned === false) {
+    return (
+      <PartnerAgreement
+        partnerId={partner.id}
+        userId={user.id}
+        defaultName={`${partner.first_name ?? ""}`.trim()}
+        onSigned={() => setHasSigned(true)}
+      />
+    );
+  }
+
   const referralUrl = `${window.location.origin}/auth?signup=true&ref=${partner.referral_code}`;
+
 
   const pendingCommission = commissions.filter(c => c.status === "pending" || c.status === "held").reduce((s, c) => s + Number(c.commission_amount), 0);
   const approvedCommission = commissions.filter(c => c.status === "approved").reduce((s, c) => s + Number(c.commission_amount), 0);

@@ -129,6 +129,26 @@ const COMING_SOON_TABS: TabId[] = [];
 const DASHBOARD_SECTION_IDS = ["overview", "preparedness", "faith", "pillars", "family"] as const;
 type DashboardSectionId = typeof DASHBOARD_SECTION_IDS[number];
 const DASHBOARD_ORDER_KEY = "faithnancial.dashboardOrder.v1";
+const DASHBOARD_COLLAPSED_KEY = "faithnancial.dashboardCollapsed.v1";
+
+const DASHBOARD_SECTION_TITLES: Record<DashboardSectionId, string> = {
+  overview: "Budget Overview & YTD",
+  preparedness: "Preparedness",
+  faith: "Faith + Finance",
+  pillars: "The 12 Pillars",
+  family: "Family Readiness",
+};
+
+function loadCollapsedMap(): Record<string, boolean> {
+  try {
+    const raw = localStorage.getItem(DASHBOARD_COLLAPSED_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
 function loadDashboardOrder(): DashboardSectionId[] {
   try {
@@ -154,6 +174,7 @@ function DashboardSections({
   setActiveTab: (tab: TabId) => void;
 }) {
   const [order, setOrder] = useState<DashboardSectionId[]>(() => loadDashboardOrder());
+  const [collapsedMap, setCollapsedMap] = useState<Record<string, boolean>>(() => loadCollapsedMap());
 
   useEffect(() => {
     try {
@@ -162,6 +183,14 @@ function DashboardSections({
       // ignore quota / privacy mode errors
     }
   }, [order]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DASHBOARD_COLLAPSED_KEY, JSON.stringify(collapsedMap));
+    } catch {
+      // ignore
+    }
+  }, [collapsedMap]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -219,7 +248,15 @@ function DashboardSections({
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
           <div className="space-y-4 sm:space-y-6 pl-3 sm:pl-4">
             {order.map((id) => (
-              <SortableSection key={id} id={id}>
+              <SortableSection
+                key={id}
+                id={id}
+                title={DASHBOARD_SECTION_TITLES[id]}
+                collapsed={!!collapsedMap[id]}
+                onToggleCollapsed={(next) =>
+                  setCollapsedMap((prev) => ({ ...prev, [id]: next }))
+                }
+              >
                 {renderSection(id)}
               </SortableSection>
             ))}

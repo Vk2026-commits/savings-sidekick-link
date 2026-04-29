@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,10 @@ import OnboardingPreview from "./pages/OnboardingPreview";
 import Estate from "./pages/Estate";
 import NotFound from "./pages/NotFound";
 import Policies from "./pages/Policies";
+import PartnersApply from "./pages/PartnersApply";
+import PartnerDashboard from "./pages/PartnerDashboard";
+import AdminAffiliates from "./pages/AdminAffiliates";
+import { captureReferralFromUrl } from "@/lib/affiliate-tracking";
 
 const queryClient = new QueryClient();
 

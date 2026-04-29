@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { maskEmail } from "@/lib/affiliate-tracking";
 import PartnerAgreement, { AGREEMENT_VERSION } from "@/components/PartnerAgreement";
+import MarketingTemplates from "@/components/MarketingTemplates";
 import {
   ArrowLeft, Copy, Link2, MousePointerClick, UserPlus, CreditCard,
   DollarSign, TrendingUp, CheckCircle2, Clock,
@@ -180,6 +181,10 @@ export default function PartnerDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Marketing templates */}
+        <MarketingTemplates referralUrl={referralUrl} />
+
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

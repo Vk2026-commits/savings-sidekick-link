@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Wallet, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { attributeSignup } from "@/lib/affiliate-tracking";
 
 export default function Auth() {
   const { user, loading } = useAuth();
@@ -45,7 +46,7 @@ export default function Auth() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -57,6 +58,9 @@ export default function Auth() {
     if (error) {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });
     } else {
+      if (data.user) {
+        await attributeSignup(data.user.id, email, displayName).catch(() => {});
+      }
       toast({ title: "Check your email", description: "We sent you a confirmation link. Please verify your email to sign in." });
     }
   };

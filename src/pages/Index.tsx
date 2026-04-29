@@ -125,6 +125,112 @@ type TabId = typeof tabs[number]["id"];
 const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
 const COMING_SOON_TABS: TabId[] = [];
 
+// --- Dashboard sortable sections -------------------------------------------
+const DASHBOARD_SECTION_IDS = ["overview", "preparedness", "faith", "pillars", "family"] as const;
+type DashboardSectionId = typeof DASHBOARD_SECTION_IDS[number];
+const DASHBOARD_ORDER_KEY = "faithnancial.dashboardOrder.v1";
+
+function loadDashboardOrder(): DashboardSectionId[] {
+  try {
+    const raw = localStorage.getItem(DASHBOARD_ORDER_KEY);
+    if (!raw) return [...DASHBOARD_SECTION_IDS];
+    const parsed = JSON.parse(raw) as string[];
+    const valid = parsed.filter((id): id is DashboardSectionId =>
+      (DASHBOARD_SECTION_IDS as readonly string[]).includes(id)
+    );
+    // Append any missing sections (e.g. new ones added later) at the end.
+    const missing = DASHBOARD_SECTION_IDS.filter((id) => !valid.includes(id));
+    return [...valid, ...missing];
+  } catch {
+    return [...DASHBOARD_SECTION_IDS];
+  }
+}
+
+function DashboardSections({
+  budget,
+  setActiveTab,
+}: {
+  budget: ReturnType<typeof useBudget>;
+  setActiveTab: (tab: TabId) => void;
+}) {
+  const [order, setOrder] = useState<DashboardSectionId[]>(() => loadDashboardOrder());
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DASHBOARD_ORDER_KEY, JSON.stringify(order));
+    } catch {
+      // ignore quota / privacy mode errors
+    }
+  }, [order]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setOrder((prev) => {
+      const oldIndex = prev.indexOf(active.id as DashboardSectionId);
+      const newIndex = prev.indexOf(over.id as DashboardSectionId);
+      if (oldIndex < 0 || newIndex < 0) return prev;
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
+
+  const renderSection = (id: DashboardSectionId) => {
+    switch (id) {
+      case "overview":
+        return <DashboardView budget={budget} />;
+      case "preparedness":
+        return <PreparednessCard onNavigate={(tab) => setActiveTab(tab as TabId)} />;
+      case "faith":
+        return <FaithCard />;
+      case "pillars":
+        return <PillarsCard onNavigate={(tab) => setActiveTab(tab as TabId)} />;
+      case "family":
+        return <FamilyReadinessChecklist onNavigate={(tab) => setActiveTab(tab as TabId)} />;
+    }
+  };
+
+  const isDefault =
+    order.length === DASHBOARD_SECTION_IDS.length &&
+    order.every((id, i) => id === DASHBOARD_SECTION_IDS[i]);
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span className="hidden sm:inline">Tip: drag the handle on the left of any card to rearrange your dashboard.</span>
+        <span className="sm:hidden">Drag the handle to rearrange.</span>
+        {!isDefault && (
+          <button
+            type="button"
+            onClick={() => setOrder([...DASHBOARD_SECTION_IDS])}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset layout
+          </button>
+        )}
+      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4 sm:space-y-6 pl-3 sm:pl-4">
+            {order.map((id) => (
+              <SortableSection key={id} id={id}>
+                {renderSection(id)}
+              </SortableSection>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+}
+// ---------------------------------------------------------------------------
+
 const Index = () => {
   const budget = useBudget();
   const isMobile = useIsMobile();

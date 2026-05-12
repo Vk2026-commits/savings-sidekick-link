@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
+import AffiliateAdminPanel from "@/components/AffiliateAdminPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +65,7 @@ function statusBadge(status: string) {
 
 export default function PartnerDashboard() {
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [partner, setPartner] = useState<Partner | null>(null);
@@ -105,6 +108,29 @@ export default function PartnerDashboard() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading partner data…</div>;
 
   if (!partner) {
+    if (isAdmin) {
+      return (
+        <div className="min-h-screen bg-background">
+          <header className="border-b bg-card/50 backdrop-blur">
+            <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Link to="/" className="text-muted-foreground hover:text-foreground shrink-0"><ArrowLeft className="h-5 w-5" /></Link>
+                <h1 className="text-lg sm:text-xl font-semibold truncate">Partner Dashboard</h1>
+              </div>
+              <Badge variant="outline" className="shrink-0">Admin view</Badge>
+            </div>
+          </header>
+          <main className="max-w-7xl mx-auto p-4 space-y-6">
+            <Card>
+              <CardContent className="pt-6 text-sm text-muted-foreground">
+                You don't have a personal partner account, but as an admin you can manage all affiliate partners and applications below.
+              </CardContent>
+            </Card>
+            <AffiliateAdminPanel />
+          </main>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
@@ -270,6 +296,13 @@ export default function PartnerDashboard() {
         <p className="text-xs text-muted-foreground text-center pt-4">
           Commissions are subject to a 30-day hold period for refund protection. Minimum payout: $50.
         </p>
+
+        {isAdmin && (
+          <>
+            <div className="border-t pt-6" />
+            <AffiliateAdminPanel />
+          </>
+        )}
       </main>
     </div>
   );

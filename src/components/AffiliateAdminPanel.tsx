@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tabs, TabsContent, TabsList, TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Handshake, Check, X, Copy, Pause, Play, UserPlus } from "lucide-react";
+import { Handshake, Check, X, Copy, Pause, Play, UserPlus } from "lucide-react";
 
 interface Application {
   id: string;
@@ -34,9 +30,8 @@ interface Partner {
   created_at: string;
 }
 
-export default function AdminAffiliates() {
-  const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useAdmin();
+export default function AffiliateAdminPanel() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [apps, setApps] = useState<Application[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -52,7 +47,6 @@ export default function AdminAffiliates() {
   const [inviting, setInviting] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin) return;
     (async () => {
       const [{ data: a }, { data: p }] = await Promise.all([
         supabase.from("affiliate_applications").select("*").order("created_at", { ascending: false }),
@@ -61,11 +55,7 @@ export default function AdminAffiliates() {
       setApps((a as any) ?? []);
       setPartners((p as any) ?? []);
     })();
-  }, [isAdmin, refreshKey]);
-
-  if (authLoading || roleLoading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
-  if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  }, [refreshKey]);
 
   const approve = async () => {
     if (!reviewApp) return;
@@ -78,8 +68,6 @@ export default function AdminAffiliates() {
       toast({ title: "Approval failed", description: error.message, variant: "destructive" });
       return;
     }
-
-    // Send welcome email
     try {
       const { data: partnerRow } = await supabase
         .from("affiliate_partners")
@@ -114,6 +102,7 @@ export default function AdminAffiliates() {
   };
 
   const reject = async (app: Application) => {
+    if (!user) return;
     const { error } = await supabase
       .from("affiliate_applications")
       .update({ status: "rejected", reviewed_by: user.id, reviewed_at: new Date().toISOString() })
@@ -178,7 +167,6 @@ export default function AdminAffiliates() {
     const url = code ? `${window.location.origin}/auth?signup=true&ref=${code}` : "";
     if (url) await navigator.clipboard.writeText(url).catch(() => {});
 
-    // Send welcome email
     if (code) {
       try {
         await supabase.functions.invoke("send-transactional-email", {
@@ -213,79 +201,72 @@ export default function AdminAffiliates() {
   const pending = apps.filter(a => a.status === "pending");
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/admin" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
-            <div className="flex items-center gap-2">
-              <Handshake className="h-5 w-5 text-primary" />
-              <h1 className="text-xl font-semibold">Affiliate Management</h1>
-            </div>
-          </div>
-          <Button size="sm" onClick={() => setInviteOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-1" /> Invite Partner
-          </Button>
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Handshake className="h-5 w-5 text-primary" />
+          <h2 className="text-lg sm:text-xl font-semibold">Affiliate Management (Admin)</h2>
         </div>
-      </header>
+        <Button size="sm" onClick={() => setInviteOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-1" /> Invite Partner
+        </Button>
+      </div>
 
-      <main className="max-w-7xl mx-auto p-4 space-y-6">
-        <Tabs defaultValue="applications" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="applications">
-              Applications {pending.length > 0 && <Badge className="ml-2" variant="secondary">{pending.length}</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="partners">Active Partners ({partners.filter(p => p.status === "active").length})</TabsTrigger>
-            <TabsTrigger value="suspended">Suspended ({partners.filter(p => p.status === "suspended").length})</TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="applications" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="applications">
+            Applications {pending.length > 0 && <Badge className="ml-2" variant="secondary">{pending.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="partners">Active Partners ({partners.filter(p => p.status === "active").length})</TabsTrigger>
+          <TabsTrigger value="suspended">Suspended ({partners.filter(p => p.status === "suspended").length})</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="applications">
-            <Card>
-              <CardHeader><CardTitle>Partner Applications</CardTitle></CardHeader>
-              <CardContent>
-                {apps.length === 0 ? (
-                  <p className="text-muted-foreground text-sm py-8 text-center">No applications yet.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {apps.map(a => (
-                      <div key={a.id} className="border rounded-lg p-4 space-y-2">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <strong>{a.first_name} {a.last_name}</strong>
-                              <Badge variant="outline" className="text-xs">{a.partner_type.replace("_", " ")}</Badge>
-                              <Badge variant={a.status === "pending" ? "default" : a.status === "approved" ? "secondary" : "destructive"} className="text-xs">{a.status}</Badge>
-                            </div>
-                            <div className="text-sm text-muted-foreground mt-1">
-                              {a.email} {a.business_name && `• ${a.business_name}`} {a.website && <a href={a.website} target="_blank" rel="noreferrer" className="text-primary hover:underline">• site</a>}
-                            </div>
-                            {a.audience_size && <div className="text-xs text-muted-foreground mt-1">Audience: {a.audience_size}</div>}
-                            <p className="text-sm mt-2 text-foreground/80">{a.promotion_plan}</p>
+        <TabsContent value="applications">
+          <Card>
+            <CardHeader><CardTitle>Partner Applications</CardTitle></CardHeader>
+            <CardContent>
+              {apps.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-8 text-center">No applications yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {apps.map(a => (
+                    <div key={a.id} className="border rounded-lg p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <strong>{a.first_name} {a.last_name}</strong>
+                            <Badge variant="outline" className="text-xs">{a.partner_type.replace("_", " ")}</Badge>
+                            <Badge variant={a.status === "pending" ? "default" : a.status === "approved" ? "secondary" : "destructive"} className="text-xs">{a.status}</Badge>
                           </div>
-                          {a.status === "pending" && (
-                            <div className="flex gap-2 shrink-0">
-                              <Button size="sm" onClick={() => setReviewApp(a)}><Check className="h-4 w-4 mr-1" /> Approve</Button>
-                              <Button size="sm" variant="outline" onClick={() => reject(a)}><X className="h-4 w-4" /></Button>
-                            </div>
-                          )}
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {a.email} {a.business_name && `• ${a.business_name}`} {a.website && <a href={a.website} target="_blank" rel="noreferrer" className="text-primary hover:underline">• site</a>}
+                          </div>
+                          {a.audience_size && <div className="text-xs text-muted-foreground mt-1">Audience: {a.audience_size}</div>}
+                          <p className="text-sm mt-2 text-foreground/80">{a.promotion_plan}</p>
                         </div>
+                        {a.status === "pending" && (
+                          <div className="flex gap-2 shrink-0">
+                            <Button size="sm" onClick={() => setReviewApp(a)}><Check className="h-4 w-4 mr-1" /> Approve</Button>
+                            <Button size="sm" variant="outline" onClick={() => reject(a)}><X className="h-4 w-4" /></Button>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="partners">
-            <PartnerTable partners={partners.filter(p => p.status === "active")} onToggle={togglePartnerStatus} onCopy={copyLink} onRateChange={updateCommissionRate} />
-          </TabsContent>
+        <TabsContent value="partners">
+          <PartnerTable partners={partners.filter(p => p.status === "active")} onToggle={togglePartnerStatus} onCopy={copyLink} onRateChange={updateCommissionRate} />
+        </TabsContent>
 
-          <TabsContent value="suspended">
-            <PartnerTable partners={partners.filter(p => p.status === "suspended")} onToggle={togglePartnerStatus} onCopy={copyLink} onRateChange={updateCommissionRate} />
-          </TabsContent>
-        </Tabs>
-      </main>
+        <TabsContent value="suspended">
+          <PartnerTable partners={partners.filter(p => p.status === "suspended")} onToggle={togglePartnerStatus} onCopy={copyLink} onRateChange={updateCommissionRate} />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!reviewApp} onOpenChange={(o) => !o && setReviewApp(null)}>
         <DialogContent>
@@ -357,7 +338,7 @@ export default function AdminAffiliates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </section>
   );
 }
 

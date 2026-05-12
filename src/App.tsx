@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -17,7 +17,7 @@ import NotFound from "./pages/NotFound";
 import Policies from "./pages/Policies";
 import PartnersApply from "./pages/PartnersApply";
 import PartnerDashboard from "./pages/PartnerDashboard";
-import AdminAffiliates from "./pages/AdminAffiliates";
+
 import Unsubscribe from "./pages/Unsubscribe";
 import { captureReferralFromUrl } from "@/lib/affiliate-tracking";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -41,7 +41,7 @@ const App = () => {
               <Route path="/partners/apply" element={<PartnersApply />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-              <Route path="/admin/affiliates" element={<ProtectedRoute><AdminAffiliates /></ProtectedRoute>} />
+              <Route path="/admin/affiliates" element={<Navigate to="/partner-dashboard" replace />} />
               <Route path="/admin/onboarding-preview" element={<ProtectedRoute><OnboardingPreview /></ProtectedRoute>} />
               <Route path="/partner-dashboard" element={<ProtectedRoute><PartnerDashboard /></ProtectedRoute>} />
               <Route path="/estate" element={<ProtectedRoute><Estate /></ProtectedRoute>} />

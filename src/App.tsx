@@ -17,7 +17,7 @@ import NotFound from "./pages/NotFound";
 import Policies from "./pages/Policies";
 import PartnersApply from "./pages/PartnersApply";
 import PartnerDashboard from "./pages/PartnerDashboard";
-import AdminAffiliates from "./pages/AdminAffiliates";
+import { Navigate } from "react-router-dom";
 import Unsubscribe from "./pages/Unsubscribe";
 import { captureReferralFromUrl } from "@/lib/affiliate-tracking";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";

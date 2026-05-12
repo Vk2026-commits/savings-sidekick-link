@@ -296,6 +296,13 @@ export default function PartnerDashboard() {
         <p className="text-xs text-muted-foreground text-center pt-4">
           Commissions are subject to a 30-day hold period for refund protection. Minimum payout: $50.
         </p>
+
+        {isAdmin && (
+          <>
+            <div className="border-t pt-6" />
+            <AffiliateAdminPanel />
+          </>
+        )}
       </main>
     </div>
   );

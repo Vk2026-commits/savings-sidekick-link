@@ -65,6 +65,7 @@ function statusBadge(status: string) {
 
 export default function PartnerDashboard() {
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [partner, setPartner] = useState<Partner | null>(null);

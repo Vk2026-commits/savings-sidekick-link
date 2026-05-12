@@ -63,7 +63,7 @@ export default function UserMenu() {
               <Shield className="h-4 w-4 mr-2" /> Admin Portal
             </DropdownMenuItem>
           )}
-          {isPartner && (
+          {(isPartner || isAdmin) && (
             <DropdownMenuItem onClick={() => navigate("/partner-dashboard")}>
               <Handshake className="h-4 w-4 mr-2" /> Partner Dashboard
             </DropdownMenuItem>

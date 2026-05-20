@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -120,22 +120,33 @@ export function useBudget() {
     return () => { cancelled = true; };
   }, [uid]);
 
-  // Seed defaults if first time
+  // Seed defaults if first time (guarded against re-runs/StrictMode)
+  const seededRef = useRef<string | null>(null);
   useEffect(() => {
     if (!uid || !loaded) return;
+    if (seededRef.current === uid) return;
+    seededRef.current = uid;
+
     if (expenseGroups.length === 0) {
-      // seed default expense groups
       DEFAULT_EXPENSE_GROUPS.forEach(g => {
         supabase.from("expense_groups").insert({ user_id: uid, name: g.name }).select().single().then(({ data }) => {
-          if (data) setExpenseGroups(prev => [...prev, mapExpGroup(data)]);
+          if (data) setExpenseGroups(prev => prev.some(x => x.name === data.name) ? prev : [...prev, mapExpGroup(data)]);
         });
       });
     }
     if (paymentAccounts.length === 0) {
       DEFAULT_PAYMENT_ACCOUNTS.forEach(a => {
-        supabase.from("payment_accounts").insert({ user_id: uid, name: a.name, nickname: a.nickname, type: a.type }).select().single().then(({ data }) => {
-          if (data) setPaymentAccounts(prev => [...prev, mapPayAcct(data)]);
-        });
+        supabase
+          .from("payment_accounts")
+          .upsert(
+            { user_id: uid, name: a.name, nickname: a.nickname, type: a.type },
+            { onConflict: "user_id,name", ignoreDuplicates: true }
+          )
+          .select()
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data) setPaymentAccounts(prev => prev.some(x => x.name === data.name) ? prev : [...prev, mapPayAcct(data)]);
+          });
       });
     }
   }, [uid, loaded]);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Handshake, Check, X, Copy, Pause, Play, UserPlus } from "lucide-react";
+import { Handshake, Check, X, Copy, Pause, Play, UserPlus, ShieldAlert } from "lucide-react";
 
 interface Application {
   id: string;
@@ -32,6 +33,7 @@ interface Partner {
 
 export default function AffiliateAdminPanel() {
   const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const { toast } = useToast();
   const [apps, setApps] = useState<Application[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -47,6 +49,7 @@ export default function AffiliateAdminPanel() {
   const [inviting, setInviting] = useState(false);
 
   useEffect(() => {
+    if (!isAdmin) return;
     (async () => {
       const [{ data: a }, { data: p }] = await Promise.all([
         supabase.from("affiliate_applications").select("*").order("created_at", { ascending: false }),
@@ -55,7 +58,7 @@ export default function AffiliateAdminPanel() {
       setApps((a as any) ?? []);
       setPartners((p as any) ?? []);
     })();
-  }, [refreshKey]);
+  }, [refreshKey, isAdmin]);
 
   const approve = async () => {
     if (!reviewApp) return;
@@ -199,6 +202,19 @@ export default function AffiliateAdminPanel() {
   };
 
   const pending = apps.filter(a => a.status === "pending");
+
+  // Strict admin guard — non-admins cannot view this panel even if rendered directly
+  if (adminLoading) return null;
+  if (!user || !isAdmin) {
+    return (
+      <Card className="border-destructive/30">
+        <CardContent className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
+          <ShieldAlert className="h-5 w-5 text-destructive" />
+          Admin access required to view affiliate management.
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <section className="space-y-4">

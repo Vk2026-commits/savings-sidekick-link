@@ -584,22 +584,23 @@ const Index = () => {
 
         {activeTab === "budget" && (
           <div className="space-y-4">
-            {isFree && budget.categoryBudgets.length >= 3 ? (
+            {isFree && (
               <UpgradePrompt
-                message="Free plan includes up to 3 category budgets. Upgrade to Pro to add unlimited budgets."
-                showPricing
+                message={
+                  budget.categoryBudgets.length >= 3
+                    ? "Free plan includes up to 3 category budgets. Upgrade to Pro for unlimited budgets."
+                    : `Free plan: ${budget.categoryBudgets.length}/3 category budgets used. Upgrade to Pro for unlimited.`
+                }
+                showPricing={budget.categoryBudgets.length >= 3}
               />
-            ) : isFree ? (
-              <UpgradePrompt
-                message={`Free plan: ${budget.categoryBudgets.length}/3 category budgets used. Upgrade to Pro for unlimited.`}
-              />
-            ) : null}
+            )}
             <CategoryBudgets
               budgets={budget.categoryBudgets}
               transactions={budget.transactions}
-              onAdd={isFree && budget.categoryBudgets.length >= 3 ? undefined as any : budget.addCategoryBudget}
+              onAdd={budget.addCategoryBudget}
               onUpdate={budget.updateCategoryBudget}
               onDelete={budget.deleteCategoryBudget}
+              maxItems={isFree ? 3 : undefined}
             />
           </div>
         )}
@@ -607,19 +608,22 @@ const Index = () => {
 
         {activeTab === "savings" && (
           <div className="space-y-4">
-            {isFree && budget.savingsGoals.length >= 3 ? (
+            {isFree && (
               <UpgradePrompt
-                message="Free plan includes up to 3 savings goals. Upgrade to Pro for unlimited goals."
-                showPricing
+                message={
+                  budget.savingsGoals.length >= 3
+                    ? "Free plan includes up to 3 savings goals. Upgrade to Pro for unlimited goals."
+                    : `Free plan: ${budget.savingsGoals.length}/3 savings goals used. Upgrade to Pro for unlimited.`
+                }
+                showPricing={budget.savingsGoals.length >= 3}
               />
-            ) : isFree ? (
-              <UpgradePrompt
-                message={`Free plan: ${budget.savingsGoals.length}/3 savings goals used. Upgrade to Pro for unlimited.`}
-              />
-            ) : null}
+            )}
             <SavingsGoals
               goals={budget.savingsGoals}
-              onAdd={isFree && budget.savingsGoals.length >= 3 ? undefined as any : budget.addSavingsGoal}
+              onAdd={(g) => {
+                if (isFree && budget.savingsGoals.length >= 3) return;
+                budget.addSavingsGoal(g);
+              }}
               onUpdate={budget.updateSavingsGoal}
               onDelete={budget.deleteSavingsGoal}
             />

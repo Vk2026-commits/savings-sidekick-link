@@ -583,31 +583,47 @@ const Index = () => {
         )}
 
         {activeTab === "budget" && (
-          isFree ? (
-            <UpgradePrompt message="Unlock category budgeting with a Pro subscription." showPricing />
-          ) : (
+          <div className="space-y-4">
+            {isFree && budget.categoryBudgets.length >= 3 ? (
+              <UpgradePrompt
+                message="Free plan includes up to 3 category budgets. Upgrade to Pro to add unlimited budgets."
+                showPricing
+              />
+            ) : isFree ? (
+              <UpgradePrompt
+                message={`Free plan: ${budget.categoryBudgets.length}/3 category budgets used. Upgrade to Pro for unlimited.`}
+              />
+            ) : null}
             <CategoryBudgets
               budgets={budget.categoryBudgets}
               transactions={budget.transactions}
-              onAdd={budget.addCategoryBudget}
+              onAdd={isFree && budget.categoryBudgets.length >= 3 ? undefined as any : budget.addCategoryBudget}
               onUpdate={budget.updateCategoryBudget}
               onDelete={budget.deleteCategoryBudget}
             />
-          )
+          </div>
         )}
 
 
         {activeTab === "savings" && (
-          isFree ? (
-            <UpgradePrompt message="Unlock savings goals with a Pro subscription." showPricing />
-          ) : (
+          <div className="space-y-4">
+            {isFree && budget.savingsGoals.length >= 3 ? (
+              <UpgradePrompt
+                message="Free plan includes up to 3 savings goals. Upgrade to Pro for unlimited goals."
+                showPricing
+              />
+            ) : isFree ? (
+              <UpgradePrompt
+                message={`Free plan: ${budget.savingsGoals.length}/3 savings goals used. Upgrade to Pro for unlimited.`}
+              />
+            ) : null}
             <SavingsGoals
               goals={budget.savingsGoals}
-              onAdd={budget.addSavingsGoal}
+              onAdd={isFree && budget.savingsGoals.length >= 3 ? undefined as any : budget.addSavingsGoal}
               onUpdate={budget.updateSavingsGoal}
               onDelete={budget.deleteSavingsGoal}
             />
-          )
+          </div>
         )}
 
 

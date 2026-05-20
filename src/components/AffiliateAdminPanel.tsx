@@ -49,6 +49,7 @@ export default function AffiliateAdminPanel() {
   const [inviting, setInviting] = useState(false);
 
   useEffect(() => {
+    if (!isAdmin) return;
     (async () => {
       const [{ data: a }, { data: p }] = await Promise.all([
         supabase.from("affiliate_applications").select("*").order("created_at", { ascending: false }),
@@ -57,7 +58,7 @@ export default function AffiliateAdminPanel() {
       setApps((a as any) ?? []);
       setPartners((p as any) ?? []);
     })();
-  }, [refreshKey]);
+  }, [refreshKey, isAdmin]);
 
   const approve = async () => {
     if (!reviewApp) return;

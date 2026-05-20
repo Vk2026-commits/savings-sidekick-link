@@ -609,7 +609,7 @@ const Index = () => {
 
 
         {activeTab === "networth" && (
-          <PinGate label="Net Worth">
+          <>
             <NetWorthTracker
               bills={budget.bills}
               assets={budget.assets}
@@ -629,7 +629,7 @@ const Index = () => {
               monthlyIncome={budget.monthlyIncome}
               totalMonthlyBills={budget.totalMonthlyBills}
             />
-          </PinGate>
+          </>
         )}
 
 

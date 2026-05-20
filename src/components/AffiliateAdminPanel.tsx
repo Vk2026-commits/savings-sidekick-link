@@ -324,6 +324,7 @@ export default function AffiliateAdminPanel() {
           </TabsTrigger>
           <TabsTrigger value="partners">Active Partners ({partners.filter(p => p.status === "active").length})</TabsTrigger>
           <TabsTrigger value="suspended">Suspended ({partners.filter(p => p.status === "suspended").length})</TabsTrigger>
+          <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
         <TabsContent value="applications">

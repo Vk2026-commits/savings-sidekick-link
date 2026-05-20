@@ -160,6 +160,11 @@ export default function AffiliateAdminPanel() {
       return;
     }
     toast({ title: "Application rejected" });
+    await logAudit("reject", {
+      application_id: app.id,
+      email: app.email,
+      name: `${app.first_name} ${app.last_name}`.trim(),
+    });
     setRefreshKey(k => k + 1);
   };
 
@@ -171,6 +176,13 @@ export default function AffiliateAdminPanel() {
       return;
     }
     toast({ title: `Partner ${newStatus}` });
+    await logAudit(newStatus === "suspended" ? "suspend" : "reactivate", {
+      partner_id: p.id,
+      email: p.email,
+      name: `${p.first_name} ${p.last_name}`.trim(),
+      from_status: p.status,
+      to_status: newStatus,
+    }, p.id);
     setRefreshKey(k => k + 1);
   };
 

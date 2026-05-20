@@ -62,6 +62,7 @@ export default function AffiliateAdminPanel() {
   const [auditAction, setAuditAction] = useState<string>("all");
   const [auditDateFrom, setAuditDateFrom] = useState<string>("");
   const [auditDateTo, setAuditDateTo] = useState<string>("");
+  const [auditDetail, setAuditDetail] = useState<any | null>(null);
 
   const loadAuditLog = async () => {
     const { data } = await supabase

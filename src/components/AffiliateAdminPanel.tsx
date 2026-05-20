@@ -137,6 +137,14 @@ export default function AffiliateAdminPanel() {
     }
 
     toast({ title: "Partner approved", description: "Referral code generated and welcome email sent." });
+    await logAudit("approve", {
+      application_id: reviewApp.id,
+      partner_id: newPartnerId,
+      email: reviewApp.email,
+      name: `${reviewApp.first_name} ${reviewApp.last_name}`.trim(),
+      commission_rate: parseFloat(commissionRate),
+      payout_months: parseInt(payoutMonths, 10),
+    });
     setReviewApp(null);
     setRefreshKey(k => k + 1);
   };

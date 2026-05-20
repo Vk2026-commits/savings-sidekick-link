@@ -49,6 +49,13 @@ export default function AffiliateAdminPanel() {
   });
   const [inviting, setInviting] = useState(false);
 
+  // Application filters
+  const [appSearch, setAppSearch] = useState("");
+  const [appStatus, setAppStatus] = useState<string>("all");
+  const [appType, setAppType] = useState<string>("all");
+  const [appDateFrom, setAppDateFrom] = useState<string>("");
+  const [appDateTo, setAppDateTo] = useState<string>("");
+
   useEffect(() => {
     if (!isAdmin) return;
     (async () => {

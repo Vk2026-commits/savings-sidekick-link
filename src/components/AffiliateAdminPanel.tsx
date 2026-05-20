@@ -415,6 +415,61 @@ export default function AffiliateAdminPanel() {
         <TabsContent value="suspended">
           <PartnerTable partners={partners.filter(p => p.status === "suspended")} onToggle={togglePartnerStatus} onCopy={copyLink} onRateChange={updateCommissionRate} />
         </TabsContent>
+
+        <TabsContent value="audit">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Audit Log</span>
+                <Button size="sm" variant="ghost" onClick={loadAuditLog}>Refresh</Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {auditLog.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-8 text-center">No audit entries yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b text-muted-foreground">
+                      <tr>
+                        <th className="text-left py-2 font-medium">When</th>
+                        <th className="text-left py-2 font-medium">Admin</th>
+                        <th className="text-left py-2 font-medium">Action</th>
+                        <th className="text-left py-2 font-medium">Target</th>
+                        <th className="text-left py-2 font-medium">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {auditLog.map((l) => {
+                        const action = (l.action ?? "").replace("affiliate.", "");
+                        const d = l.details ?? {};
+                        const target = d.name || d.email || d.partner_id || d.application_id || "—";
+                        const summary: string[] = [];
+                        if (d.referral_code) summary.push(`code ${d.referral_code}`);
+                        if (d.commission_rate != null) summary.push(`${d.commission_rate}%`);
+                        if (d.payout_months != null) summary.push(`${d.payout_months}mo`);
+                        if (d.from_status && d.to_status) summary.push(`${d.from_status} → ${d.to_status}`);
+                        return (
+                          <tr key={l.id} className="border-b last:border-0 align-top">
+                            <td className="py-2 pr-3 text-muted-foreground whitespace-nowrap">
+                              {new Date(l.created_at).toLocaleString()}
+                            </td>
+                            <td className="py-2 pr-3">{l.admin_email ?? l.admin_id?.slice(0, 8)}</td>
+                            <td className="py-2 pr-3">
+                              <Badge variant="outline" className="capitalize">{action}</Badge>
+                            </td>
+                            <td className="py-2 pr-3">{target}</td>
+                            <td className="py-2 text-muted-foreground">{summary.join(" • ")}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       <Dialog open={!!reviewApp} onOpenChange={(o) => !o && setReviewApp(null)}>

@@ -253,6 +253,15 @@ export default function AffiliateAdminPanel() {
       title: "Partner created",
       description: code ? `Code ${code} • Link copied & welcome email sent` : "Partner created",
     });
+    await logAudit("invite", {
+      partner_id: partnerId,
+      email: invite.email.trim(),
+      name: `${invite.first_name} ${invite.last_name}`.trim(),
+      partner_type: invite.partner_type,
+      referral_code: code,
+      commission_rate: parseFloat(invite.commission_rate),
+      payout_months: parseInt(invite.payout_months, 10),
+    });
     setInviteOpen(false);
     setInvite({ email: "", first_name: "", last_name: "", business_name: "", partner_type: "individual", commission_rate: "20", payout_months: "12" });
     setRefreshKey(k => k + 1);

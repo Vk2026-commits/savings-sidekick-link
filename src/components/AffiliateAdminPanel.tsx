@@ -458,9 +458,43 @@ export default function AffiliateAdminPanel() {
                 <Button size="sm" variant="ghost" onClick={loadAuditLog}>Refresh</Button>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {auditLog.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-8 text-center">No audit entries yet.</p>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+                <div className="lg:col-span-2 relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search admin, target, email…"
+                    value={auditSearch}
+                    onChange={e => setAuditSearch(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+                <Select value={auditAction} onValueChange={setAuditAction}>
+                  <SelectTrigger><SelectValue placeholder="Action type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All actions</SelectItem>
+                    {auditActions.map(a => (
+                      <SelectItem key={a} value={a} className="capitalize">{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Input type="date" value={auditDateFrom} onChange={e => setAuditDateFrom(e.target.value)} aria-label="From date" />
+                  <Input type="date" value={auditDateTo} onChange={e => setAuditDateTo(e.target.value)} aria-label="To date" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Showing {filteredAuditLog.length} of {auditLog.length}</span>
+                {hasActiveAuditFilters && (
+                  <Button size="sm" variant="ghost" onClick={clearAuditFilters} className="h-7">
+                    <FilterX className="h-3.5 w-3.5 mr-1" /> Clear filters
+                  </Button>
+                )}
+              </div>
+              {filteredAuditLog.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-8 text-center">
+                  {auditLog.length === 0 ? "No audit entries yet." : "No entries match these filters."}
+                </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -474,7 +508,7 @@ export default function AffiliateAdminPanel() {
                       </tr>
                     </thead>
                     <tbody>
-                      {auditLog.map((l) => {
+                      {filteredAuditLog.map((l) => {
                         const action = (l.action ?? "").replace("affiliate.", "");
                         const d = l.details ?? {};
                         const target = d.name || d.email || d.partner_id || d.application_id || "—";

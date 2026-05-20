@@ -62,6 +62,7 @@ export default function AffiliateAdminPanel() {
   const [auditAction, setAuditAction] = useState<string>("all");
   const [auditDateFrom, setAuditDateFrom] = useState<string>("");
   const [auditDateTo, setAuditDateTo] = useState<string>("");
+  const [auditDetail, setAuditDetail] = useState<any | null>(null);
 
   const loadAuditLog = async () => {
     const { data } = await supabase
@@ -518,7 +519,12 @@ export default function AffiliateAdminPanel() {
                         if (d.payout_months != null) summary.push(`${d.payout_months}mo`);
                         if (d.from_status && d.to_status) summary.push(`${d.from_status} → ${d.to_status}`);
                         return (
-                          <tr key={l.id} className="border-b last:border-0 align-top">
+                          <tr
+                            key={l.id}
+                            className="border-b last:border-0 align-top cursor-pointer hover:bg-muted/50 transition-colors"
+                            onClick={() => setAuditDetail(l)}
+                          >
+
                             <td className="py-2 pr-3 text-muted-foreground whitespace-nowrap">
                               {new Date(l.created_at).toLocaleString()}
                             </td>
@@ -607,6 +613,61 @@ export default function AffiliateAdminPanel() {
             <Button onClick={submitInvite} disabled={inviting}>
               {inviting ? "Creating…" : "Create & Copy Link"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!auditDetail} onOpenChange={(o) => !o && setAuditDetail(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Audit Event Details</DialogTitle>
+            <DialogDescription>
+              {auditDetail && (
+                <>
+                  {(auditDetail.action ?? "").replace("affiliate.", "")} • {new Date(auditDetail.created_at).toLocaleString()}
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          {auditDetail && (
+            <div className="space-y-3 py-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Admin</Label>
+                  <div>{auditDetail.admin_email ?? auditDetail.admin_id}</div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Target user</Label>
+                  <div className="truncate">{auditDetail.target_user_id ?? "—"}</div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">IP</Label>
+                  <div>{auditDetail.ip_address ?? "—"}</div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">User agent</Label>
+                  <div className="truncate" title={auditDetail.user_agent ?? ""}>{auditDetail.user_agent ?? "—"}</div>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Details (JSON)</Label>
+                <pre className="mt-1 max-h-96 overflow-auto rounded-md bg-muted p-3 text-xs font-mono whitespace-pre-wrap break-all">
+{JSON.stringify(auditDetail.details ?? {}, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (auditDetail) navigator.clipboard.writeText(JSON.stringify(auditDetail, null, 2));
+                toast({ title: "Copied", description: "Audit event copied to clipboard." });
+              }}
+            >
+              <Copy className="h-4 w-4 mr-2" /> Copy JSON
+            </Button>
+            <Button onClick={() => setAuditDetail(null)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

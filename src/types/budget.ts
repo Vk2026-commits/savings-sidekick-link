@@ -202,10 +202,10 @@ export function getAssignedBillMonth(bill: Pick<Bill, "month" | "paidDate">): st
 
 export const DEFAULT_EXPENSE_GROUPS: ExpenseGroup[] = [
   { id: "household", name: "Household Bills" },
-  { id: "wife", name: "Wife's Bills" },
-  { id: "daughter", name: "Daughter's Bills" },
-  { id: "son", name: "Son's Bills" },
   { id: "kids", name: "Kids' Expenses" },
+  { id: "daughter", name: "Daughter's Expenses" },
+  { id: "son", name: "Son's Expenses" },
+  { id: "wife", name: "Wife's Expenses" },
 ];
 
 export const DEFAULT_PAYMENT_ACCOUNTS: PaymentAccount[] = [

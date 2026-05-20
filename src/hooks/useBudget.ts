@@ -129,9 +129,17 @@ export function useBudget() {
 
     if (expenseGroups.length === 0) {
       DEFAULT_EXPENSE_GROUPS.forEach(g => {
-        supabase.from("expense_groups").insert({ user_id: uid, name: g.name }).select().single().then(({ data }) => {
-          if (data) setExpenseGroups(prev => prev.some(x => x.name === data.name) ? prev : [...prev, mapExpGroup(data)]);
-        });
+        supabase
+          .from("expense_groups")
+          .upsert(
+            { user_id: uid, name: g.name },
+            { onConflict: "user_id,name", ignoreDuplicates: true }
+          )
+          .select()
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data) setExpenseGroups(prev => prev.some(x => x.name === data.name) ? prev : [...prev, mapExpGroup(data)]);
+          });
       });
     }
     if (paymentAccounts.length === 0) {

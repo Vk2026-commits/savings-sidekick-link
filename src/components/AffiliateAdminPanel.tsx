@@ -296,6 +296,36 @@ export default function AffiliateAdminPanel() {
     setAppSearch(""); setAppStatus("all"); setAppType("all"); setAppDateFrom(""); setAppDateTo("");
   };
 
+  const auditActions = Array.from(new Set(auditLog.map(l => (l.action ?? "").replace("affiliate.", "")).filter(Boolean)));
+  const filteredAuditLog = auditLog.filter(l => {
+    const action = (l.action ?? "").replace("affiliate.", "");
+    if (auditAction !== "all" && action !== auditAction) return false;
+    if (auditDateFrom && new Date(l.created_at) < new Date(auditDateFrom)) return false;
+    if (auditDateTo) {
+      const end = new Date(auditDateTo);
+      end.setHours(23, 59, 59, 999);
+      if (new Date(l.created_at) > end) return false;
+    }
+    if (auditSearch.trim()) {
+      const q = auditSearch.trim().toLowerCase();
+      const d = l.details ?? {};
+      const hay = [
+        l.admin_email,
+        d.name,
+        d.email,
+        d.partner_id,
+        d.application_id,
+        action,
+      ].filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const hasActiveAuditFilters = auditSearch || auditAction !== "all" || auditDateFrom || auditDateTo;
+  const clearAuditFilters = () => {
+    setAuditSearch(""); setAuditAction("all"); setAuditDateFrom(""); setAuditDateTo("");
+  };
+
   // Strict admin guard — non-admins cannot view this panel even if rendered directly
   if (adminLoading) return null;
   if (!user || !isAdmin) {

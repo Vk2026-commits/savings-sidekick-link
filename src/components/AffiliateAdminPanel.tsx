@@ -211,6 +211,29 @@ export default function AffiliateAdminPanel() {
 
   const pending = apps.filter(a => a.status === "pending");
 
+  const partnerTypes = Array.from(new Set(apps.map(a => a.partner_type).filter(Boolean)));
+  const filteredApps = apps.filter(a => {
+    if (appStatus !== "all" && a.status !== appStatus) return false;
+    if (appType !== "all" && a.partner_type !== appType) return false;
+    if (appDateFrom && new Date(a.created_at) < new Date(appDateFrom)) return false;
+    if (appDateTo) {
+      const end = new Date(appDateTo);
+      end.setHours(23, 59, 59, 999);
+      if (new Date(a.created_at) > end) return false;
+    }
+    if (appSearch.trim()) {
+      const q = appSearch.trim().toLowerCase();
+      const hay = [a.first_name, a.last_name, a.email, a.business_name, a.website, a.promotion_plan]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const hasActiveFilters = appSearch || appStatus !== "all" || appType !== "all" || appDateFrom || appDateTo;
+  const clearAppFilters = () => {
+    setAppSearch(""); setAppStatus("all"); setAppType("all"); setAppDateFrom(""); setAppDateTo("");
+  };
+
   // Strict admin guard — non-admins cannot view this panel even if rendered directly
   if (adminLoading) return null;
   if (!user || !isAdmin) {

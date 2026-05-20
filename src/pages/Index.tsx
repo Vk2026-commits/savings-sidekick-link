@@ -583,31 +583,51 @@ const Index = () => {
         )}
 
         {activeTab === "budget" && (
-          isFree ? (
-            <UpgradePrompt message="Unlock category budgeting with a Pro subscription." showPricing />
-          ) : (
+          <div className="space-y-4">
+            {isFree && (
+              <UpgradePrompt
+                message={
+                  budget.categoryBudgets.length >= 3
+                    ? "Free plan includes up to 3 category budgets. Upgrade to Pro for unlimited budgets."
+                    : `Free plan: ${budget.categoryBudgets.length}/3 category budgets used. Upgrade to Pro for unlimited.`
+                }
+                showPricing={budget.categoryBudgets.length >= 3}
+              />
+            )}
             <CategoryBudgets
               budgets={budget.categoryBudgets}
               transactions={budget.transactions}
               onAdd={budget.addCategoryBudget}
               onUpdate={budget.updateCategoryBudget}
               onDelete={budget.deleteCategoryBudget}
+              maxItems={isFree ? 3 : undefined}
             />
-          )
+          </div>
         )}
 
 
         {activeTab === "savings" && (
-          isFree ? (
-            <UpgradePrompt message="Unlock savings goals with a Pro subscription." showPricing />
-          ) : (
+          <div className="space-y-4">
+            {isFree && (
+              <UpgradePrompt
+                message={
+                  budget.savingsGoals.length >= 3
+                    ? "Free plan includes up to 3 savings goals. Upgrade to Pro for unlimited goals."
+                    : `Free plan: ${budget.savingsGoals.length}/3 savings goals used. Upgrade to Pro for unlimited.`
+                }
+                showPricing={budget.savingsGoals.length >= 3}
+              />
+            )}
             <SavingsGoals
               goals={budget.savingsGoals}
-              onAdd={budget.addSavingsGoal}
+              onAdd={(g) => {
+                if (isFree && budget.savingsGoals.length >= 3) return;
+                budget.addSavingsGoal(g);
+              }}
               onUpdate={budget.updateSavingsGoal}
               onDelete={budget.deleteSavingsGoal}
             />
-          )
+          </div>
         )}
 
 

@@ -203,6 +203,19 @@ export default function AffiliateAdminPanel() {
 
   const pending = apps.filter(a => a.status === "pending");
 
+  // Strict admin guard — non-admins cannot view this panel even if rendered directly
+  if (adminLoading) return null;
+  if (!user || !isAdmin) {
+    return (
+      <Card className="border-destructive/30">
+        <CardContent className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
+          <ShieldAlert className="h-5 w-5 text-destructive" />
+          Admin access required to view affiliate management.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">

@@ -56,6 +56,34 @@ export default function AffiliateAdminPanel() {
   const [appDateFrom, setAppDateFrom] = useState<string>("");
   const [appDateTo, setAppDateTo] = useState<string>("");
 
+  // Audit log
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+
+  const loadAuditLog = async () => {
+    const { data } = await supabase
+      .from("admin_audit_log")
+      .select("*")
+      .like("action", "affiliate.%")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setAuditLog((data as any) ?? []);
+  };
+
+  const logAudit = async (action: string, details: Record<string, any> = {}, target_user_id?: string | null) => {
+    if (!user) return;
+    try {
+      await supabase.from("admin_audit_log").insert({
+        admin_id: user.id,
+        admin_email: user.email ?? null,
+        action: `affiliate.${action}`,
+        target_user_id: target_user_id ?? null,
+        details,
+      });
+    } catch (e) {
+      console.error("Audit log failed", e);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) return;
     (async () => {
@@ -65,6 +93,7 @@ export default function AffiliateAdminPanel() {
       ]);
       setApps((a as any) ?? []);
       setPartners((p as any) ?? []);
+      loadAuditLog();
     })();
   }, [refreshKey, isAdmin]);
 
@@ -108,6 +137,14 @@ export default function AffiliateAdminPanel() {
     }
 
     toast({ title: "Partner approved", description: "Referral code generated and welcome email sent." });
+    await logAudit("approve", {
+      application_id: reviewApp.id,
+      partner_id: newPartnerId,
+      email: reviewApp.email,
+      name: `${reviewApp.first_name} ${reviewApp.last_name}`.trim(),
+      commission_rate: parseFloat(commissionRate),
+      payout_months: parseInt(payoutMonths, 10),
+    });
     setReviewApp(null);
     setRefreshKey(k => k + 1);
   };
@@ -123,6 +160,11 @@ export default function AffiliateAdminPanel() {
       return;
     }
     toast({ title: "Application rejected" });
+    await logAudit("reject", {
+      application_id: app.id,
+      email: app.email,
+      name: `${app.first_name} ${app.last_name}`.trim(),
+    });
     setRefreshKey(k => k + 1);
   };
 
@@ -134,6 +176,13 @@ export default function AffiliateAdminPanel() {
       return;
     }
     toast({ title: `Partner ${newStatus}` });
+    await logAudit(newStatus === "suspended" ? "suspend" : "reactivate", {
+      partner_id: p.id,
+      email: p.email,
+      name: `${p.first_name} ${p.last_name}`.trim(),
+      from_status: p.status,
+      to_status: newStatus,
+    }, p.id);
     setRefreshKey(k => k + 1);
   };
 
@@ -204,6 +253,15 @@ export default function AffiliateAdminPanel() {
       title: "Partner created",
       description: code ? `Code ${code} • Link copied & welcome email sent` : "Partner created",
     });
+    await logAudit("invite", {
+      partner_id: partnerId,
+      email: invite.email.trim(),
+      name: `${invite.first_name} ${invite.last_name}`.trim(),
+      partner_type: invite.partner_type,
+      referral_code: code,
+      commission_rate: parseFloat(invite.commission_rate),
+      payout_months: parseInt(invite.payout_months, 10),
+    });
     setInviteOpen(false);
     setInvite({ email: "", first_name: "", last_name: "", business_name: "", partner_type: "individual", commission_rate: "20", payout_months: "12" });
     setRefreshKey(k => k + 1);
@@ -266,6 +324,7 @@ export default function AffiliateAdminPanel() {
           </TabsTrigger>
           <TabsTrigger value="partners">Active Partners ({partners.filter(p => p.status === "active").length})</TabsTrigger>
           <TabsTrigger value="suspended">Suspended ({partners.filter(p => p.status === "suspended").length})</TabsTrigger>
+          <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
         <TabsContent value="applications">
@@ -355,6 +414,61 @@ export default function AffiliateAdminPanel() {
 
         <TabsContent value="suspended">
           <PartnerTable partners={partners.filter(p => p.status === "suspended")} onToggle={togglePartnerStatus} onCopy={copyLink} onRateChange={updateCommissionRate} />
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Audit Log</span>
+                <Button size="sm" variant="ghost" onClick={loadAuditLog}>Refresh</Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {auditLog.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-8 text-center">No audit entries yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b text-muted-foreground">
+                      <tr>
+                        <th className="text-left py-2 font-medium">When</th>
+                        <th className="text-left py-2 font-medium">Admin</th>
+                        <th className="text-left py-2 font-medium">Action</th>
+                        <th className="text-left py-2 font-medium">Target</th>
+                        <th className="text-left py-2 font-medium">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {auditLog.map((l) => {
+                        const action = (l.action ?? "").replace("affiliate.", "");
+                        const d = l.details ?? {};
+                        const target = d.name || d.email || d.partner_id || d.application_id || "—";
+                        const summary: string[] = [];
+                        if (d.referral_code) summary.push(`code ${d.referral_code}`);
+                        if (d.commission_rate != null) summary.push(`${d.commission_rate}%`);
+                        if (d.payout_months != null) summary.push(`${d.payout_months}mo`);
+                        if (d.from_status && d.to_status) summary.push(`${d.from_status} → ${d.to_status}`);
+                        return (
+                          <tr key={l.id} className="border-b last:border-0 align-top">
+                            <td className="py-2 pr-3 text-muted-foreground whitespace-nowrap">
+                              {new Date(l.created_at).toLocaleString()}
+                            </td>
+                            <td className="py-2 pr-3">{l.admin_email ?? l.admin_id?.slice(0, 8)}</td>
+                            <td className="py-2 pr-3">
+                              <Badge variant="outline" className="capitalize">{action}</Badge>
+                            </td>
+                            <td className="py-2 pr-3">{target}</td>
+                            <td className="py-2 text-muted-foreground">{summary.join(" • ")}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 

@@ -93,6 +93,7 @@ export default function AffiliateAdminPanel() {
       ]);
       setApps((a as any) ?? []);
       setPartners((p as any) ?? []);
+      loadAuditLog();
     })();
   }, [refreshKey, isAdmin]);
 

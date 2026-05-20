@@ -56,6 +56,34 @@ export default function AffiliateAdminPanel() {
   const [appDateFrom, setAppDateFrom] = useState<string>("");
   const [appDateTo, setAppDateTo] = useState<string>("");
 
+  // Audit log
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+
+  const loadAuditLog = async () => {
+    const { data } = await supabase
+      .from("admin_audit_log")
+      .select("*")
+      .like("action", "affiliate.%")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setAuditLog((data as any) ?? []);
+  };
+
+  const logAudit = async (action: string, details: Record<string, any> = {}, target_user_id?: string | null) => {
+    if (!user) return;
+    try {
+      await supabase.from("admin_audit_log").insert({
+        admin_id: user.id,
+        admin_email: user.email ?? null,
+        action: `affiliate.${action}`,
+        target_user_id: target_user_id ?? null,
+        details,
+      });
+    } catch (e) {
+      console.error("Audit log failed", e);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) return;
     (async () => {

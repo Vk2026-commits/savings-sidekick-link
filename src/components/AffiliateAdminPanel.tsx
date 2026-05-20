@@ -11,8 +11,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Handshake, Check, X, Copy, Pause, Play, UserPlus, ShieldAlert } from "lucide-react";
+import { Handshake, Check, X, Copy, Pause, Play, UserPlus, ShieldAlert, Search, FilterX } from "lucide-react";
 
 interface Application {
   id: string;
@@ -47,6 +48,13 @@ export default function AffiliateAdminPanel() {
     partner_type: "individual", commission_rate: "20", payout_months: "12",
   });
   const [inviting, setInviting] = useState(false);
+
+  // Application filters
+  const [appSearch, setAppSearch] = useState("");
+  const [appStatus, setAppStatus] = useState<string>("all");
+  const [appType, setAppType] = useState<string>("all");
+  const [appDateFrom, setAppDateFrom] = useState<string>("");
+  const [appDateTo, setAppDateTo] = useState<string>("");
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -203,6 +211,29 @@ export default function AffiliateAdminPanel() {
 
   const pending = apps.filter(a => a.status === "pending");
 
+  const partnerTypes = Array.from(new Set(apps.map(a => a.partner_type).filter(Boolean)));
+  const filteredApps = apps.filter(a => {
+    if (appStatus !== "all" && a.status !== appStatus) return false;
+    if (appType !== "all" && a.partner_type !== appType) return false;
+    if (appDateFrom && new Date(a.created_at) < new Date(appDateFrom)) return false;
+    if (appDateTo) {
+      const end = new Date(appDateTo);
+      end.setHours(23, 59, 59, 999);
+      if (new Date(a.created_at) > end) return false;
+    }
+    if (appSearch.trim()) {
+      const q = appSearch.trim().toLowerCase();
+      const hay = [a.first_name, a.last_name, a.email, a.business_name, a.website, a.promotion_plan]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const hasActiveFilters = appSearch || appStatus !== "all" || appType !== "all" || appDateFrom || appDateTo;
+  const clearAppFilters = () => {
+    setAppSearch(""); setAppStatus("all"); setAppType("all"); setAppDateFrom(""); setAppDateTo("");
+  };
+
   // Strict admin guard — non-admins cannot view this panel even if rendered directly
   if (adminLoading) return null;
   if (!user || !isAdmin) {
@@ -240,12 +271,55 @@ export default function AffiliateAdminPanel() {
         <TabsContent value="applications">
           <Card>
             <CardHeader><CardTitle>Partner Applications</CardTitle></CardHeader>
-            <CardContent>
-              {apps.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-8 text-center">No applications yet.</p>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+                <div className="lg:col-span-2 relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search name, email, business…"
+                    value={appSearch}
+                    onChange={e => setAppSearch(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+                <Select value={appStatus} onValueChange={setAppStatus}>
+                  <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={appType} onValueChange={setAppType}>
+                  <SelectTrigger><SelectValue placeholder="Partner type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All types</SelectItem>
+                    {partnerTypes.map(t => (
+                      <SelectItem key={t} value={t}>{t.replace(/_/g, " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Input type="date" value={appDateFrom} onChange={e => setAppDateFrom(e.target.value)} aria-label="From date" />
+                  <Input type="date" value={appDateTo} onChange={e => setAppDateTo(e.target.value)} aria-label="To date" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Showing {filteredApps.length} of {apps.length}</span>
+                {hasActiveFilters && (
+                  <Button size="sm" variant="ghost" onClick={clearAppFilters} className="h-7">
+                    <FilterX className="h-3.5 w-3.5 mr-1" /> Clear filters
+                  </Button>
+                )}
+              </div>
+              {filteredApps.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-8 text-center">
+                  {apps.length === 0 ? "No applications yet." : "No applications match these filters."}
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {apps.map(a => (
+                  {filteredApps.map(a => (
                     <div key={a.id} className="border rounded-lg p-4 space-y-2">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">

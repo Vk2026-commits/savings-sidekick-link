@@ -519,7 +519,12 @@ export default function AffiliateAdminPanel() {
                         if (d.payout_months != null) summary.push(`${d.payout_months}mo`);
                         if (d.from_status && d.to_status) summary.push(`${d.from_status} → ${d.to_status}`);
                         return (
-                          <tr key={l.id} className="border-b last:border-0 align-top">
+                          <tr
+                            key={l.id}
+                            className="border-b last:border-0 align-top cursor-pointer hover:bg-muted/50 transition-colors"
+                            onClick={() => setAuditDetail(l)}
+                          >
+
                             <td className="py-2 pr-3 text-muted-foreground whitespace-nowrap">
                               {new Date(l.created_at).toLocaleString()}
                             </td>

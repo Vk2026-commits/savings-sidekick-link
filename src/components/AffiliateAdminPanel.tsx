@@ -11,8 +11,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Handshake, Check, X, Copy, Pause, Play, UserPlus, ShieldAlert } from "lucide-react";
+import { Handshake, Check, X, Copy, Pause, Play, UserPlus, ShieldAlert, Search, FilterX } from "lucide-react";
 
 interface Application {
   id: string;

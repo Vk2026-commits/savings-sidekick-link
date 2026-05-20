@@ -33,6 +33,7 @@ interface Partner {
 
 export default function AffiliateAdminPanel() {
   const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const { toast } = useToast();
   const [apps, setApps] = useState<Application[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);

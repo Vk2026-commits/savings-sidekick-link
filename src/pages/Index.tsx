@@ -126,9 +126,10 @@ const RESTRICTED_TABS: TabId[] = ["reports", "analytics"];
 const COMING_SOON_TABS: TabId[] = [];
 
 // --- Dashboard sortable sections -------------------------------------------
-const DASHBOARD_SECTION_IDS = ["overview", "preparedness", "faith", "pillars", "family"] as const;
+const DASHBOARD_SECTION_IDS = ["faith", "overview", "preparedness", "pillars", "family"] as const;
 type DashboardSectionId = typeof DASHBOARD_SECTION_IDS[number];
-const DASHBOARD_ORDER_KEY = "faithnancial.dashboardOrder.v1";
+// v2: default order changed to place Faith + Finance at the top.
+const DASHBOARD_ORDER_KEY = "faithnancial.dashboardOrder.v2";
 const DASHBOARD_COLLAPSED_KEY = "faithnancial.dashboardCollapsed.v1";
 
 const DASHBOARD_SECTION_TITLES: Record<DashboardSectionId, string> = {
